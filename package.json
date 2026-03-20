@@ -1,0 +1,33 @@
+{
+  "name": "realestate-webapp",
+  "version": "1.0.0",
+  "description": "GharRush Real Estate Backend",
+  "main": "api/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon api/index.js",
+    "start": "node api/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rubinamagar/realestate-web-app.git"
+  },
+  "keywords": [],
+  "author": "Rubina Chhahari",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rubinamagar/realestate-web-app/issues"
+  },
+  "homepage": "https://github.com/rubinamagar/realestate-web-app#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "csv-parser": "^3.2.0",
+    "dotenv": "^16.6.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.1.0",
+    "mongoose": "^8.23.0",
+    "nodemon": "^3.1.14"
+  }
+}
