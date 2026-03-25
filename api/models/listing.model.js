@@ -6,29 +6,28 @@ const listingSchema = new mongoose.Schema(
     address: { type: String, required: true },
     city: { type: String, required: true },
     price: { type: Number, required: true },
-    description: { type: String },
     bedroom: { type: Number, default: 0 },
     bathroom: { type: Number, default: 0 },
     floors: { type: Number, default: 0 },
     parking: { type: String, default: "No" },
-    face: { type: String }, 
+    face: { type: String },
     year: { type: Number },
     views: { type: Number, default: 0 },
-    area: { type: String }, // For Nepali measurements like 0-4-0-0
-    road: { type: String }, 
+    area: { type: String },
     roadWidth: { type: String },
     roadType: { type: String },
-    buildArea: { type: String },
     posted: { type: String },
     amenities: { type: Array, default: [] },
-    type: { type: String, default: 'sale' }, 
+    category: { type: String, required: true },
+    type: { type: String, required: true },
+    latitude: { type: Number, required: true },
+    longitude: { type: Number, required: true },
     imageUrls: { type: Array, required: true },
     userRef: { type: String, required: true },
+    status: { type: String, default: 'approved' },
   },
   { timestamps: true }
 );
 
 const Listing = mongoose.model('Listing', listingSchema);
-
-// THIS LINE WAS MISSING AND CAUSED THE CRASH:
 export default Listing;

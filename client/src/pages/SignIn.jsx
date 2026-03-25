@@ -28,6 +28,8 @@ const SignIn = ({ isOpen, onClose }) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
+  // ... (Keep existing imports and state)
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -48,19 +50,28 @@ const SignIn = ({ isOpen, onClose }) => {
         alert("Account created successfully!");
         setIsLogin(true);
         dispatch(signInFailure(null));
+        setFormData({ username: '', email: '', password: '' });
       } else {
         dispatch(signInSuccess(data));
         onClose();
         
-         const targetRole = data.role.toLowerCase();
-  if (targetRole === 'admin') navigate('/admin-dashboard');
-  else if (targetRole === 'broker') navigate('/broker-dashboard');
-  else navigate('/client-dashboard');
+        // REDIRECT LOGIC: Only Admins and Brokers go to special dashboards
+        const userRole = data.role.toLowerCase();
+        if (userRole === 'admin') {
+          navigate('/admin-dashboard');
+        } else if (userRole === 'broker') {
+          navigate('/broker-dashboard');
+        } else {
+          // Clients go to Home Page
+          navigate('/');
+        }
       }
     } catch (err) {
-      dispatch(signInFailure("Connection Failed. Check Backend Terminal."));
+      dispatch(signInFailure("Server Connection Failed"));
     }
   };
+
+// ... (Keep the rest of the file)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">

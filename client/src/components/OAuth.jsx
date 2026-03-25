@@ -31,6 +31,16 @@ export default function OAuth({ selectedRole }) {
       const data = await res.json();
       dispatch(signInSuccess(data));
       
+      const userRole = data.role.toLowerCase();
+      if (userRole === 'admin') {
+        navigate('/admin-dashboard');
+      } else if (userRole === 'broker') {
+        navigate('/broker-dashboard');
+      } else {
+        // Normal clients go Home
+        navigate('/');
+      }
+
       // REDIRECT LOGIC
       const role = data.role.toLowerCase();
       if (role === 'admin') navigate('/admin-dashboard');

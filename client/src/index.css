@@ -1,12 +1,21 @@
 @import "tailwindcss";
-@custom-variant dark (&:where(.dark, .dark *));
 
-:root {
-  --background: #ffffff;
-  --foreground: #1F3E35;
+@theme {
+  /* This replaces the 'brand' colors in your config */
+  --color-brand-navy: #0D2A4A;
+  --color-brand-blue: #77B6EA;
+  --color-brand-orange: #F26419;
+  --color-brand-dark: #06101c;
+
+  /* This replaces the 'fontFamily' section */
+  --font-sans: "Inter", "system-ui", "sans-serif";
+
+  /* This handles the 'extend' logic automatically */
 }
 
-.dark {
-  --background: #020617; /* Very dark slate */
-  --foreground: #f8fafc;
-}
+/* 
+   Dark mode in v4 is automatic. 
+   When you add the 'dark' class to your <html> tag, 
+   Tailwind will look for variables defined inside a .dark selector.
+*/
+@variant dark (&:where(.dark, .dark *));
