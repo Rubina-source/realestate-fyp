@@ -30,7 +30,7 @@ export default function OAuth({ selectedRole }) {
 
       const data = await res.json();
       dispatch(signInSuccess(data));
-      
+
       const userRole = data.role.toLowerCase();
       if (userRole === 'admin') {
         navigate('/admin-dashboard');

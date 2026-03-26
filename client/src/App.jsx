@@ -29,7 +29,7 @@ export default function App() {
 
       {!isHome && <Navbar />}
 
-      <main className={`flex-1 bg-white dark:bg-neutral-900`}>
+      <main className={`flex-1 bg-white dark:bg-neutral-900 text-black dark:text-white`}>
         <Routes>
           <Route path="/" element={
             <Home />
@@ -40,25 +40,24 @@ export default function App() {
           <Route path="/contact" element={<Contact darkMode={dm} />} />
 
           {/* ── Any logged-in user ── */}
-          <Route element={<PrivateRoute />}>
+          <Route >
             <Route path="/profile" element={<Profile darkMode={dm} />} />
-            <Route path="/dashboard" element={<DashboardRedirect />} />
           </Route>
 
           {/* ── Broker only ── */}
-          <Route element={<BrokerRoute />}>
+          <Route >
             <Route path="/broker-dashboard" element={<BrokerDashboard darkMode={dm} />} />
             <Route path="/create-listing" element={<CreateListing darkMode={dm} />} />
           </Route>
 
           {/* ── Admin only ── */}
-          <Route element={<AdminRoute />}>
+          <Route>
             <Route path="/admin-dashboard" element={<AdminDashboard darkMode={dm} />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
+        </Routes >
+      </main >
     </>
   );
 }

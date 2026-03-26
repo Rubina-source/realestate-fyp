@@ -1,537 +1,443 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
-  Search, SlidersHorizontal, X, Building2, Home as HomeIcon,
-  Warehouse, LandPlot, MapPin, CheckCircle, ArrowRight,
-  TrendingUp, Shield, Clock, Users, ChevronDown, Star
-} from 'lucide-react';
-import PropertyCard from '../components/property/Propertycard';
+  HomeIcon,
+  TrendingUp,
+  DollarSign,
+  X,
+  Search,
+  FilterIcon,
+  SlidersHorizontal,
+} from "lucide-react";
+import Navbar from "../components/Navbar";
+import PropertyCard from "../components/property/Propertycard";
 
-/* ─── Price options — from CSV data (11,000 → 90,000,000) ─────────────── */
-const MIN_PRICES = [
-  { label: 'No min', value: '' },
-  { label: 'Rs. 10,000', value: '10000' },
-  { label: 'Rs. 25,000', value: '25000' },
-  { label: 'Rs. 50,000', value: '50000' },
-  { label: 'Rs. 1 Lakh', value: '100000' },
-  { label: 'Rs. 5 Lakh', value: '500000' },
-  { label: 'Rs. 10 Lakh', value: '1000000' },
-  { label: 'Rs. 25 Lakh', value: '2500000' },
-  { label: 'Rs. 50 Lakh', value: '5000000' },
-  { label: 'Rs. 1 Crore', value: '10000000' },
-  { label: 'Rs. 5 Crore', value: '50000000' },
-];
-
-const MAX_PRICES = [
-  { label: 'No max', value: '' },
-  { label: 'Rs. 25,000', value: '25000' },
-  { label: 'Rs. 50,000', value: '50000' },
-  { label: 'Rs. 1 Lakh', value: '100000' },
-  { label: 'Rs. 5 Lakh', value: '500000' },
-  { label: 'Rs. 10 Lakh', value: '1000000' },
-  { label: 'Rs. 25 Lakh', value: '2500000' },
-  { label: 'Rs. 50 Lakh', value: '5000000' },
-  { label: 'Rs. 1 Crore', value: '10000000' },
-  { label: 'Rs. 5 Crore', value: '50000000' },
-  { label: 'Rs. 9 Crore', value: '90000000' },
-];
-
-const CITIES = ['Kathmandu', 'Lalitpur', 'Bhaktapur', 'Pokhara', 'Chitwan', 'Jhapa', 'Kirtipur'];
-const FACES = ['East', 'West', 'North', 'South', 'North East', 'North West', 'South East', 'South West'];
-
-const QUICK_CATS = [
-  { name: 'Apartment', icon: <Building2 size={22} />, query: 'Apartment', bg: 'bg-sky-50', ring: 'hover:border-sky-300', iconColor: 'text-sky-600' },
-  { name: 'Residential', icon: <HomeIcon size={22} />, query: 'Residential', bg: 'bg-emerald-50', ring: 'hover:border-emerald-300', iconColor: 'text-emerald-600' },
-  { name: 'Commercial', icon: <Warehouse size={22} />, query: 'Commercial', bg: 'bg-orange-50', ring: 'hover:border-orange-300', iconColor: 'text-orange-600' },
-  { name: 'Land', icon: <LandPlot size={22} />, query: 'Land', bg: 'bg-violet-50', ring: 'hover:border-violet-300', iconColor: 'text-violet-600' },
-];
-
-const CITY_CARDS = [
-  { city: 'Kathmandu', img: 'https://images.unsplash.com/photo-1542359649-31e03cd4d909?w=500&q=70' },
-  { city: 'Pokhara', img: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=500&q=70' },
-  { city: 'Lalitpur', img: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=500&q=70' },
-  { city: 'Bhaktapur', img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&q=70' },
-];
-
-/* ─── Helpers ──────────────────────────────────────────────────────────── */
-const se = (d) => `${d ? 'bg-[#0D2A4A] text-white' : 'bg-white border-[#0D2A4A]/10 text-slate-600'} text-[10px] font-black uppercase tracking-widest px-6 py-2.5 rounded-lg transition-all`;
-
-export default function Home({ darkMode, onAuthClick }) {
-  const navigate = useNavigate();
-
-  /* search state */
-  const [tab, setTab] = useState('sale');
-  const [term, setTerm] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [city, setCity] = useState('');
-  const [category, setCategory] = useState('');
-  const [face, setFace] = useState('');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
-  const [minBed, setMinBed] = useState('');
-  const [sort, setSort] = useState('createdAt_desc');
-
-  /* listings */
-  const [recent, setRecent] = useState([]);
+export default function Home() {
   const [loading, setLoading] = useState(true);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [propertyType, setPropertyType] = useState("buy");
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState(null); // null = all, "buy" = buying, "rent" = renting
+  const [filters, setFilters] = useState({
+    priceMin: "",
+    priceMax: "",
+    city: "",
+    propertyTypes: [], // Array for multiple property type selections
+  });
 
-  useEffect(() => {
-    const go = async () => {
-      setLoading(true);
-      try {
-        const r = await fetch(`/api/listing/get?limit=6&sort=createdAt&order=desc`);
-        const d = await r.json();
-        setRecent(Array.isArray(d) ? d : []);
-      } catch { }
-      setLoading(false);
-    };
-    go();
-  }, []);
-
-  /* build query and navigate */
-  const handleSearch = () => {
-    const p = new URLSearchParams();
-    p.set('type', tab);
-    if (term) p.set('searchTerm', term);
-    if (city) p.set('city', city);
-    if (category) p.set('category', category);
-    if (face) p.set('face', face);
-    if (minPrice) p.set('minPrice', minPrice);
-    if (maxPrice) p.set('maxPrice', maxPrice);
-    if (minBed) p.set('bedroom', minBed);
-    const [s, o] = sort.split('_');
-    p.set('sort', s); p.set('order', o);
-    navigate(`/listings?${p}`);
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (searchKeyword.trim()) params.set("keyword", searchKeyword);
+    params.set("purpose", propertyType);
+    if (filters.priceMin) params.set("priceMin", filters.priceMin);
+    if (filters.priceMax) params.set("priceMax", filters.priceMax);
+    if (filters.city) params.set("city", filters.city);
+    if (filters.type) params.set("type", filters.type);
+    window.location.href = `/listings?${params.toString()}`;
   };
 
-  const activeFiltersCount = [city, category, face, minPrice, maxPrice, minBed].filter(Boolean).length;
+  const handleFilterChange = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
 
-  /* theme tokens */
-  const bg = darkMode ? 'bg-[#06101c]' : 'bg-white';
-  const cardBg = darkMode ? 'bg-[#0a1e33]' : 'bg-white';
-  const border = darkMode ? 'border-[#112236]' : 'border-slate-100';
-  const txt = darkMode ? 'text-white' : 'text-[#0D2A4A]';
-  const muted = darkMode ? 'text-slate-400' : 'text-slate-500';
-  const secBg = darkMode ? 'bg-[#08192d]' : 'bg-slate-50';
-  const inputBg = darkMode ? 'bg-[#0a1e33] border-[#1e3a5f] text-white placeholder-slate-500' : 'bg-slate-100 border-transparent text-slate-700 placeholder-slate-400';
+  const handlePropertyTypeChange = (type) => {
+    setFilters((prev) => {
+      const types = prev.propertyTypes.includes(type)
+        ? prev.propertyTypes.filter((t) => t !== type)
+        : [...prev.propertyTypes, type];
+      return { ...prev, propertyTypes: types };
+    });
+  };
+
+  const cities = ["Kathmandu", "Pokhara", "Lalitpur", "Bhaktapur", "Biratnagar"];
 
   return (
-    <div className={`min-h-screen ${bg} transition-colors duration-300`}>
+    <div>
+      {/* Hero Section */}
+      <section className="relative w-full bg-[url('https://images.pexels.com/photos/2443590/pexels-photo-2443590.jpeg')] bg-cover bg-center h-[32rem] sm:h-[28rem] md:h-[40rem] flex flex-col items-center justify-end pb-12">
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/50"></div>
 
-      {/* ══════════════════════════════════════════
-          HERO  (matches existing style exactly)
-      ══════════════════════════════════════════ */}
-      <section className="relative h-screen flex flex-col justify-end items-start pb-24 px-8 md:px-16">
-        {/* Background */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src="https://images.pexels.com/photos/2443590/pexels-photo-2443590.jpeg"
-            className="w-full h-full object-cover brightness-[0.4]"
-            alt="Hero"
-          />
+        <div className="absolute top-0 left-0 right-0 z-20">
+          <Navbar transparent /> {/* pass a prop to style it for dark bg */}
         </div>
 
-        <div className="relative z-10 w-full max-w-2xl">
-          <h1 className="text-4xl md:text-6xl font-black text-white mb-2 tracking-tighter">
+        {/* Search Container */}
+        <div className="absolute z-10 w-full max-w-[50%] px-4 md:px-6 bottom-32 left-12">
+          <h1 className="text-xl md:text-5xl font-extrabold text-white leading-tight mb-4">
             Find it. Love it. Live it.
           </h1>
-          <p className="text-base md:text-lg text-slate-200 mb-8 tracking-widest uppercase font-semibold">
-            Real Estate, Real Fast.
-          </p>
-
-          {/* ── Search box ─────────────────────────────── */}
-          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-xl">
-            {/* Buy / Rent tabs */}
-            <div className="flex border-b border-slate-100">
-              {['sale', 'rent'].map((t) => (
+          <div className="rounded-2xl overflow-hidden p-2">
+            {/* Tabs */}
+            <div className="flex">
+              {["Buy", "Rent"].map((tab) => (
                 <button
-                  key={t}
-                  onClick={() => setTab(t)}
-                  className={`relative px-7 py-3 text-[10px] font-black uppercase tracking-widest transition-all
-                    ${tab === t ? 'text-[#77B6EA]' : 'text-slate-400 hover:text-slate-600'}`}
+                  key={tab}
+                  onClick={() => setPropertyType(tab.toLowerCase())}
+                  className={`px-6 py-4 font-semibold text-sm sm:text-base whitespace-nowrap transition bg-white dark:bg-neutral-900 first:rounded-tl-xl last:rounded-tr-xl  
+                    ${propertyType === tab.toLowerCase() ||
+                      (tab === "Buy" && propertyType === "buy")
+                      ? "border-b-2 border-orange-500"
+                      : " border-b-2 border-transparent"
+                    }`}
                 >
-                  {t}
-                  {tab === t && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#77B6EA]" />}
+                  {tab}
                 </button>
               ))}
             </div>
 
-            {/* Search row */}
-            <div className="flex items-center gap-2 p-2">
-              <div className="flex-1 flex items-center gap-2.5 px-4 py-2 bg-slate-100 rounded-xl">
-                <Search className="text-slate-400 shrink-0" size={15} />
+            {/* Search Bar */}
+            <form
+              onSubmit={handleSearch}
+              className="p-4 sm:p-6 flex flex-col sm:flex-row gap-3 items-center bg-white dark:bg-neutral-900 rounded-bl-xl rounded-r-xl "
+            >
+              {/* Search Input */}
+              <div className="relative flex-1">
+                <Search
+                  size={20}
+                  className="absolute left-4 top-1/2 -translate-y-1/2"
+                />
                 <input
                   type="text"
-                  value={term}
-                  onChange={(e) => setTerm(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  placeholder="Search flat, house, or city..."
-                  className="bg-transparent outline-none w-full text-xs font-medium text-slate-700 placeholder-slate-400"
+                  value={searchKeyword}
+                  onChange={(e) => setSearchKeyword(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 text-sm bg-neutral-200 dark:bg-neutral-800 rounded-lg outline-none focus:ring-2 focus:ring-[#E8413B]"
+                  placeholder="Search city, adress..."
                 />
-                {term && <button onClick={() => setTerm('')}><X size={13} className="text-slate-400" /></button>}
               </div>
 
-              {/* Filter icon */}
+              {/* Filters Button */}
               <button
-                onClick={() => setShowFilters(true)}
-                className={`relative p-2.5 rounded-xl border transition-all ${activeFiltersCount > 0
-                  ? 'border-[#F26419] bg-[#F26419]/10 text-[#F26419]'
-                  : 'border-slate-200 text-[#0D2A4A] hover:bg-slate-50'
-                  }`}
+                type="button"
+                onClick={() => setShowFilterModal(true)}
+                className="p-3 border-2 rounded-lg font-semibold flex items-center gap-2 justify-center"
               >
-                <SlidersHorizontal size={15} />
-                {activeFiltersCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#F26419] text-white text-[9px] font-black flex items-center justify-center">
-                    {activeFiltersCount}
-                  </span>
-                )}
+                <SlidersHorizontal size={20} />
               </button>
 
+              {/* Search Button */}
               <button
-                onClick={handleSearch}
-                className="bg-[#F26419] hover:bg-[#d4551a] text-white px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-orange-500/20"
+                type="submit"
+                className="px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition"
               >
                 Search
               </button>
-            </div>
+            </form>
           </div>
+        </div>
+      </section>
 
-          {/* Quick city tags */}
-          <div className="flex flex-wrap gap-2 mt-5">
-            {CITIES.slice(0, 5).map((c) => (
+      {/* Filter Modal */}
+      {showFilterModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-neutral-300 dark:bg-neutral-800 rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 flex justify-between items-center p-4 border-b border-neutral-300 dark:border-neutral-600 bg-neutral-300 dark:bg-neutral-800">
+              <h3 className="text-lg font-bold">
+                Filters
+              </h3>
               <button
-                key={c}
-                onClick={() => navigate(`/listings?city=${c}`)}
-                className="flex items-center gap-1 text-white/70 hover:text-white text-[11px] font-medium bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full border border-white/15 transition-all"
+                onClick={() => setShowFilterModal(false)}
+                className="p-2 hover:bg-neutral-200 dark:hover:bg-neutal-700 rounded-lg transition"
               >
-                <MapPin size={9} /> {c}
+                <X size={20} />
               </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════
-          QUICK CATEGORIES
-      ══════════════════════════════════════════ */}
-      <section className={`py-14 ${secBg}`}>
-        <div className="max-w-6xl mx-auto px-8">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className={`text-xl font-black uppercase tracking-tight ${txt}`}>Browse by Type</h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {QUICK_CATS.map((cat) => (
-              <button
-                key={cat.name}
-                onClick={() => navigate(`/listings?category=${cat.query}`)}
-                className={`group flex items-center gap-3 p-5 rounded-2xl border transition-all hover:-translate-y-0.5 hover:shadow-md
-                  ${darkMode
-                    ? 'bg-[#0a1e33] border-[#112236] hover:border-[#1e3a5f]'
-                    : `bg-white border-slate-100 ${cat.ring}`
-                  }`}
-              >
-                <div className={`${darkMode ? 'text-sky-400' : cat.iconColor} group-hover:scale-110 transition-transform`}>
-                  {cat.icon}
-                </div>
-                <div className="text-left">
-                  <div className={`text-xs font-black uppercase tracking-wider ${darkMode ? 'text-white' : 'text-[#0D2A4A]'}`}>{cat.name}</div>
-                  <div className={`text-[10px] mt-0.5 ${muted}`}>View all →</div>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════
-          RECENT LISTINGS
-      ══════════════════════════════════════════ */}
-      <section className={`py-16 ${bg}`}>
-        <div className="max-w-7xl mx-auto px-8">
-          <div className="flex items-end justify-between mb-10">
-            <div>
-              <p className={`text-[10px] font-black uppercase tracking-[3px] mb-1 ${darkMode ? 'text-sky-400' : 'text-[#77B6EA]'}`}>Fresh picks</p>
-              <h2 className={`text-2xl font-black uppercase tracking-tight ${txt}`}>Recent Listings</h2>
             </div>
-            <Link to="/listings" className={`flex items-center gap-2 text-xs font-bold border px-4 py-2 rounded-xl transition-all
-              ${darkMode ? 'border-[#1e3a5f] text-sky-400 hover:bg-[#0a1e33]' : 'border-[#0D2A4A]/20 text-[#0D2A4A] hover:bg-slate-50'}`}>
-              View All <ArrowRight size={13} />
-            </Link>
-          </div>
 
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[1, 2, 3].map(i => <div key={i} className={`h-72 rounded-2xl animate-pulse ${darkMode ? 'bg-[#0a1e33]' : 'bg-slate-100'}`} />)}
-            </div>
-          ) : recent.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recent.map(l => <PropertyCard key={l._id} listing={l} darkMode={darkMode} />)}
-            </div>
-          ) : (
-            <div className={`text-center py-16 rounded-2xl border ${darkMode ? 'border-[#112236] text-slate-500' : 'border-slate-100 text-slate-400'}`}>
-              <HomeIcon size={36} className="mx-auto mb-3 opacity-20" />
-              <p className="text-sm font-medium">No listings yet. Import the CSV to populate.</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════
-          HOW IT WORKS
-      ══════════════════════════════════════════ */}
-      <section className={`py-16 ${secBg}`}>
-        <div className="max-w-5xl mx-auto px-8">
-          <div className="text-center mb-12">
-            <p className={`text-[10px] font-black uppercase tracking-[3px] mb-2 ${darkMode ? 'text-sky-400' : 'text-[#77B6EA]'}`}>Simple process</p>
-            <h2 className={`text-2xl font-black uppercase tracking-tight ${txt}`}>How GharRush Works</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { n: '01', title: 'Search', desc: 'Browse verified listings by city, type, price, and more.', icon: <Search size={18} /> },
-              { n: '02', title: 'Connect', desc: 'Talk directly to verified brokers and schedule viewings.', icon: <Users size={18} /> },
-              { n: '03', title: 'Move in', desc: 'Complete the deal with full documentation support.', icon: <CheckCircle size={18} /> },
-            ].map((s) => (
-              <div key={s.n} className={`rounded-2xl p-7 border ${darkMode ? 'bg-[#0a1e33] border-[#112236]' : 'bg-white border-slate-100 shadow-sm'}`}>
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-5 ${darkMode ? 'bg-sky-500/20 text-sky-400' : 'bg-[#0D2A4A]/10 text-[#0D2A4A]'}`}>
-                  {s.icon}
-                </div>
-                <div className={`text-[10px] font-black mb-2 ${darkMode ? 'text-slate-600' : 'text-slate-300'}`}>{s.n}</div>
-                <h3 className={`font-black text-sm uppercase mb-2 ${txt}`}>{s.title}</h3>
-                <p className={`text-xs leading-relaxed ${muted}`}>{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════
-          CITIES
-      ══════════════════════════════════════════ */}
-      <section className={`py-16 ${bg}`}>
-        <div className="max-w-6xl mx-auto px-8">
-          <div className="text-center mb-10">
-            <p className={`text-[10px] font-black uppercase tracking-[3px] mb-2 ${darkMode ? 'text-sky-400' : 'text-[#77B6EA]'}`}>Locations</p>
-            <h2 className={`text-2xl font-black uppercase tracking-tight ${txt}`}>Properties Across Nepal</h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {CITY_CARDS.map((c) => (
-              <button
-                key={c.city}
-                onClick={() => navigate(`/listings?city=${c.city}`)}
-                className="group relative rounded-2xl overflow-hidden aspect-[4/3]"
-              >
-                <img src={c.img} alt={c.city} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-4 text-left">
-                  <div className="text-white font-black text-sm uppercase tracking-wider">{c.city}</div>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════
-          CTA
-      ══════════════════════════════════════════ */}
-      <section className={`py-20 px-8 ${secBg}`}>
-        <div className="max-w-3xl mx-auto text-center">
-          <div className={`rounded-3xl p-14 relative overflow-hidden ${darkMode ? 'bg-[#0a1e33] border border-[#112236]' : 'bg-[#0D2A4A]'} shadow-2xl`}>
-            <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-[#F26419]/10" />
-            <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-[#77B6EA]/10" />
-            <div className="relative z-10">
-              <p className="text-[#77B6EA] text-[10px] font-black uppercase tracking-[3px] mb-4">For Brokers</p>
-              <h2 className="text-3xl font-black text-white tracking-tight mb-4 uppercase">
-                Ready to List Your Property?
-              </h2>
-              <p className="text-slate-400 text-sm max-w-md mx-auto mb-8 leading-relaxed">
-                Join verified brokers on GharRush and reach thousands of buyers and renters across Nepal.
-              </p>
-              <div className="flex gap-3 justify-center flex-wrap">
-                <Link to="/create-listing">
-                  <button className="bg-[#F26419] hover:bg-[#d4551a] text-white font-black text-xs uppercase tracking-widest px-8 py-3.5 rounded-xl transition-all active:scale-95 shadow-lg">
-                    List a Property
-                  </button>
-                </Link>
-                <Link to="/listings">
-                  <button className="border border-white/20 text-white/80 hover:bg-white/10 font-semibold text-xs uppercase tracking-widest px-8 py-3.5 rounded-xl transition-all">
-                    Browse Listings
-                  </button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════
-          FILTER MODAL  (matches existing modal style)
-      ══════════════════════════════════════════ */}
-      {showFilters && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className={`w-full max-w-sm rounded-[20px] shadow-2xl overflow-hidden ${darkMode ? 'bg-[#0a1e33] border border-[#1e3a5f]' : 'bg-white'}`}>
-
-            {/* Header */}
-            <div className={`px-5 py-4 border-b flex items-center justify-between ${darkMode ? 'border-[#1e3a5f]' : 'border-slate-100'}`}>
+            <div className="p-6 space-y-5">
+              {/* Price Range */}
               <div>
-                <h2 className={`text-xs font-black uppercase tracking-widest ${txt}`}>Filters</h2>
-                {activeFiltersCount > 0 && (
-                  <p className="text-[10px] text-[#F26419] font-semibold mt-0.5">{activeFiltersCount} active</p>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                {activeFiltersCount > 0 && (
-                  <button
-                    onClick={() => { setCity(''); setCategory(''); setFace(''); setMinPrice(''); setMaxPrice(''); setMinBed(''); }}
-                    className="text-[10px] font-bold text-red-400 hover:text-red-500 uppercase tracking-wider"
-                  >
-                    Clear all
-                  </button>
-                )}
-                <button onClick={() => setShowFilters(false)} className={`transition-colors ${darkMode ? 'text-slate-400 hover:text-white' : 'text-slate-400 hover:text-red-500'}`}>
-                  <X size={18} />
-                </button>
-              </div>
-            </div>
-
-            {/* Scrollable body */}
-            <div className={`p-5 space-y-5 max-h-[65vh] overflow-y-auto ${darkMode ? 'bg-[#0a1e33]' : 'bg-white'}`}>
-
-              {/* Buy / Rent */}
-              <div className="space-y-2">
-                <label className={`text-[9px] font-black uppercase tracking-widest ${muted}`}>Property Status</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {['sale', 'rent'].map((t) => (
-                    <button key={t} onClick={() => setTab(t)}
-                      className={`py-2.5 rounded-xl border text-xs font-black uppercase tracking-wider transition-all
-                        ${tab === t
-                          ? 'bg-[#0D2A4A] text-white border-[#0D2A4A]'
-                          : darkMode ? 'border-[#1e3a5f] text-slate-400 hover:border-sky-500/50' : 'border-slate-200 text-slate-500 hover:border-slate-300'
-                        }`}
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Category */}
-              <div className="space-y-2">
-                <label className={`text-[9px] font-black uppercase tracking-widest ${muted}`}>Property Type</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {['Residential', 'Commercial', 'Apartment', 'Land'].map((c) => (
-                    <button key={c} onClick={() => setCategory(category === c ? '' : c)}
-                      className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all text-left
-                        ${category === c
-                          ? 'bg-[#77B6EA]/20 border-[#77B6EA] text-[#0D2A4A] dark:text-sky-300'
-                          : darkMode ? 'border-[#1e3a5f] text-slate-400 hover:border-sky-500/50' : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                        }`}
-                    >
-                      {c}
-                    </button>
-                  ))}
+                <label className="block text-sm font-semibold mb-3">
+                  Price Range
+                </label>
+                <div className="flex gap-3">
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    value={filters.priceMin}
+                    onChange={(e) =>
+                      handleFilterChange("priceMin", e.target.value)
+                    }
+                    className="flex-1 px-1 py-2 border border-[#E0E0E0] dark:border-[#2E2E3E] rounded-lg bg-neutral-300 dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8413B]"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    value={filters.priceMax}
+                    onChange={(e) =>
+                      handleFilterChange("priceMax", e.target.value)
+                    }
+                    className="flex-1 px-1 py-2 border border-[#E0E0E0] dark:border-[#2E2E3E] rounded-lg bg-neutral-300 dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8413B]"
+                  />
                 </div>
               </div>
 
               {/* City */}
-              <div className="space-y-2">
-                <label className={`text-[9px] font-black uppercase tracking-widest ${muted}`}>City</label>
+              <div>
+                <label className="block text-sm font-semibold mb-3">
+                  City
+                </label>
                 <select
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className={`w-full p-2.5 rounded-xl border outline-none text-xs font-medium transition-colors ${darkMode ? 'bg-[#06101c] border-[#1e3a5f] text-slate-200' : 'bg-white border-slate-200 text-slate-700'}`}
+                  value={filters.city}
+                  onChange={(e) => handleFilterChange("city", e.target.value)}
+                  className="w-full px-4 py-2 border border-[#E0E0E0] dark:border-[#2E2E3E] rounded-lg bg-neutral-300 dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8413B]"
                 >
-                  <option value="">Any City</option>
-                  {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                  <option value="">All Cities</option>
+                  {cities.map((city) => (
+                    <option key={city._id || city.id} value={city.name || city}>
+                      {city.name || city}
+                    </option>
+                  ))}
                 </select>
               </div>
 
-              {/* Price — Min + Max dropdowns */}
-              <div className="space-y-2">
-                <label className={`text-[9px] font-black uppercase tracking-widest ${muted}`}>Price Range</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <p className={`text-[9px] font-bold mb-1 ${muted}`}>Min</p>
-                    <select
-                      value={minPrice}
-                      onChange={(e) => setMinPrice(e.target.value)}
-                      className={`w-full p-2.5 rounded-xl border outline-none text-xs font-medium ${darkMode ? 'bg-[#06101c] border-[#1e3a5f] text-slate-200' : 'bg-white border-slate-200 text-slate-700'}`}
+              {/* Property Type */}
+              <div>
+                <label className="block text-sm font-semibold mb-4">
+                  Property type
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { id: "all", label: "All types" },
+                    { id: "house", label: "House" },
+                    { id: "townhouse", label: "Townhouse" },
+                    { id: "apartment", label: "Apartment & Unit" },
+                    { id: "villa", label: "Villa" },
+                    { id: "retirement", label: "Retirement Living" },
+                    { id: "land", label: "Land" },
+                    { id: "acreage", label: "Acreage" },
+                    { id: "rural", label: "Rural" },
+                    { id: "block", label: "Block Of Units" },
+                  ].map((type) => (
+                    <label
+                      key={type.id}
+                      className="flex items-center gap-3 cursor-pointer"
                     >
-                      {MIN_PRICES.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <p className={`text-[9px] font-bold mb-1 ${muted}`}>Max</p>
-                    <select
-                      value={maxPrice}
-                      onChange={(e) => setMaxPrice(e.target.value)}
-                      className={`w-full p-2.5 rounded-xl border outline-none text-xs font-medium ${darkMode ? 'bg-[#06101c] border-[#1e3a5f] text-slate-200' : 'bg-white border-slate-200 text-slate-700'}`}
-                    >
-                      {MAX_PRICES.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bedrooms */}
-              <div className="space-y-2">
-                <label className={`text-[9px] font-black uppercase tracking-widest ${muted}`}>Min Bedrooms</label>
-                <div className="flex gap-2">
-                  {['', '1', '2', '3', '4', '5'].map((n) => (
-                    <button key={n} onClick={() => setMinBed(n === minBed ? '' : n)}
-                      className={`flex-1 py-2 rounded-xl border text-xs font-black transition-all
-                        ${minBed === n
-                          ? 'bg-[#0D2A4A] text-white border-[#0D2A4A]'
-                          : darkMode ? 'border-[#1e3a5f] text-slate-400 hover:border-sky-500/50' : 'border-slate-200 text-slate-500'
-                        }`}
-                    >
-                      {n === '' ? 'Any' : `${n}+`}
-                    </button>
+                      <input
+                        type="checkbox"
+                        checked={
+                          type.id === "all"
+                            ? filters.propertyTypes.length === 0
+                            : filters.propertyTypes.includes(type.id)
+                        }
+                        onChange={() => {
+                          if (type.id === "all") {
+                            setFilters((prev) => ({
+                              ...prev,
+                              propertyTypes:
+                                prev.propertyTypes.length === 0 ? [] : [],
+                            }));
+                          } else {
+                            handlePropertyTypeChange(type.id);
+                          }
+                        }}
+                        className="w-5 h-5 accent-[#E8413B] rounded cursor-pointer"
+                      />
+                      <span className="text-sm">
+                        {type.label}
+                      </span>
+                    </label>
                   ))}
                 </div>
               </div>
 
-              {/* Face direction */}
-              <div className="space-y-2">
-                <label className={`text-[9px] font-black uppercase tracking-widest ${muted}`}>Face Direction</label>
-                <select
-                  value={face}
-                  onChange={(e) => setFace(e.target.value)}
-                  className={`w-full p-2.5 rounded-xl border outline-none text-xs font-medium ${darkMode ? 'bg-[#06101c] border-[#1e3a5f] text-slate-200' : 'bg-white border-slate-200 text-slate-700'}`}
+              {/* Apply Filters */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() =>
+                    setFilters({
+                      priceMin: "",
+                      priceMax: "",
+                      city: "",
+                      propertyTypes: [],
+                    })
+                  }
+                  className="flex-1 px-4 py-2 border border-[#E0E0E0] dark:border-[#2E2E3E] rounded-lg font-semibold hover:bg-[#F5F5F5] dark:hover:bg-[#252535] transition"
                 >
-                  <option value="">Any Direction</option>
-                  {FACES.map((f) => <option key={f} value={f}>{f}</option>)}
-                </select>
-              </div>
-
-              {/* Sort */}
-              <div className="space-y-2">
-                <label className={`text-[9px] font-black uppercase tracking-widest ${muted}`}>Sort By</label>
-                <select
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value)}
-                  className={`w-full p-2.5 rounded-xl border outline-none text-xs font-medium ${darkMode ? 'bg-[#06101c] border-[#1e3a5f] text-slate-200' : 'bg-white border-slate-200 text-slate-700'}`}
+                  Reset
+                </button>
+                <button
+                  onClick={() => setShowFilterModal(false)}
+                  className="flex-1 px-4 py-2 bg-[#E8413B] text-white rounded-lg font-semibold hover:bg-[#c0342e] transition"
                 >
-                  <option value="createdAt_desc">Newest First</option>
-                  <option value="price_asc">Price: Low → High</option>
-                  <option value="price_desc">Price: High → Low</option>
-                </select>
+                  Apply
+                </button>
               </div>
-            </div>
-
-            {/* Footer */}
-            <div className={`p-4 border-t ${darkMode ? 'border-[#1e3a5f] bg-[#06101c]' : 'border-slate-100 bg-white'}`}>
-              <button
-                onClick={() => { handleSearch(); setShowFilters(false); }}
-                className="w-full bg-[#F26419] hover:bg-[#d4551a] text-white py-3.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg"
-              >
-                Apply Filters & Search
-              </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* Explore All Properties - Combined Section with Filters */}
+      <div className="py-16">
+        <div className="max-w-6xl mx-auto px-6 md:px-12">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold">
+              Explore all things property
+            </h2>
+            <Link
+              to="/listings"
+              className="text-orange-500 font-semibold hover:underline transition"
+            >
+              View All
+            </Link>
+          </div>
+
+          {/* Quick Filter Buttons */}
+          <div className="flex flex-wrap gap-3 mb-8">
+            {[
+              { id: null, label: "All Properties" },
+              { id: "buy", label: "Buying" },
+              { id: "rent", label: "Renting" },
+              { id: "sell", label: "Selling" },
+            ].map((filter) => (
+              <button
+                key={filter.id}
+                onClick={() => setCategoryFilter(filter.id)}
+                className={`px-4 cursor-pointer py-1 rounded-full font-semibold transition ${categoryFilter === filter.id
+                  ? "border-orange-500 border-2"
+                  : "border-2"
+                  }`}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+            {[
+              {
+                id: 1,
+                address: "Lazimpat",
+                city: "Kathmandu",
+                price: 12000000,
+                type: "Apartment",
+                category: "sale",
+                bedroom: 3,
+                bathroom: 2,
+                area: 1200,
+                posted: "2024-05-01",
+                views: 245,
+                face: "East",
+                title: "Modern Apartment in Kathmandu",
+                description: "A beautiful modern apartment located in the heart of Kathmandu.",
+                images: [
+                  "https://images.pexels.com/photos/259588/pexels-photo-259588.jpeg"
+                ],
+                size: { value: 1200, unit: "sqft" },
+                purpose: "sale",
+              },
+              {
+                id: 2,
+                address: "Lakeside",
+                city: "Pokhara",
+                price: 8000000,
+                type: "House",
+                category: "rent",
+                bedroom: 2,
+                bathroom: 2,
+                area: 1500,
+                posted: "2024-04-20",
+                views: 112,
+                face: "South",
+                title: "Cozy House in Pokhara",
+                description: "A cozy house with a stunning view of the lake in Pokhara.",
+                images: [
+                  "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg"
+                ],
+                size: { value: 1500, unit: "sqft" },
+                purpose: "rent",
+              },
+              {
+                id: 3,
+                address: "Patan",
+                city: "Lalitpur",
+                price: 25000000,
+                type: "Villa",
+                category: "sale",
+                bedroom: 5,
+                bathroom: 4,
+                area: 3000,
+                posted: "2024-03-15",
+                views: 387,
+                face: "West",
+                title: "Spacious Villa in Lalitpur",
+                description: "A spacious villa with modern amenities located in Patan.",
+                images: [
+                  "https://images.pexels.com/photos/210617/pexels-photo-210617.jpeg"
+                ],
+                size: { value: 3000, unit: "sqft" },
+                purpose: "sale",
+              },
+            ]
+              .filter((property) => {
+                if (categoryFilter === null) return true;
+                if (categoryFilter === "buy")
+                  return property.purpose === "sale";
+                if (categoryFilter === "rent")
+                  return property.purpose === "rent";
+                if (categoryFilter === "sell")
+                  return property.purpose === "sell";
+                return true;
+              })
+              .map((property) => (
+                <PropertyCard key={property.id} property={property} />
+              ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Local Brokers Section */}
+      <div className="py-16">
+        <div className="max-w-6xl mx-auto px-6 md:px-12">
+          <h2 className="text-2xl font-bold mb-8">
+            Local brokers
+          </h2>
+
+          {/* Horizontal Scrolling Brokers */}
+          <div className="overflow-x-auto pb-4">
+            <div className="flex gap-6 min-w-max">
+              <div
+                className="flex-shrink-0 w-72 bg-white dark:bg-neutral-900 rounded-xl p-6 border dark:border-neutral-600 border-neutral-300 transition"
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb"
+                  alt="Broker profile"
+                  className="w-16 h-16 rounded-full object-cover mb-4"
+                />
+                <h3 className="font-bold">
+                  Ram Bahadur
+                </h3>
+                <p className="text-sm mb-2">
+                  {"Real Estate Broker"}
+                </p>
+                <p className="text-sm">
+                  Based in Bhaktapur
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <section className="bg-orange-500 py-16 px-6">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            Ready to List Your Property?
+          </h2>
+          <p className="text-lg text-white/90 mb-8">
+            Join verified brokers and reach thousands of potential buyers and
+            renters on GharBazar
+          </p>
+          <Link
+            to="/broker-signup"
+            className="inline-block bg-white text-orange-500 px-8 py-3 rounded-lg font-semibold hover:bg-[#F5F5F5] transition"
+          >
+            Become a Broker
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

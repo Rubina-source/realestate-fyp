@@ -2,9 +2,9 @@
 
 @theme {
   /* This replaces the 'brand' colors in your config */
-  --color-brand-navy: #0D2A4A;
-  --color-brand-blue: #77B6EA;
-  --color-brand-orange: #F26419;
+  --color-brand-navy: #0d2a4a;
+  --color-brand-blue: #77b6ea;
+  --color-brand-orange: #f26419;
   --color-brand-dark: #06101c;
 
   /* This replaces the 'fontFamily' section */
