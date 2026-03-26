@@ -1,5 +1,8 @@
-import { initializeApp } from "firebase/app";
-console.log("DEBUG: Firebase Key is ->", import.meta.env.VITE_FIREBASE_API_KEY);
+import {
+  initializeApp
+} from "firebase/app";
+console.log("DEBUG: Firebase Key is ->",
+  import.meta.env.VITE_FIREBASE_API_KEY);
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
