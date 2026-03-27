@@ -1,98 +1,303 @@
 import User from '../models/user.model.js';
-import bcryptjs from 'bcryptjs';
-import { errorHandler } from '../utils/error.js';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 
-// --- SIGN UP ---
-export const signup = async (req, res, next) => {
-    const { username, email, password, role } = req.body;
-    
-    if (!username || !email || !password) {
-        return next(errorHandler(400, 'All fields are required!'));
+const generateToken = (userId, role) => {
+  return jwt.sign({
+      userId,
+      role
+    },
+    process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRE || '7d',
+    });
+};
+
+export const register = async (req, res, next) => {
+  try {
+    const {
+      name,
+      email,
+      password,
+      confirmPassword,
+      role,
+      phone,
+      company,
+      city,
+      profileImage
+    } = req.body;
+
+    // Validation
+    if (!name || !email || !password || !confirmPassword) {
+      return res.status(400).json({
+        message: 'Name, email, password, and confirmation are required'
+      });
     }
 
-    const hashedPassword = bcryptjs.hashSync(password, 10);
-    const newUser = new User({ 
-        username, 
-        email, 
-        password: hashedPassword, 
-        role: role || 'client' 
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        message: 'Passwords do not match'
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: 'Password must be at least 6 characters'
+      });
+    }
+
+    // Check if user exists
+    const existingUser = await User.findOne({
+      email
+    });
+    if (existingUser) {
+      return res.status(409).json({
+        message: 'User already exists'
+      });
+    }
+
+    // Broker-specific validation
+    if (role === 'broker') {
+      if (!phone || !company || !city) {
+        return res.status(400).json({
+          message: 'Phone, company, and city are required for broker registration'
+        });
+      }
+    }
+
+    // Generate verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+
+    console.log('Registration data received:', {
+      name,
+      email,
+      role,
+      hasProfileImage: !!profileImage,
+      profileImage: profileImage
     });
 
-    try {
-        await newUser.save();
-        res.status(201).json({
-            success: true,
-            message: "User created successfully!"
-        });
-    } catch (error) {
-        next(error); 
+    // Create user object with role-specific fields
+    const userData = {
+      name,
+      email,
+      password,
+      role: role || 'client',
+      verificationToken,
+      isVerified: false,
+      ...(profileImage && {
+        profileImage
+      }),
+    };
+
+    // Add broker-specific fields
+    if (role === 'broker') {
+      userData.phone = phone;
+      userData.company = company;
+      userData.city = city;
+      userData.isBrokerVerified = false; // Requires admin approval
+    } else if (role === 'client') {
+      userData.phone = phone || null;
     }
-};
 
-// --- SIGN IN ---
-export const signin = async (req, res, next) => {
-    const { email, password } = req.body;
-    
-    try {
-        const validUser = await User.findOne({ email });
-        if (!validUser) return next(errorHandler(404, 'User not found!'));
+    // Create user
+    const user = new User(userData);
+    await user.save();
 
-        const validPassword = bcryptjs.compareSync(password, validUser.password);
-        if (!validPassword) return next(errorHandler(401, 'Wrong credentials!'));
+    console.log('User registered successfully:', {
+      userId: user._id,
+      email: user.email
+    });
 
-        const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
-
-        // Remove password from the response
-        const { password: pass, ...rest } = validUser._doc;
-
-        // We send 'rest' which contains the 'role'
-        res
-            .cookie('access_token', token, { httpOnly: true })
-            .status(200)
-            .json(rest); 
-
-    } catch (error) {
-        next(error);
-    }
-};
-//signout
-export const signout = async (req, res, next) => {
-  try {
-    res.clearCookie('access_token');
-    res.status(200).json('User has been logged out!');
+    res.status(201).json({
+      message: role === 'broker' ?
+        'Broker account created successfully. Please check your email to verify your account. Admin verification is required to list properties.' : 'User registered successfully. Please check your email to verify your account.',
+      userId: user._id,
+    });
   } catch (error) {
-    next(error);
-  }
-};
-// --- GOOGLE OAUTH (Add this now so the Google button works later) ---
-export const google = async (req, res, next) => {
+    console.error('Registration error:', error);
+  };
+}
+
+export const login = async (req, res, next) => {
   try {
-    const user = await User.findOne({ email: req.body.email });
-    if (user) {
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-      const { password: pass, ...rest } = user._doc;
-      res.cookie('access_token', token, { httpOnly: true }).status(200).json(rest);
-    } else {
-      // NEW USER SIGNUP VIA GOOGLE
-      const generatedPassword = Math.random().toString(36).slice(-8);
-      const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
-      const newUser = new User({
-        username: req.body.name.split(" ").join("").toLowerCase() + Math.random().toString(36).slice(-4),
-        email: req.body.email,
-        password: hashedPassword,
-        avatar: req.body.photo,
-        // FIX: Use the role sent from the frontend modal!
-        role: req.body.role || 'client', 
+    const {
+      email,
+      password
+    } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        message: 'Email and password are required'
       });
-      await newUser.save();
-      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
-      const { password: pass, ...rest } = newUser._doc;
-      res.cookie('access_token', token, { httpOnly: true }).status(200).json(rest);
     }
+
+    // Find user and select password
+    const user = await User.findOne({
+      email
+    }).select('+password');
+    if (!user) {
+      return res.status(401).json({
+        message: 'Invalid credentials'
+      });
+    }
+
+    // Check if broker is verified by admin
+    if (user.role === 'broker' && !user.isBrokerVerified) {
+      return res.status(403).json({
+        message: 'Your broker account is pending admin approval. Please wait for verification.',
+        userId: user._id,
+      });
+    }
+
+    // Compare passwords
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        message: 'Invalid credentials'
+      });
+    }
+
+    // Generate token
+    const token = generateToken(user._id, user.role);
+
+    res.json({
+      message: 'Login successful',
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        profileImage: user.profileImage,
+      },
+    });
+  } catch (error) {
+    console.log(error)
+    next(error);
+  }
+};
+
+export const verifyEmail = async (req, res, next) => {
+  try {
+    const {
+      token
+    } = req.params;
+
+    if (!token) {
+      return res.status(400).json({
+        message: 'Verification token is required'
+      });
+    }
+
+    const user = await User.findOne({
+      verificationToken: token
+    });
+    if (!user) {
+      return res.status(400).json({
+        message: 'Invalid or expired verification token'
+      });
+    }
+
+    user.isVerified = true;
+    user.verificationToken = null;
+    await user.save();
+
+    res.json({
+      message: 'Email verified successfully. You can now log in.'
+    });
   } catch (error) {
     next(error);
   }
+};
 
-  
+export const getCurrentUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.userId).populate('name');
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found'
+      });
+    }
+
+    const responseUser = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      phone: user.phone,
+      company: user.company,
+      profileImage: user.profileImage,
+    };
+
+    // Add broker-specific fields if broker
+    if (user.role === 'broker') {
+      responseUser.city = user.city;
+      responseUser.experience = user.experience;
+      responseUser.certification = user.certification;
+      responseUser.isBrokerVerified = user.isBrokerVerified;
+    }
+
+    res.json({
+      user: responseUser
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateProfile = async (req, res, next) => {
+  try {
+    const {
+      name,
+      phone,
+      company,
+      city,
+      experience,
+      certification,
+      profileImage
+    } = req.body;
+
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found'
+      });
+    }
+
+    // Update user fields
+    if (name) user.name = name;
+    if (phone) user.phone = phone;
+    if (company) user.company = company;
+    if (profileImage) user.profileImage = profileImage;
+
+    // Update broker-specific fields
+    if (user.role === 'broker') {
+      if (city) user.city = city;
+      if (experience) user.experience = experience;
+      if (certification) user.certification = certification;
+    }
+
+    await user.save();
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+        company: user.company,
+        profileImage: user.profileImage,
+        ...(user.role === 'broker' && {
+          city: user.city,
+          experience: user.experience,
+          certification: user.certification,
+          isBrokerVerified: user.isBrokerVerified,
+        }),
+      },
+    });
+  } catch (error) {
+    console.error('Profile update error:', error);
+    next(error);
+  }
 };

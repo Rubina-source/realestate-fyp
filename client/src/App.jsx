@@ -15,6 +15,32 @@ import AdminDashboard from './pages/AdminDashboard';
 import BrokerDashboard from './pages/BrokerDashboard';
 import Navbar from './components/Navbar';
 import { useTheme } from './hooks/useTheme';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import { useAuth } from './hooks/useAuth';
+
+
+const ProtectedRoute = ({ children, allowed }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+
+  if (allowed && !allowed.includes(user.role)) {
+    return <Navigate to="/" />;
+  }
+
+  return children;
+};
 
 export default function App() {
   const { isDark } = useTheme();
@@ -34,6 +60,8 @@ export default function App() {
           <Route path="/" element={
             <Home />
           } />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/listings" element={<Properties darkMode={dm} />} />
           <Route path="/listing/:listingId" element={<PropertyDetails darkMode={dm} />} />
           <Route path="/about" element={<About darkMode={dm} />} />

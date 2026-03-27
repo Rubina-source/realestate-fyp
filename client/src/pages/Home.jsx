@@ -423,7 +423,7 @@ export default function Home() {
       {/* CTA Section */}
       <section className="bg-orange-500 py-16 px-6">
         <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
             Ready to List Your Property?
           </h2>
           <p className="text-lg text-white/90 mb-8">
@@ -432,7 +432,7 @@ export default function Home() {
           </p>
           <Link
             to="/broker-signup"
-            className="inline-block bg-white text-orange-500 px-8 py-3 rounded-lg font-semibold hover:bg-[#F5F5F5] transition"
+            className="inline-block bg-white text-orange-500 px-8 py-3 rounded-lg font-semibold hover:bg-orange- transition"
           >
             Become a Broker
           </Link>

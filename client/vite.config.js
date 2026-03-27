@@ -9,9 +9,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:3000', // Use the IP address directly
+        target: 'http://localhost:5000', // Use the IP address directly
         changeOrigin: true,
-        secure: false,
       },
     },
   },

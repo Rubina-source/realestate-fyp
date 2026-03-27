@@ -9,9 +9,18 @@ export const getListings = async (req, res, next) => {
     // 1. Search Term (Title/City)
     const searchTerm = req.query.searchTerm || '';
     if (searchTerm) {
-      query.$or = [
-        { title: { $regex: searchTerm, $options: 'i' } },
-        { city: { $regex: searchTerm, $options: 'i' } },
+      query.$or = [{
+          title: {
+            $regex: searchTerm,
+            $options: 'i'
+          }
+        },
+        {
+          city: {
+            $regex: searchTerm,
+            $options: 'i'
+          }
+        },
       ];
     }
 
@@ -28,14 +37,21 @@ export const getListings = async (req, res, next) => {
     // 4. Price Range
     const minPrice = parseInt(req.query.minPrice) || 0;
     const maxPrice = parseInt(req.query.maxPrice) || 1000000000;
-    query.price = { $gte: minPrice, $lte: maxPrice };
+    query.price = {
+      $gte: minPrice,
+      $lte: maxPrice
+    };
 
     // 5. Bedrooms/Bathrooms (Only filter if it's a number, not 'any')
     if (req.query.bedroom && req.query.bedroom !== 'any') {
-      query.bedroom = { $gte: parseInt(req.query.bedroom) };
+      query.bedroom = {
+        $gte: parseInt(req.query.bedroom)
+      };
     }
     if (req.query.bathroom && req.query.bathroom !== 'any') {
-      query.bathroom = { $gte: parseInt(req.query.bathroom) };
+      query.bathroom = {
+        $gte: parseInt(req.query.bathroom)
+      };
     }
 
     // 6. Face/Direction
@@ -46,10 +62,12 @@ export const getListings = async (req, res, next) => {
     const listings = await Listing.find(query)
       .limit(limit)
       .skip(startIndex)
-      .sort({ createdAt: -1 });
+      .sort({
+        createdAt: -1
+      });
 
     return res.status(200).json(listings);
   } catch (error) {
     next(error); // This sends the error to your index.js handler
   }
-}; 
+};

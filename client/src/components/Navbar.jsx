@@ -14,11 +14,33 @@ import {
     Users,
 } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Navbar({ transparent = false }) {
+    const { user, logout } = useAuth();
     const { isDark, toggleTheme } = useTheme();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [accountDropdown, setAccountDropdown] = useState(false);
     const dropdownRef = useRef(null);
+
+    console.log(user)
+
+    const handleLogout = () => {
+        logout();
+        setMobileOpen(false);
+        setAccountDropdown(false);
+    };
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setAccountDropdown(false);
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     const navBgClass = transparent
         ? "bg-transparent"
@@ -78,19 +100,106 @@ export default function Navbar({ transparent = false }) {
                     </div>
 
                     <div className="hidden lg:flex items-center gap-4">
-                        <Link
-                            to="/login"
-                            className="px-4 py-2 text-white hover:text-[#E8413B] transition text-sm font-medium"
-                        >
-                            Sign In
-                        </Link>
-                        <Link
-                            to="/broker-signup"
-                            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-sm font-medium"
-                        >
-                            Join as Broker
-                        </Link>
+                        {user ? (
+                            <>
+                                {/* Quick Links */}
+                                {user.role === "client" && (
+                                    <Link
+                                        to="/favorites"
+                                        className={`p-2 hover:text-orange-500 ${transparent ? "text-white" : 'dark:text-white'} transition`}
+                                        title="Favorites"
+                                    >
+                                        <Heart size={20} />
+                                    </Link>
+                                )}
 
+                                {/* Account Dropdown */}
+                                <div className="relative" ref={dropdownRef}>
+                                    <button
+                                        onClick={() => setAccountDropdown(!accountDropdown)}
+                                        className="flex items-center gap-2 px-4 py-2 rounded-lg transition cursor-pointer"
+                                    >
+                                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm bg-white text-black">
+                                            {user.name.charAt(0).toUpperCase()}
+                                        </div>
+                                        {/* <span className="text-sm font-medium">{user.name}</span> */}
+                                    </button>
+
+                                    {/* Dropdown Menu */}
+                                    {accountDropdown && (
+                                        <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 overflow-hidden z-50">
+                                            {/* Profile */}
+                                            <Link
+                                                to="/profile"
+                                                className="flex items-center gap-3 px-4 py-3  border-b border-[#E0E0E0] dark:border-[#2E2E3E]"
+                                                onClick={() => setAccountDropdown(false)}
+                                            >
+                                                <Home size={16} />
+                                                <span className="text-sm">My Profile</span>
+                                            </Link>
+
+                                            {/* Settings */}
+                                            <Link
+                                                to="/settings"
+                                                className="flex items-center gap-3 px-4 py-3 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition border-b border-[#E0E0E0] dark:border-[#2E2E3E]"
+                                                onClick={() => setAccountDropdown(false)}
+                                            >
+                                                <Settings size={16} />
+                                                <span className="text-sm">Account Settings</span>
+                                            </Link>
+
+                                            {/* Notifications */}
+                                            <Link
+                                                to="/notifications"
+                                                className="flex items-center gap-3 px-4 py-3 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition border-b border-[#E0E0E0] dark:border-[#2E2E3E]"
+                                                onClick={() => setAccountDropdown(false)}
+                                            >
+                                                <Bell size={16} />
+                                                <span className="text-sm">Notifications</span>
+                                            </Link>
+
+                                            {/* Broker Upgrade (clients only) */}
+                                            {user.role === "client" && (
+                                                <Link
+                                                    to="/broker-signup"
+                                                    className="flex items-center gap-3 px-4 py-3 text-orange-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition border-b border-[#E0E0E0] dark:border-[#2E2E3E] font-medium"
+                                                    onClick={() => setAccountDropdown(false)}
+                                                >
+                                                    <Users size={16} />
+                                                    <span className="text-sm">Join as Broker</span>
+                                                </Link>
+                                            )}
+
+                                            {/* Logout */}
+                                            <button
+                                                onClick={handleLogout}
+                                                className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/50 transition text-left"
+                                            >
+                                                <LogOut size={16} />
+                                                <span className="text-sm">Sign Out</span>
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <Link
+                                    to="/login"
+                                    className="px-4 py-2 text-white hover:text-[#E8413B] transition text-sm font-medium"
+                                >
+                                    Sign In
+                                </Link>
+                                <Link
+                                    to="/broker-signup"
+                                    className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-sm font-medium"
+                                >
+                                    Join as Broker
+                                </Link>
+                            </>
+                        )}
+
+                        {/* Theme Toggle */}
                         <button
                             onClick={toggleTheme}
                             className="p-2 rounded-lg  transition dark:text-white"
