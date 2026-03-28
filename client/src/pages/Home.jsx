@@ -11,8 +11,11 @@ import {
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import PropertyCard from "../components/property/Propertycard";
+import { propertyService } from "../services/apiService";
 
 export default function Home() {
+  const [properties, setProperties] = useState([]);
+  const [brokers, setBrokers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [propertyType, setPropertyType] = useState("buy");
@@ -24,6 +27,30 @@ export default function Home() {
     city: "",
     propertyTypes: [], // Array for multiple property type selections
   });
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        // Fetch featured properties
+        const propertiesResponse = await propertyService.getAll({ limit: 6 });
+        setProperties(propertiesResponse.data.properties);
+
+        // Fetch public brokers
+        const brokersResponse = await propertyService.getPublicBrokers({
+          limit: 6,
+        });
+        setBrokers(brokersResponse.data.data.brokers || []);
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -305,71 +332,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-            {[
-              {
-                id: 1,
-                address: "Lazimpat",
-                city: "Kathmandu",
-                price: 12000000,
-                type: "Apartment",
-                category: "sale",
-                bedroom: 3,
-                bathroom: 2,
-                area: 1200,
-                posted: "2024-05-01",
-                views: 245,
-                face: "East",
-                title: "Modern Apartment in Kathmandu",
-                description: "A beautiful modern apartment located in the heart of Kathmandu.",
-                images: [
-                  "https://images.pexels.com/photos/259588/pexels-photo-259588.jpeg"
-                ],
-                size: { value: 1200, unit: "sqft" },
-                purpose: "sale",
-              },
-              {
-                id: 2,
-                address: "Lakeside",
-                city: "Pokhara",
-                price: 8000000,
-                type: "House",
-                category: "rent",
-                bedroom: 2,
-                bathroom: 2,
-                area: 1500,
-                posted: "2024-04-20",
-                views: 112,
-                face: "South",
-                title: "Cozy House in Pokhara",
-                description: "A cozy house with a stunning view of the lake in Pokhara.",
-                images: [
-                  "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg"
-                ],
-                size: { value: 1500, unit: "sqft" },
-                purpose: "rent",
-              },
-              {
-                id: 3,
-                address: "Patan",
-                city: "Lalitpur",
-                price: 25000000,
-                type: "Villa",
-                category: "sale",
-                bedroom: 5,
-                bathroom: 4,
-                area: 3000,
-                posted: "2024-03-15",
-                views: 387,
-                face: "West",
-                title: "Spacious Villa in Lalitpur",
-                description: "A spacious villa with modern amenities located in Patan.",
-                images: [
-                  "https://images.pexels.com/photos/210617/pexels-photo-210617.jpeg"
-                ],
-                size: { value: 3000, unit: "sqft" },
-                purpose: "sale",
-              },
-            ]
+            {properties
               .filter((property) => {
                 if (categoryFilter === null) return true;
                 if (categoryFilter === "buy")
@@ -397,24 +360,31 @@ export default function Home() {
           {/* Horizontal Scrolling Brokers */}
           <div className="overflow-x-auto pb-4">
             <div className="flex gap-6 min-w-max">
-              <div
-                className="flex-shrink-0 w-72 bg-white dark:bg-neutral-900 rounded-xl p-6 border dark:border-neutral-600 border-neutral-300 transition"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb"
-                  alt="Broker profile"
-                  className="w-16 h-16 rounded-full object-cover mb-4"
-                />
-                <h3 className="font-bold">
-                  Ram Bahadur
-                </h3>
-                <p className="text-sm mb-2">
-                  {"Real Estate Broker"}
-                </p>
-                <p className="text-sm">
-                  Based in Bhaktapur
-                </p>
-              </div>
+              {
+                brokers.map((broker) => {
+                  return (
+                    <div
+                      key={broker._id}
+                      className="flex-shrink-0 w-72 bg-white dark:bg-neutral-900 rounded-xl p-6 border dark:border-neutral-600 border-neutral-300 transition"
+                    >
+                      <img
+                        src={broker.profilePicture || "https://images.unsplash.com/photo-1534528741775-53994a69daeb"}
+                        alt={broker.name}
+                        className="w-16 h-16 rounded-full object-cover mb-4"
+                      />
+                      <h3 className="font-bold">
+                        {broker.name}
+                      </h3>
+                      <p className="text-sm mb-2">
+                        {"Real Estate Broker"}
+                      </p>
+                      {broker.city && <p className="text-sm">
+                        Based in {broker.city.name}
+                      </p>}
+                    </div>
+                  )
+                })
+              }
             </div>
           </div>
         </div>

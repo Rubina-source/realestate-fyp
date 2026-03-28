@@ -5,7 +5,7 @@ import { propertyData } from '../data/properties';
 const Listings = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredListings = propertyData.filter(item => 
+  const filteredListings = propertyData.filter(item =>
     item.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -24,15 +24,15 @@ const Listings = () => {
         {/* Classy Search Bar */}
         <div className="flex justify-center mb-16 px-4">
           <div className="flex bg-white p-2 rounded-[25px] shadow-2xl border border-slate-100 w-full max-w-2xl transition-all focus-within:ring-2 ring-[#E7C873]/20">
-            <input 
-              type="text" 
-              placeholder="Search by location (e.g. Kathmandu, Baluwatar)..." 
+            <input
+              type="text"
+              placeholder="Search by location (e.g. Kathmandu, Baluwatar)..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 px-6 py-3 outline-none text-sm font-bold text-slate-600 placeholder:text-slate-300" 
+              className="flex-1 px-6 py-3 outline-none text-sm font-bold text-slate-600 placeholder:text-slate-300"
             />
             <div className="bg-[#1F3E35] text-white p-4 rounded-2xl shadow-lg cursor-pointer hover:bg-black transition-all">
-              <Search size={22}/>
+              <Search size={22} />
             </div>
           </div>
         </div>
@@ -42,7 +42,7 @@ const Listings = () => {
           {filteredListings.length > 0 ? (
             filteredListings.map((item) => (
               <div key={item._id} className="bg-white rounded-[45px] border border-slate-50 overflow-hidden hover:shadow-[0_40px_80px_rgba(0,0,0,0.07)] transition-all duration-700 group relative">
-                
+
                 {/* Image Section */}
                 <div className="relative h-72 overflow-hidden">
                   <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition duration-1000" />
@@ -62,15 +62,15 @@ const Listings = () => {
                   </p>
 
                   <div className="flex justify-between items-center text-slate-400 text-[10px] font-black uppercase tracking-[2px] border-t border-slate-50 pt-8 mb-8 opacity-70">
-                    <div className="flex items-center gap-2"><Bed size={16} className="text-[#1F3E35]"/> {item.bedroom} Bed</div>
-                    <div className="flex items-center gap-2"><Bath size={16} className="text-[#1F3E35]"/> {item.bathroom} Bath</div>
-                    <div className="flex items-center gap-2"><Maximize size={16} className="text-[#1F3E35]"/> {item.area.split(' ')[0]}</div>
+                    <div className="flex items-center gap-2"><Bed size={16} className="text-[#1F3E35]" /> {item.bedroom} Bed</div>
+                    <div className="flex items-center gap-2"><Bath size={16} className="text-[#1F3E35]" /> {item.bathroom} Bath</div>
+                    <div className="flex items-center gap-2"><Maximize size={16} className="text-[#1F3E35]" /> {item.area.split(' ')[0]}</div>
                   </div>
 
                   <div className="flex justify-between items-center gap-4">
                     <p className="text-3xl font-black text-[#1F3E35] tracking-tighter">Rs. {(item.price / 10000000).toFixed(1)} Cr</p>
                     <button className="bg-slate-50 text-[#1F3E35] px-6 py-3 rounded-2xl text-[10px] font-black hover:bg-[#1F3E35] hover:text-white transition-all shadow-sm uppercase tracking-widest border border-slate-100">
-                        Details
+                      Details
                     </button>
                   </div>
                 </div>

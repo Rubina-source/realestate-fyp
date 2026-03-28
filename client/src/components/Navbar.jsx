@@ -45,7 +45,7 @@ export default function Navbar({ transparent = false }) {
         ? "bg-transparent"
         : isDark
             ? "bg-neutral-900 border-b border-b-neutral-800"
-            : "bg-white";
+            : "bg-white border-b border-b-neutral-200";
 
     return (
         <nav className={`${navBgClass} sticky top-0 z-40`}>
@@ -118,7 +118,7 @@ export default function Navbar({ transparent = false }) {
                                         onClick={() => setAccountDropdown(!accountDropdown)}
                                         className="flex items-center gap-2 px-4 py-2 rounded-lg transition cursor-pointer"
                                     >
-                                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm bg-white">
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm bg-white ${transparent ? "dark:text-black" : ""}`}>
                                             {user.name.charAt(0).toUpperCase()}
                                         </div>
                                         {/* <span className="text-sm font-medium">{user.name}</span> */}
@@ -176,6 +176,16 @@ export default function Navbar({ transparent = false }) {
                                                 >
                                                     <Settings size={16} />
                                                     Admin Dashboard
+                                                </Link>
+                                            )}
+                                            {user.role === "broker" && (
+                                                <Link
+                                                    to="/broker/dashboard"
+                                                    className="flex items-center gap-3 px-4 py-3 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition border-b border-[#E0E0E0] dark:border-[#2E2E3E]"
+                                                    onClick={() => setMobileOpen(false)}
+                                                >
+                                                    <Settings size={16} />
+                                                    Broker Dashboard
                                                 </Link>
                                             )}
 

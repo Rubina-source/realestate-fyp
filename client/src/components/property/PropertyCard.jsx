@@ -10,7 +10,7 @@ export default function PropertyCard({ property }) {
     setIsFavorited(!isFavorited)
   };
   return (
-    <Link to={`/listings/${property.id}`}>
+    <Link to={`/listings/${property._id}`}>
       <div className="rounded-xl border border-neutral-300 dark:border-neutral-800 overflow-hidden cursor-pointer">
         {/* Image */}
         <div className="relative h-52 overflow-hidden">

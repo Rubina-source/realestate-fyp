@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
-import Header from './components/Header';
-import SignIn from './pages/SignIn';
 import Home from './pages/Home';
 import Properties from './pages/Properties';
 import PropertyDetails from './pages/PropertyDetails';
@@ -23,6 +21,9 @@ import AdminUsers from './pages/AdminUsers';
 import BrokerSignup from './pages/BrokerSignup';
 import AdminPendingBrokers from './pages/AdminBrokers';
 import AdminAllBrokers from './pages/AdminAllBrokers';
+import BrokerProperties from './pages/BrokerProperties';
+import AdminListingsPending from './pages/AdminListingsPending';
+import AdminAllListings from './pages/AdminAllListings';
 
 
 const ProtectedRoute = ({ children, allowed }) => {
@@ -79,12 +80,32 @@ export default function App() {
           </Route>
 
           {/* ── Broker only ── */}
-          <Route >
-            <Route path="/broker-dashboard" element={<BrokerDashboard darkMode={dm} />} />
-            <Route path="/create-listing" element={<CreateListing darkMode={dm} />} />
-          </Route>
+          <Route
+            path="/broker/dashboard"
+            element={
+              <ProtectedRoute allowed={["broker"]}>
+                <BrokerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/broker/listings/new"
+            element={
+              <ProtectedRoute allowed={["broker"]}>
+                <CreateListing />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/broker/listings"
+            element={
+              <ProtectedRoute allowed={["broker"]}>
+                <BrokerProperties />
+              </ProtectedRoute>
+            }
+          />
 
-          {/* ── Admin only ── */}
+          {/* ── Admin only ─ */}
           <Route
             path="/admin/dashboard"
             element={
@@ -106,6 +127,24 @@ export default function App() {
             element={
               <ProtectedRoute allowed={["admin"]}>
                 <AdminAllBrokers />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/listings"
+            element={
+              <ProtectedRoute allowed={["admin"]}>
+                <AdminAllListings />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/listings/pending"
+            element={
+              <ProtectedRoute allowed={["admin"]}>
+                <AdminListingsPending />
               </ProtectedRoute>
             }
           />

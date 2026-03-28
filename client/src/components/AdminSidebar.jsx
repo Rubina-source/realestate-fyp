@@ -117,8 +117,8 @@ export default function AdminSidebar() {
           {expandedSections.listings && (
             <div className="ml-3 mt-1 space-y-0.5 border-l border-neutral-200 dark:border-neutral-700 pl-3">
               <Link
-                to="/admin/listings"
-                className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors ${isActive("/admin/listings")
+                to="/admin/listings/pending"
+                className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors ${isActive("/admin/listings/pending")
                   ? "bg-neutral-100 dark:bg-neutral-800"
                   : ""
                   }`}
@@ -128,8 +128,8 @@ export default function AdminSidebar() {
               </Link>
 
               <Link
-                to="/admin/listings/all"
-                className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors ${isActive("/admin/listings/all")
+                to="/admin/listings"
+                className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors ${isActive("/admin/listings")
                   ? "bg-neutral-100 dark:bg-neutral-800"
                   : ""
                   }`}

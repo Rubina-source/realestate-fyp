@@ -1,3 +1,4 @@
+import propertyModel from "../models/property.model.js";
 import userModel from "../models/user.model.js";
 
 export const getAllUsers = async (req, res, next) => {
@@ -144,6 +145,112 @@ export const rejectBroker = async (req, res, next) => {
         next(error);
     }
 };
+export const getListings = async (req, res, next) => {
+    try {
+        const {
+            page = 1, limit = 10
+        } = req.query;
+
+        const skip = (page - 1) * limit;
+
+        const properties = await propertyModel.find()
+            .populate('broker', 'name email phone company')
+            .populate('city', 'name')
+            .sort({
+                createdAt: 1
+            })
+            .skip(skip)
+            .limit(Number(limit));
+
+        const total = await propertyModel.countDocuments({
+            // status: 'pending'
+        });
+
+        res.json({
+            total,
+            page: Number(page),
+            pages: Math.ceil(total / limit),
+            properties,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+export const getPendingListings = async (req, res, next) => {
+    try {
+        const {
+            page = 1, limit = 10
+        } = req.query;
+
+        const skip = (page - 1) * limit;
+
+        const properties = await propertyModel.find({
+                status: 'pending'
+            })
+            .populate('broker', 'name email phone company')
+            .populate('city', 'name')
+            .sort({
+                createdAt: 1
+            })
+            .skip(skip)
+            .limit(Number(limit));
+
+        const total = await propertyModel.countDocuments({
+            status: 'pending'
+        });
+
+        res.json({
+            total,
+            page: Number(page),
+            pages: Math.ceil(total / limit),
+            properties,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+export const updatePropertyStatus = async (req, res, next) => {
+    try {
+        const {
+            status,
+            rejectionReason
+        } = req.body;
+        const {
+            propertyId
+        } = req.params;
+
+        if (!['approved', 'rejected', 'sold', 'expired'].includes(status)) {
+            return res.status(400).json({
+                message: 'Invalid status'
+            });
+        }
+
+        const property = await propertyModel.findByIdAndUpdate(
+            propertyId, {
+                status,
+                ...(status === 'rejected' && rejectionReason && {
+                    rejectionReason
+                }),
+            }, {
+                new: true
+            }
+        ).populate('broker', 'name email phone');
+
+        if (!property) {
+            return res.status(404).json({
+                message: 'Property not found'
+            });
+        }
+
+        res.json({
+            message: `Property status updated to ${status}`,
+            property,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const getVerifiedBrokers = async (req, res, next) => {
     try {
         const {
@@ -210,6 +317,35 @@ export const getAllBrokers = async (req, res, next) => {
             page: Number(page),
             pages: Math.ceil(total / limit),
             brokers,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+export const getPublicBrokers = async (req, res, next) => {
+    try {
+        const {
+            limit = 6
+        } = req.query;
+
+        const brokers = await userModel.find({
+                role: 'broker',
+                isBrokerVerified: true
+            })
+            .select('name email phone company city image')
+            .select('-password')
+            .populate('city', 'name')
+            .sort({
+                createdAt: -1
+            })
+            .limit(Number(limit));
+
+        res.json({
+            success: true,
+            data: {
+                brokers,
+                total: brokers.length,
+            },
         });
     } catch (error) {
         next(error);

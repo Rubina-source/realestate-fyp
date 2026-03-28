@@ -5,6 +5,7 @@ import cors from 'cors';
 import authRouter from './routes/auth.route.js';
 import citiesRouter from './routes/cities.route.js';
 import adminRouter from './routes/admin.route.js';
+import propertyRoutes from './routes/property.route.js';
 import {
     errorHandler
 } from './middleware/errorHandler.js';
@@ -50,5 +51,6 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRouter);
 app.use('/api/cities', citiesRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/properties', propertyRoutes);
 
 app.use(errorHandler);

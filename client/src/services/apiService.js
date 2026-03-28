@@ -10,6 +10,9 @@ export const adminService = {
   getPendingListings: (filters) => api.get('/admin/listings/pending', {
     params: filters
   }),
+  getAllListings: (filters) => api.get('/admin/listings/all', {
+    params: filters
+  }),
   updatePropertyStatus: (id, data) => api.patch(`/admin/listings/${id}/status`, data),
   getAllUsers: (filters) => api.get('/admin/users', {
     params: filters
@@ -28,6 +31,22 @@ export const adminService = {
   verifyBroker: (id) => api.patch(`/admin/brokers/${id}/verify`),
   rejectBroker: (id) => api.patch(`/admin/brokers/${id}/reject`),
   getPropertyStats: () => api.get('/admin/property-stats'),
+};
+
+export const propertyService = {
+  getAll: (filters) => api.get('/properties', {
+    params: filters
+  }),
+  getById: (id) => api.get(`/properties/${id}`),
+  create: (data) => api.post('/properties', data),
+  update: (id, data) => api.put(`/properties/${id}`, data),
+  delete: (id) => api.delete(`/properties/${id}`),
+  getBrokerProperties: (filters) => api.get('/properties/broker/all', {
+    params: filters
+  }),
+  getPublicBrokers: (filters) => api.get('/properties/brokers/public/all', {
+    params: filters
+  }),
 };
 
 export const cityService = {
