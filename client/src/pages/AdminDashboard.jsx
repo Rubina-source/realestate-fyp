@@ -1,193 +1,260 @@
-import React, { useEffect, useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { Clock, CheckCircle, Building, PieChart as PieIcon } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useEffect, useState } from "react";
+import { adminService } from "../services/apiService";
+import AdminLayout from "../components/AdminLayout";
+import { Users, Home, MessageSquare, Clock } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 export default function AdminDashboard() {
-  const [listings, setListings] = useState([]);
   const [stats, setStats] = useState(null);
-  const [activeTab, setActiveTab] = useState("pending");
-
-  const COLORS = ['#1F3E35', '#E7C873', '#FF5A3C', '#7ed6df'];
-
-  const t = {
-    bg: "#f8f9fa",
-    bgCard: "#ffffff",
-    border: "#f1f5f9",
-    text: "#2F2F2F",
-    textMuted: "#64748b",
-    textSubtle: "#94a3b8",
-    accent: "#0D2A4A",
-    success: "#10b981",
-    warning: "#f59e0b",
-    info: "#3b82f6",
-    shadow: "0 4px 6px -1px rgb(0 0 0 / 0.05)"
-  };
-
-  const fetchData = async () => {
-    try {
-      const [listRes, statsRes] = await Promise.all([
-        fetch('/api/listing/get?limit=50'),
-        fetch('/api/listing/admin-stats')
-      ]);
-      const listData = await listRes.json();
-      const statsData = await statsRes.json();
-      setListings(listData);
-      setStats(statsData);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const [propertyStats, setPropertyStats] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchData();
+    fetchStats();
+    fetchPropertyStats();
   }, []);
 
-  const updateStatus = async (id, status) => {
+  const fetchStats = async () => {
     try {
-      const res = await fetch(`/api/listing/update-status/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-      });
-      if (res.ok) {
-        toast.success(`Property ${status.toLowerCase()} successfully`);
-        fetchData();
-      }
+      const response = await adminService.getStats();
+      setStats(response.data);
     } catch (error) {
-      toast.error("Error updating status");
+      console.error("Failed to fetch stats:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const formatPrice = (price) => {
-    return price ? `Rs. ${price.toLocaleString()}` : 'N/A';
-  };
-
-  const Icon = ({ name, size, color }) => {
-    switch (name) {
-      case 'clock': return <Clock size={size} color={color} />;
-      case 'check-circle': return <CheckCircle size={size} color={color} />;
-      case 'building': return <Building size={size} color={color} />;
-      case 'pie': return <PieIcon size={size} color={color} />;
-      default: return null;
+  const fetchPropertyStats = async () => {
+    try {
+      const response = await adminService.getPropertyStats();
+      setPropertyStats(response.data);
+    } catch (error) {
+      console.error("Failed to fetch property stats:", error);
     }
   };
 
-  const properties = listings.map(l => ({
-    id: l._id,
-    title: l.title,
-    city: l.city,
-    type: l.type,
-    category: l.category,
-    price: l.price,
-    status: l.status === 'pending' ? 'Pending' : (l.status === 'approved' ? 'Approved' : 'Rejected'),
-    image: l.imageUrls?.[0] || 'https://via.placeholder.com/150',
-    postedDate: new Date(l.createdAt).toLocaleDateString(),
-    broker: l.userRef // Assuming userRef is the broker ID for now
-  }));
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-200 dark:border-neutral-700 border-t-orange-500 rounded-full mb-4"></div>
+            <p className="font-medium">
+              Loading dashboard...
+            </p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
-  const tabs = [
-    { id: "pending", label: "Pending", icon: "clock", count: properties.filter(p => p.status === "Pending").length },
-    { id: "approved", label: "Approved", icon: "check-circle", count: properties.filter(p => p.status === "Approved").length },
-    { id: "analytics", label: "Analytics", icon: "pie" },
+  // Chart colors
+  const COLORS = [
+    "#E8413B",
+    "#1A1A2E",
+    "#3B82F6",
+    "#10B981",
+    "#F59E0B",
+    "#8B5CF6",
   ];
 
-  const filtered = properties.filter(p => activeTab === "analytics" ? true : p.status === (activeTab === "pending" ? "Pending" : "Approved"));
+  // Stat Card Component
+  const StatCard = ({ label, value, icon: Icon, color, trend }) => (
+    <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 border border-neutral-200 dark:border-neutral-700">
+      <div className="flex items-center justify-between mb-3">
+        <div className="space-y-1 flex-1">
+          <p className="text-xs font-medium uppercase tracking-wider">
+            {label}
+          </p>
+          <p className="text-2xl font-medium">
+            {value}
+          </p>
+        </div>
+        <div className="p-2 rounded-lg">
+          <Icon size={20} />
+        </div>
+      </div>
+      {trend && (
+        <p className="text-xs">{trend}</p>
+      )}
+    </div>
+  );
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "120px 24px 32px 24px" }}>
-      <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 600, marginBottom: 8, color: '#0D2A4A' }}>Admin Dashboard</h1>
-      <p style={{ color: t.textMuted, marginBottom: 32 }}>Manage property approvals and platform analytics</p>
-
-      {/* Quick action cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 32 }}>
-        {[
-          { label: "Pending Approval", value: properties.filter(p => p.status === "Pending").length, icon: "clock", color: t.warning, bg: t.warning + "18" },
-          { label: "Approved", value: properties.filter(p => p.status === "Approved").length, icon: "check-circle", color: t.success, bg: t.success + "18" },
-          { label: "Total Properties", value: properties.length, icon: "building", color: t.info, bg: t.info + "18" },
-        ].map(card => (
-          <div key={card.label} className="card-hover" style={{ background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 16, padding: 24, boxShadow: t.shadow }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <div>
-                <div style={{ fontSize: 36, fontWeight: 700, marginBottom: 4, color: '#0D2A4A' }}>{card.value}</div>
-                <div style={{ fontSize: 14, color: t.textMuted }}>{card.label}</div>
-              </div>
-              <div style={{ width: 48, height: 48, borderRadius: 12, background: card.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Icon name={card.icon} size={22} color={card.color} />
-              </div>
-            </div>
-          </div>
-        ))}
+    <AdminLayout>
+      {/* Page Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold  mb-2">
+          Dashboard
+        </h1>
+        <p className="text-sm">
+          Welcome back! Here's what's happening with your platform.
+        </p>
       </div>
 
-      <div style={{ display: "flex", gap: 4, marginBottom: 28, background: t.bgCard, padding: 4, borderRadius: 12, border: `1px solid ${t.border}`, width: "fit-content" }}>
-        {tabs.map(tab => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-            style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 8, border: "none", background: activeTab === tab.id ? t.accent : "transparent", color: activeTab === tab.id ? "#fff" : t.textMuted, cursor: "pointer", fontSize: 14, fontWeight: 500, transition: "all 0.2s" }}>
-            <Icon name={tab.icon} size={16} color={activeTab === tab.id ? "#fff" : t.textMuted} />
-            {tab.label}
-            {tab.count > 0 && <span style={{ background: activeTab === tab.id ? "rgba(255,255,255,0.25)" : "#F26419", color: "#fff", width: 20, height: 20, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700 }}>{tab.count}</span>}
-          </button>
-        ))}
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <StatCard
+          label="Total Users"
+          value={stats?.users.total || 0}
+          icon={Users}
+          color="bg-blue-500"
+          trend={`${stats?.users.brokers || 0} brokers, ${stats?.users.clients || 0} clients`}
+        />
+        <StatCard
+          label="Total Listings"
+          value={stats?.listings.total || 0}
+          icon={Home}
+          color="bg-emerald-500"
+          trend={`${stats?.listings.approved || 0} approved`}
+        />
+        <StatCard
+          label="Pending Approval"
+          value={stats?.listings.pending || 0}
+          icon={Clock}
+          color="bg-amber-500"
+          trend="Needs review"
+        />
+        <StatCard
+          label="Pending Brokers"
+          value={stats?.pendingBrokers || 0}
+          icon={Users}
+          color="bg-red-500"
+          trend="Awaiting verification"
+        />
+        {/*  <StatCard
+          label="Total Inquiries"
+          value={stats?.inquiries || 0}
+          icon={MessageSquare}
+          color="bg-purple-500"
+          trend="This month"
+        /> */}
       </div>
 
-      {activeTab !== "analytics" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {filtered.length === 0 ? (
-            <div style={{ textAlign: "center", padding: 60, color: t.textMuted }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
-              <div style={{ fontWeight: 600 }}>No {activeTab} properties</div>
-            </div>
-          ) : filtered.map(p => (
-            <div key={p.id} className="card-hover" style={{ background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 14, padding: 16, display: "flex", gap: 16, alignItems: "center", boxShadow: t.shadow }}>
-              <img src={p.image} alt="" style={{ width: 80, height: 60, objectFit: "cover", borderRadius: 10, flexShrink: 0 }} />
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4, color: '#0D2A4A' }}>{p.title}</div>
-                <div style={{ fontSize: 13, color: t.textMuted }}>{p.city} · {p.type} · {formatPrice(p.price)}</div>
-                <div style={{ fontSize: 12, color: t.textSubtle, marginTop: 2 }}>Posted: {p.postedDate}</div>
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Property Type Chart */}
+        {propertyStats?.propertyType &&
+          propertyStats.propertyType.length > 0 && (
+            <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 border border-neutral-200 dark:border-neutral-700">
+              <div className="mb-6">
+                <h3 className="text-lg font-medium">
+                  Properties by Type
+                </h3>
+                <p className="text-xs mt-1">
+                  Distribution of approved listings
+                </p>
               </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                {p.status !== "Approved" && <button onClick={() => updateStatus(p.id, "approved")} style={{ padding: "8px 16px", background: t.success, color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 13, fontWeight: 500 }}>Approve</button>}
-                {p.status !== "Rejected" && <button onClick={() => updateStatus(p.id, "rejected")} style={{ padding: "8px 16px", background: "#E04040", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 13, fontWeight: 500 }}>Reject</button>}
-                {p.status !== "Pending" && <button onClick={() => updateStatus(p.id, "pending")} style={{ padding: "8px 16px", background: t.warning, color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 13, fontWeight: 500 }}>Pending</button>}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {activeTab === "analytics" && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
-          <div style={{ background: "white", padding: 32, borderRadius: 24, border: "1px solid #f1f5f9" }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: "#0D2A4A", marginBottom: 24 }}>Broker Performance</h3>
-            <div style={{ height: 260 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats?.brokerStats}>
-                  <XAxis dataKey="_id" fontSize={10} fontWeight="bold" />
-                  <Tooltip />
-                  <Bar dataKey="total" fill="#0D2A4A" radius={[10, 10, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          <div style={{ background: "white", padding: 32, borderRadius: 24, border: "1px solid #f1f5f9" }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: "#0D2A4A", marginBottom: 24 }}>Property Category</h3>
-            <div style={{ height: 260 }}>
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
-                  <Pie data={stats?.categoryStats} dataKey="count" nameKey="_id" innerRadius={60} outerRadius={80}>
-                    {stats?.categoryStats?.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Pie
+                    data={propertyStats.propertyType}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name}: ${value}`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {propertyStats.propertyType.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
                     ))}
                   </Pie>
-                  <Tooltip />
-                  <Legend />
+                  <Tooltip
+                  /*  contentStyle={{
+                      backgroundColor: "#1F2937",
+                      border: "1px solid #4B5563",
+                      borderRadius: "8px",
+                      color: "#F3F4F6",
+                    }} */
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
+          )}
+
+        {/* Purpose Chart */}
+        {propertyStats?.purpose && propertyStats.purpose.length > 0 && (
+          <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 border border-neutral-200 dark:border-neutral-700">
+            <div className="mb-6">
+              <h3 className="text-lg font-medium">
+                Properties by Purpose
+              </h3>
+              <p className="text-xs mt-1">
+                Sale vs Rent distribution
+              </p>
+            </div>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={propertyStats.purpose}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis dataKey="name" stroke="#6B7280" />
+                <YAxis stroke="#6B7280" />
+                <Tooltip
+                /*  contentStyle={{
+                    backgroundColor: "#1F2937",
+                    border: "1px solid #4B5563",
+                    borderRadius: "8px",
+                    color: "#F3F4F6",
+                  }} */
+                />
+                <Bar dataKey="value" fill="#E8413B" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
+        )}
+      </div>
+
+      {/* Cities Chart */}
+      {propertyStats?.cities && propertyStats.cities.length > 0 && (
+        <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 border border-neutral-200 dark:border-neutral-700 mb-8">
+          <div className="mb-6">
+            <h3 className="text-lg font-medium">
+              Top Performing Cities
+            </h3>
+            <p className="text-xs mt-1">
+              Property count by city
+            </p>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={propertyStats.cities} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <XAxis type="number" stroke="#6B7280" />
+              <YAxis
+                dataKey="name"
+                type="category"
+                width={100}
+                stroke="#6B7280"
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#1F2937",
+                  border: "1px solid #4B5563",
+                  borderRadius: "8px",
+                  color: "#F3F4F6",
+                }}
+              />
+              <Bar dataKey="value" fill="#1A1A2E" radius={[0, 8, 8, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       )}
-    </div>
+    </AdminLayout>
   );
 }

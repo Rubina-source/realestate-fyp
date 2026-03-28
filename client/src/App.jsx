@@ -18,6 +18,8 @@ import { useTheme } from './hooks/useTheme';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import { useAuth } from './hooks/useAuth';
+import AdminCities from './pages/AdminCities';
+import AdminUsers from './pages/AdminUsers';
 
 
 const ProtectedRoute = ({ children, allowed }) => {
@@ -79,11 +81,33 @@ export default function App() {
           </Route>
 
           {/* ── Admin only ── */}
-          <Route>
-            <Route path="/admin-dashboard" element={<AdminDashboard darkMode={dm} />} />
-          </Route>
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute allowed={["admin"]}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute allowed={["admin"]}>
+                <AdminUsers />
+              </ProtectedRoute>
+            }
+          />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route
+            path="/admin/cities"
+            element={
+              <ProtectedRoute allowed={["admin"]}>
+                <AdminCities />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
         </Routes >
       </main >
     </>

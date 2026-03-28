@@ -23,7 +23,6 @@ export default function Navbar({ transparent = false }) {
     const [accountDropdown, setAccountDropdown] = useState(false);
     const dropdownRef = useRef(null);
 
-    console.log(user)
 
     const handleLogout = () => {
         logout();
@@ -45,7 +44,7 @@ export default function Navbar({ transparent = false }) {
     const navBgClass = transparent
         ? "bg-transparent"
         : isDark
-            ? "bg-[#1a1a1a]"
+            ? "bg-neutral-900 border-b border-b-neutral-800"
             : "bg-white";
 
     return (
@@ -119,7 +118,7 @@ export default function Navbar({ transparent = false }) {
                                         onClick={() => setAccountDropdown(!accountDropdown)}
                                         className="flex items-center gap-2 px-4 py-2 rounded-lg transition cursor-pointer"
                                     >
-                                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm bg-white text-black">
+                                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm bg-white">
                                             {user.name.charAt(0).toUpperCase()}
                                         </div>
                                         {/* <span className="text-sm font-medium">{user.name}</span> */}
@@ -167,6 +166,16 @@ export default function Navbar({ transparent = false }) {
                                                 >
                                                     <Users size={16} />
                                                     <span className="text-sm">Join as Broker</span>
+                                                </Link>
+                                            )}
+                                            {user.role === "admin" && (
+                                                <Link
+                                                    to="/admin/dashboard"
+                                                    className="flex items-center gap-3 px-4 py-3 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition border-b border-[#E0E0E0] dark:border-[#2E2E3E]"
+                                                    onClick={() => setMobileOpen(false)}
+                                                >
+                                                    <Settings size={16} />
+                                                    Admin Dashboard
                                                 </Link>
                                             )}
 
@@ -232,7 +241,6 @@ export default function Navbar({ transparent = false }) {
                         <NavLinkMobile href="/listings?type=rent" label="RENT" />
                         <NavLinkMobile href="/mortgage" label="MORTGAGE" />
                         <NavLinkMobile href="/brokers" label="REAL ESTATE BROKER" />
-
                     </div>
                 )}
             </div>
