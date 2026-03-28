@@ -74,8 +74,8 @@ export default function AdminSidebar() {
           {expandedSections.brokers && (
             <div className="ml-3 mt-1 space-y-0.5 border-l border-neutral-200 dark:border-neutral-700 pl-3">
               <Link
-                to="/admin/brokers"
-                className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors ${isActive("/admin/brokers")
+                to="/admin/brokers/pending"
+                className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors ${isActive("/admin/brokers/pending")
                   ? "bg-neutral-100 dark:bg-neutral-800"
                   : ""
                   }`}
@@ -85,19 +85,8 @@ export default function AdminSidebar() {
               </Link>
 
               <Link
-                to="/admin/brokers/active"
-                className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors ${isActive("/admin/brokers/active")
-                  ? "bg-neutral-100 dark:bg-neutral-800"
-                  : ""
-                  }`}
-              >
-                <CheckCircle size={12} />
-                Active
-              </Link>
-
-              <Link
-                to="/admin/brokers/all"
-                className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors ${isActive("/admin/brokers/all")
+                to="/admin/brokers"
+                className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors ${isActive("/admin/brokers")
                   ? "bg-neutral-100 dark:bg-neutral-800"
                   : ""
                   }`}
@@ -136,17 +125,6 @@ export default function AdminSidebar() {
               >
                 <Clock size={12} />
                 Pending
-              </Link>
-
-              <Link
-                to="/admin/listings/approved"
-                className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors ${isActive("/admin/listings/approved")
-                  ? "bg-neutral-100 dark:bg-neutral-800"
-                  : ""
-                  }`}
-              >
-                <CheckCircle size={12} />
-                Approved
               </Link>
 
               <Link

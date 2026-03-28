@@ -20,6 +20,9 @@ import Signup from './pages/Signup';
 import { useAuth } from './hooks/useAuth';
 import AdminCities from './pages/AdminCities';
 import AdminUsers from './pages/AdminUsers';
+import BrokerSignup from './pages/BrokerSignup';
+import AdminPendingBrokers from './pages/AdminBrokers';
+import AdminAllBrokers from './pages/AdminAllBrokers';
 
 
 const ProtectedRoute = ({ children, allowed }) => {
@@ -64,6 +67,7 @@ export default function App() {
           } />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/broker-signup" element={<BrokerSignup />} />
           <Route path="/listings" element={<Properties darkMode={dm} />} />
           <Route path="/listing/:listingId" element={<PropertyDetails darkMode={dm} />} />
           <Route path="/about" element={<About darkMode={dm} />} />
@@ -89,6 +93,23 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/admin/brokers/pending"
+            element={
+              <ProtectedRoute allowed={["admin"]}>
+                <AdminPendingBrokers />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/brokers"
+            element={
+              <ProtectedRoute allowed={["admin"]}>
+                <AdminAllBrokers />
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/admin/users"
             element={

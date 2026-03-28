@@ -43,14 +43,14 @@ export default function AdminUsers() {
       {/* Page Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-medium mb-2">Manage Users</h1>
-        <p className="text-neutral-600 dark:text-neutral-400 text-sm">View and manage all users on the platform. Change roles and verify accounts.</p>
+        <p className="text-sm">View and manage all users on the platform. Change roles and verify accounts.</p>
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-200 dark:border-neutral-700 border-t-orange-500 rounded-full mb-4"></div>
-            <p className="text-neutral-600 dark:text-neutral-400 font-medium">Loading users...</p>
+            <p className="font-medium">Loading users...</p>
           </div>
         </div>
       ) : (
@@ -66,21 +66,23 @@ export default function AdminUsers() {
             </thead>
             <tbody>
               {users.map((user) => (
-                <tr key={user._id} className="bg-white dark:bg-neutral-800 border-b border-neutral-100 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors duration-200">
+                <tr key={user._id}
+                  className="bg-white dark:bg-neutral-800 border-b border-neutral-100 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors duration-200"
+                >
                   <th scope="row" className="px-6 py-4 font-medium whitespace-nowrap">{user.name}</th>
-                  <td className="px-6 py-4 text-neutral-600 dark:text-neutral-400">{user.email}</td>
+                  <td className="px-6 py-4 ">{user.email}</td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-md text-xs font-medium ${user.role === 'admin' ? 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300' :
-                      user.role === 'broker' ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' :
-                        'bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300'
+                    <span className={`px-3 py-1 rounded-md text-xs font-medium ${user.role === 'admin' ? 'bg-purple-100 dark:bg-purple-900/60' :
+                      user.role === 'broker' ? 'bg-blue-100 dark:bg-blue-900/60' :
+                        'bg-neutral-100 dark:bg-neutral-700'
                       }`}>
                       {user.role}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 rounded-md text-xs font-medium ${user.isVerified
-                      ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300'
-                      : 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300'
+                      ? 'bg-green-100 dark:bg-green-900/60'
+                      : 'bg-yellow-100 dark:bg-yellow-900/60'
                       }`}>
                       {user.isVerified ? 'Verified' : 'Unverified'}
                     </span>
