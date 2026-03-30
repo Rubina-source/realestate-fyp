@@ -12,7 +12,12 @@ export const createProperty = async (req, res, next) => {
       size,
       location,
       images,
+      amenities,
+      rentalType,
       city,
+      bedrooms,
+      bathrooms,
+      parking
     } = req.body;
 
     // Check if broker is verified
@@ -30,7 +35,7 @@ export const createProperty = async (req, res, next) => {
       });
     }
 
-    if (!['apartment', 'land', 'house', 'commercial'].includes(type)) {
+    if (!['apartment', 'land', 'house', 'commercial', 'office'].includes(type)) {
       return res.status(400).json({
         message: 'Invalid property type'
       });
@@ -41,8 +46,15 @@ export const createProperty = async (req, res, next) => {
         message: 'Purpose must be sale or rent'
       });
     }
-
-    if (images.length < 1) {
+    // Validate rentalType if purpose is rent
+    if (purpose === 'rent' && rentalType) {
+      if (!["daily", 'monthly', 'yearly'].includes(rentalType)) {
+        return res.status(400).json({
+          message: 'Invalid rental type'
+        });
+      }
+    }
+    if (images.length < 1 || images.length > 5) {
       return res.status(400).json({
         message: 'Upload 1-5 images'
       });
@@ -54,12 +66,17 @@ export const createProperty = async (req, res, next) => {
       price,
       type,
       purpose,
+      rentalType: rentalType || null,
+      city,
       size,
+      bedrooms: bedrooms || null,
+      bathrooms: bathrooms || null,
+      parking: parking || null,
       location,
       images,
+      amenities: amenities || [],
       broker: req.user.userId,
       status: 'pending',
-      city,
     });
 
     await property.save();
@@ -81,8 +98,10 @@ export const getAllProperties = async (req, res, next) => {
       priceMin,
       priceMax,
       type,
+      types,
       purpose,
       city,
+      rentalType,
       sort,
       page = 1,
       limit = 10
@@ -122,14 +141,24 @@ export const getAllProperties = async (req, res, next) => {
       if (priceMax) filter.price.$lte = Number(priceMax);
     }
 
-    // Type filter
-    if (type) {
+    // Type filter - support both 'type' and 'types' parameters
+    if (types) {
+      const typeArray = types.split(',').map(t => t.trim());
+      filter.type = {
+        $in: typeArray
+      };
+    } else if (type) {
       filter.type = type;
     }
 
     // Purpose filter
     if (purpose) {
       filter.purpose = purpose;
+    }
+
+    // Rental type filter
+    if (rentalType) {
+      filter.rentalType = rentalType;
     }
 
     // City filter
@@ -156,9 +185,8 @@ export const getAllProperties = async (req, res, next) => {
     }
 
     const skip = (page - 1) * limit;
-    const properties = await Property.find({
-        ...filter,
-      })
+
+    const properties = await Property.find(filter)
       .populate('broker', 'name phone company')
       .sort(sortBy)
       .skip(skip)
@@ -234,7 +262,13 @@ export const updateProperty = async (req, res, next) => {
       purpose,
       size,
       location,
-      images
+      images,
+      amenities,
+      rentalType,
+      city,
+      bedrooms,
+      bathrooms,
+      parking
     } = req.body;
 
     if (title) property.title = title;
@@ -242,9 +276,15 @@ export const updateProperty = async (req, res, next) => {
     if (price) property.price = price;
     if (type) property.type = type;
     if (purpose) property.purpose = purpose;
+    if (rentalType) property.rentalType = rentalType;
+    if (city) property.city = city;
     if (size) property.size = size;
     if (location) property.location = location;
     if (images) property.images = images;
+    if (bedrooms !== undefined) property.bedrooms = bedrooms || null;
+    if (bathrooms !== undefined) property.bathrooms = bathrooms || null;
+    if (parking !== undefined) property.parking = parking || null;
+    if (amenities) property.amenities = amenities;
 
     property.status = 'pending';
     property.rejectionReason = null;

@@ -13,11 +13,11 @@ const propertySchema = new mongoose.Schema({
   price: {
     type: Number,
     required: [true, 'Price is required'],
-    min: 0,
+    min: [0, 'Price must be positive'],
   },
   type: {
     type: String,
-    enum: ['apartment', 'land', 'house', 'commercial'],
+    enum: ['apartment', 'land', 'house', 'commercial', 'office'],
     required: [true, 'Property type is required'],
   },
   purpose: {
@@ -25,16 +25,37 @@ const propertySchema = new mongoose.Schema({
     enum: ['sale', 'rent'],
     required: [true, 'Purpose is required'],
   },
+  rentalType: {
+    type: String,
+    enum: ['daily', 'monthly', 'yearly'],
+    default: null,
+  },
   size: {
     value: {
       type: Number,
       required: [true, 'Size value is required'],
+      min: [0, 'Size must be positive'],
     },
     unit: {
       type: String,
-      enum: ['sqft', 'ropani'],
+      enum: ['sqft', 'ropani, aana'],
       default: 'sqft',
     },
+  },
+  bedrooms: {
+    type: Number,
+    default: null,
+    min: [0, 'Bedrooms must be positive'],
+  },
+  bathrooms: {
+    type: Number,
+    default: null,
+    min: [0, 'Bathrooms must be positive'],
+  },
+  parking: {
+    type: Number,
+    default: null,
+    min: [0, 'Parking must be positive'],
   },
   city: {
     type: mongoose.Schema.Types.ObjectId,
@@ -57,13 +78,34 @@ const propertySchema = new mongoose.Schema({
   },
   images: {
     type: [String],
-    validate: [{
-      validator: function (arr) {
-        return arr.length >= 1 && arr.length <= 5;
+    /* validate: [
+      {
+        validator: function (arr) {
+          return arr.length >= 1 && arr.length <= 5;
+        },
+        message: 'Must have 1-5 images',
       },
-      message: 'Must have 1-5 images',
-    }, ],
+    ], */
   },
+  amenities: [{
+    type: String,
+    enum: [
+      'Bathroom',
+      'Living room',
+      'Terrace',
+      'Security',
+      'Price negotiable',
+      'Garden',
+      'Swimming Pool',
+      'Gym',
+      'Lift',
+      'Water Supply',
+      'Electricity Backup',
+      'Internet',
+      'Kitchen',
+      'Balcony',
+    ],
+  }, ],
   broker: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

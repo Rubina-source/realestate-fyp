@@ -18,12 +18,18 @@ export default function CreateListing() {
     price: "",
     type: "apartment",
     purpose: "sale",
+    rentalType: "",
     city: "",
     address: "",
     location: {},
     sizeValue: "",
     sizeUnit: "sqft",
+    bedrooms: "",
+    bathrooms: "",
+    parking: "",
     images: [],
+    amenities: [],
+    amenities: [],
   });
 
   const types = ["apartment", "land", "house", "commercial"];
@@ -54,12 +60,30 @@ export default function CreateListing() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    console.log({ name, value })
+    if (
+      ["price", "sizeValue", "bedrooms", "bathrooms", "parking"].includes(name)
+    ) {
+      if (value !== "" && Number(value) < 0) {
+        return; // Reject negative values
+      }
+    }
     setFormData({ ...formData, [name]: value });
   };
 
   const handleLocationChange = (coords) => {
     setFormData({ ...formData, location: coords });
   };
+
+  const handleAmenityChange = (amenity) => {
+    setFormData((prev) => {
+      const amenities = prev.amenities.includes(amenity)
+        ? prev.amenities.filter((a) => a !== amenity)
+        : [...prev.amenities, amenity];
+      return { ...prev, amenities };
+    });
+  };
+
 
   const uploadToCloudinary = async (file) => {
     const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
@@ -142,7 +166,11 @@ export default function CreateListing() {
           value: Number(formData.sizeValue),
           unit: formData.sizeUnit,
         },
+        bedrooms: formData.bedrooms ? Number(formData.bedrooms) : null,
+        bathrooms: formData.bathrooms ? Number(formData.bathrooms) : null,
+        parking: formData.parking ? Number(formData.parking) : null,
         images: formData.images,
+        amenities: formData.amenities,
       };
 
       await propertyService.create(payload);
@@ -242,6 +270,125 @@ export default function CreateListing() {
                       <option value="sale">Sale</option>
                       <option value="rent">Rent</option>
                     </select>
+                  </div>
+                </div>
+                {
+                  formData.purpose === "rent" && (
+                    <div>
+                      <label className="block font-semibold mb-2 text-sm">
+                        Rental Type{" "}
+                        <span
+                          className={formData.purpose === "rent" ? "text-[#E8413B]" : ""}
+                        >
+                          *
+                        </span>
+                      </label>
+                      <select
+                        name="rentalType"
+                        value={formData.rentalType}
+                        onChange={handleChange}
+                        disabled={formData.purpose !== "rent"}
+                        className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <option value="">Select rental type</option>
+                        <option value="daily">Daily</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                      </select>
+                    </div>
+                  )
+                }
+                <div className="space-y-4 pt-4">
+                  <div className="grid grid-cols-3 gap-3 pb-4">
+                    {["apartment", "house"].includes(formData.type) && (
+                      <div>
+                        <label className="block font-semibold mb-2 text-sm">
+                          Bedrooms
+                        </label>
+                        <input
+                          name="bedrooms"
+                          type="number"
+                          min="0"
+                          placeholder="0"
+                          value={formData.bedrooms}
+                          onChange={handleChange}
+                          className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
+                        />
+                      </div>
+                    )}
+
+                    {["apartment", "house"].includes(formData.type) && (
+                      <div>
+                        <label className="block font-semibold mb-2 text-sm">
+                          Bathrooms
+                        </label>
+                        <input
+                          name="bathrooms"
+                          type="number"
+                          min="0"
+                          placeholder="0"
+                          value={formData.bathrooms}
+                          onChange={handleChange}
+                          className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
+                        />
+                      </div>
+                    )}
+                    {["apartment", "house", "office", "commercial"].includes(formData.type) && (
+                      <div>
+                        <label className="block font-semibold mb-2 text-sm">
+                          Parking
+                        </label>
+                        <input
+                          name="parking"
+                          type="number"
+                          min="0"
+                          placeholder="0"
+                          value={formData.parking}
+                          onChange={handleChange}
+                          className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Other Amenities (Checkboxes) */}
+                  <div className="">
+                    <p className="block font-semibold mb-2 text-sm">
+                      Amenities
+                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        "Bathroom",
+                        "Living room",
+                        "Terrace",
+                        "Security",
+                        "Price negotiable",
+                        "Garden",
+                        "Swimming Pool",
+                        "Gym",
+                        "Lift",
+                        "Water Supply",
+                        "Electricity Backup",
+                        "Internet",
+                        "Kitchen",
+                        "Balcony",
+                      ].map((amenity) => (
+                        <label
+                          key={amenity}
+                          className="flex items-center gap-3 cursor-pointer p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={formData.amenities.includes(amenity)}
+                            onChange={() => handleAmenityChange(amenity)}
+                            className="w-5 h-5 accent-orange-500 rounded cursor-pointer"
+                          />
+                          <span className="text-sm ">
+                            {amenity}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
@@ -446,7 +593,7 @@ export default function CreateListing() {
             </form>
           </div>
         </div>
-      </div>
-    </BrokerLayout>
+      </div >
+    </BrokerLayout >
   );
 }

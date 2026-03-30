@@ -126,7 +126,7 @@ export default function Navbar({ transparent = false }) {
 
                                     {/* Dropdown Menu */}
                                     {accountDropdown && (
-                                        <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 overflow-hidden z-50">
+                                        <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-950 overflow-hidden z-50">
                                             {/* Profile */}
                                             <Link
                                                 to="/profile"
