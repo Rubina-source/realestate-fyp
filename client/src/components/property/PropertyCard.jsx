@@ -36,14 +36,22 @@ export default function PropertyCard({ property }) {
             {property.title}
           </h3>
 
-          <div className="flex items-center  mb-3 text-sm">
+          {property.city && <div className="flex items-center  mb-3 text-sm">
             <MapPin size={16} className="mr-1" />
-            {property.city}, {property.address}
-          </div>
+            {property.city.name}
+          </div>}
 
           <div className="flex items-center justify-between mb-3">
             <span className="text-orange-400 font-bold text-xl">
               Rs. {property.price.toLocaleString()}
+
+              {property.rentalType && <p>
+                {
+                  property.rentalType === "daily" ? "/day" :
+                    property.rentalType === "monthly" ? "/month" :
+                      property.rentalType === "yearly" ? "/year" : ""
+                }
+              </p>}
             </span>
             <div className="flex items-center text-xs font-medium bg-neutral-300 dark:bg-neutral-800 px-3 py-1 rounded-lg">
               <HomeIcon size={14} className="mr-1" />

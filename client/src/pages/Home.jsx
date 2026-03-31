@@ -160,54 +160,42 @@ export default function Home() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-neutral-300 dark:bg-neutral-800 rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 flex justify-between items-center p-4 border-b border-neutral-300 dark:border-neutral-600 bg-neutral-300 dark:bg-neutral-800">
-              <h3 className="text-lg font-bold">
-                Filters
-              </h3>
+              <h3 className="text-lg font-bold">Filters</h3>
               <button
                 onClick={() => setShowFilterModal(false)}
-                className="p-2 hover:bg-neutral-200 dark:hover:bg-neutal-700 rounded-lg transition"
+                className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition"
               >
-                <X size={20} />
+                <X size={20} className="text-neutral-800 dark:text-neutral-200" />
               </button>
             </div>
-
             <div className="p-6 space-y-5">
               {/* Price Range */}
               <div>
-                <label className="block text-sm font-semibold mb-3">
-                  Price Range
-                </label>
+                <label className="block text-sm font-semibold mb-3">Price Range</label>
                 <div className="flex gap-3">
                   <input
                     type="number"
                     placeholder="Min"
                     value={filters.priceMin}
-                    onChange={(e) =>
-                      handleFilterChange("priceMin", e.target.value)
-                    }
-                    className="flex-1 px-1 py-2 border border-[#E0E0E0] dark:border-[#2E2E3E] rounded-lg bg-neutral-300 dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8413B]"
+                    onChange={(e) => handleFilterChange("priceMin", e.target.value)}
+                    className="flex-1 px-1 py-2 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-300 dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                   <input
                     type="number"
                     placeholder="Max"
                     value={filters.priceMax}
-                    onChange={(e) =>
-                      handleFilterChange("priceMax", e.target.value)
-                    }
-                    className="flex-1 px-1 py-2 border border-[#E0E0E0] dark:border-[#2E2E3E] rounded-lg bg-neutral-300 dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8413B]"
+                    onChange={(e) => handleFilterChange("priceMax", e.target.value)}
+                    className="flex-1 px-1 py-2 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-300 dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
               </div>
-
               {/* City */}
               <div>
-                <label className="block text-sm font-semibold mb-3">
-                  City
-                </label>
+                <label className="block text-sm font-semibold mb-3">City</label>
                 <select
                   value={filters.city}
                   onChange={(e) => handleFilterChange("city", e.target.value)}
-                  className="w-full px-4 py-2 border border-[#E0E0E0] dark:border-[#2E2E3E] rounded-lg bg-neutral-300 dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8413B]"
+                  className="w-full px-4 py-2 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                 >
                   <option value="">All Cities</option>
                   {cities.map((city) => (
@@ -217,24 +205,16 @@ export default function Home() {
                   ))}
                 </select>
               </div>
-
               {/* Property Type */}
               <div>
-                <label className="block text-sm font-semibold mb-4">
-                  Property type
-                </label>
+                <label className="block text-sm font-semibold mb-4">Property type</label>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { id: "all", label: "All types" },
+                    { id: "apartment", label: "Apartment" },
                     { id: "house", label: "House" },
-                    { id: "townhouse", label: "Townhouse" },
-                    { id: "apartment", label: "Apartment & Unit" },
-                    { id: "villa", label: "Villa" },
-                    { id: "retirement", label: "Retirement Living" },
                     { id: "land", label: "Land" },
-                    { id: "acreage", label: "Acreage" },
-                    { id: "rural", label: "Rural" },
-                    { id: "block", label: "Block Of Units" },
+                    { id: "commercial", label: "Commercial" },
+                    { id: "office", label: "Office" },
                   ].map((type) => (
                     <label
                       key={type.id}
@@ -242,32 +222,15 @@ export default function Home() {
                     >
                       <input
                         type="checkbox"
-                        checked={
-                          type.id === "all"
-                            ? filters.propertyTypes.length === 0
-                            : filters.propertyTypes.includes(type.id)
-                        }
-                        onChange={() => {
-                          if (type.id === "all") {
-                            setFilters((prev) => ({
-                              ...prev,
-                              propertyTypes:
-                                prev.propertyTypes.length === 0 ? [] : [],
-                            }));
-                          } else {
-                            handlePropertyTypeChange(type.id);
-                          }
-                        }}
-                        className="w-5 h-5 accent-[#E8413B] rounded cursor-pointer"
+                        checked={filters.propertyTypes.includes(type.id)}
+                        onChange={() => handlePropertyTypeChange(type.id)}
+                        className="w-5 h-5 accent-orange-500 rounded cursor-pointer"
                       />
-                      <span className="text-sm">
-                        {type.label}
-                      </span>
+                      <span className="text-sm">{type.label}</span>
                     </label>
                   ))}
                 </div>
               </div>
-
               {/* Apply Filters */}
               <div className="flex gap-3 pt-4">
                 <button
@@ -275,17 +238,16 @@ export default function Home() {
                     setFilters({
                       priceMin: "",
                       priceMax: "",
-                      city: "",
                       propertyTypes: [],
                     })
                   }
-                  className="flex-1 px-4 py-2 border border-[#E0E0E0] dark:border-[#2E2E3E] rounded-lg font-semibold hover:bg-[#F5F5F5] dark:hover:bg-[#252535] transition"
+                  className="flex-1 px-4 py-2 border border-neutral-200 dark:border-neutral-700 rounded-lg font-semibold hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
                 >
                   Reset
                 </button>
                 <button
                   onClick={() => setShowFilterModal(false)}
-                  className="flex-1 px-4 py-2 bg-[#E8413B] text-white rounded-lg font-semibold hover:bg-[#c0342e] transition"
+                  className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-brand-orange/80 cursor-pointer transition"
                 >
                   Apply
                 </button>

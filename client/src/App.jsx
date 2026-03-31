@@ -69,7 +69,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/broker-signup" element={<BrokerSignup />} />
-          <Route path="/listings" element={<Properties darkMode={dm} />} />
+          <Route path="/listings" element={<Properties />} />
           <Route path="/listing/:listingId" element={<PropertyDetails darkMode={dm} />} />
           <Route path="/about" element={<About darkMode={dm} />} />
           <Route path="/contact" element={<Contact darkMode={dm} />} />

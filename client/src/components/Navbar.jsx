@@ -73,13 +73,13 @@ export default function Navbar({ transparent = false }) {
                     {/* Desktop Navigation */}
                     <div className="hidden lg:flex items-center gap-1">
                         <NavLink
-                            href="/listings?type=sale"
+                            href="/listings?purpose=sale"
                             label="BUY"
                             transparent={transparent}
                             isDark={isDark}
                         />
                         <NavLink
-                            href="/listings?type=rent"
+                            href="/listings?purpose=rent"
                             label="RENT"
                             transparent={transparent}
                             isDark={isDark}
@@ -247,8 +247,8 @@ export default function Navbar({ transparent = false }) {
                 {/* Mobile Menu */}
                 {mobileOpen && (
                     <div className="lg:hidden pb-4 space-y-2 border-t border-[#E0E0E0] dark:border-[#2E2E3E]">
-                        <NavLinkMobile href="/listings?type=sale" label="BUY" />
-                        <NavLinkMobile href="/listings?type=rent" label="RENT" />
+                        <NavLinkMobile href="/listings?purpose=sale" label="BUY" />
+                        <NavLinkMobile href="/listings?purpose=rent" label="RENT" />
                         <NavLinkMobile href="/mortgage" label="MORTGAGE" />
                         <NavLinkMobile href="/brokers" label="REAL ESTATE BROKER" />
                     </div>

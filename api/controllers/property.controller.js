@@ -97,6 +97,9 @@ export const getAllProperties = async (req, res, next) => {
       keyword,
       priceMin,
       priceMax,
+      sizeMin,
+      sizeMax,
+      sizeUnit,
       type,
       types,
       purpose,
@@ -141,6 +144,18 @@ export const getAllProperties = async (req, res, next) => {
       if (priceMax) filter.price.$lte = Number(priceMax);
     }
 
+    // Size filter
+    if (sizeMin || sizeMax) {
+      filter['size.value'] = {};
+      if (sizeMin) filter['size.value'].$gte = Number(sizeMin);
+      if (sizeMax) filter['size.value'].$lte = Number(sizeMax);
+    }
+
+    // Size unit filter
+    if (sizeUnit) {
+      filter['size.unit'] = sizeUnit;
+    }
+
     // Type filter - support both 'type' and 'types' parameters
     if (types) {
       const typeArray = types.split(',').map(t => t.trim());
@@ -163,7 +178,7 @@ export const getAllProperties = async (req, res, next) => {
 
     // City filter
     if (city) {
-      filter['city.name'] = city;
+      filter.city = city;
     }
 
     // Sorting
@@ -185,9 +200,11 @@ export const getAllProperties = async (req, res, next) => {
     }
 
     const skip = (page - 1) * limit;
+    console.log('Filter:', filter);
 
     const properties = await Property.find(filter)
       .populate('broker', 'name phone company')
+      .populate('city', 'name')
       .sort(sortBy)
       .skip(skip)
       .limit(Number(limit));
