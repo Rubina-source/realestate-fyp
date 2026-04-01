@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { propertyService } from "../services/apiService";
 import BrokerLayout from "../components/BrokerLayout";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Edit2, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
 
 export default function BrokerProperties() {
   const [properties, setProperties] = useState([]);
@@ -99,6 +100,9 @@ export default function BrokerProperties() {
                   <th scope="col" className="px-6 py-4">
                     Created
                   </th>
+                  <th scope="col" className="px-6 py-4">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -149,6 +153,22 @@ export default function BrokerProperties() {
                     </td>
                     <td className="px-6 py-4 text-sm">
                       {new Date(property.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex justify-end gap-2">
+                        <Link
+                          to={`/broker/listings/edit/${property._id}`}
+                          className="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm font-medium"
+                        >
+                          <Edit2 size={16} /> Edit
+                        </Link>
+                        {/* <button
+                          onClick={() => setDeleteConfirm(city)}
+                          className="bg-red-600 hover:bg-red-700 cursor-pointer text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm font-medium"
+                        >
+                          <Trash2 size={16} /> Delete
+                        </button> */}
+                      </div>
                     </td>
                   </tr>
                 ))}

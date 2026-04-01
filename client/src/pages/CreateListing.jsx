@@ -493,6 +493,7 @@ export default function CreateListing() {
                     >
                       <option value="sqft">Sq Ft</option>
                       <option value="ropani">Ropani</option>
+                      <option value="aana">Aana</option>
                     </select>
                   </div>
                 </div>

@@ -42,7 +42,7 @@ export default function PropertyCard({ property }) {
           </div>}
 
           <div className="flex items-center justify-between mb-3">
-            <span className="text-orange-400 font-bold text-xl">
+            <span className="text-orange-400 font-bold text-xl flex items-center justify-center">
               Rs. {property.price.toLocaleString()}
 
               {property.rentalType && <p>

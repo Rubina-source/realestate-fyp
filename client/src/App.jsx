@@ -24,6 +24,8 @@ import AdminAllBrokers from './pages/AdminAllBrokers';
 import BrokerProperties from './pages/BrokerProperties';
 import AdminListingsPending from './pages/AdminListingsPending';
 import AdminAllListings from './pages/AdminAllListings';
+import EditListing from './pages/EditListing';
+import AdminPropertyImport from './pages/AdminPropertyImport';
 
 
 const ProtectedRoute = ({ children, allowed }) => {
@@ -70,7 +72,7 @@ export default function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/broker-signup" element={<BrokerSignup />} />
           <Route path="/listings" element={<Properties />} />
-          <Route path="/listing/:listingId" element={<PropertyDetails darkMode={dm} />} />
+          <Route path="/listings/:id" element={<PropertyDetails />} />
           <Route path="/about" element={<About darkMode={dm} />} />
           <Route path="/contact" element={<Contact darkMode={dm} />} />
 
@@ -93,6 +95,14 @@ export default function App() {
             element={
               <ProtectedRoute allowed={["broker"]}>
                 <CreateListing />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/broker/listings/edit/:id"
+            element={
+              <ProtectedRoute allowed={["broker"]}>
+                <EditListing />
               </ProtectedRoute>
             }
           />
@@ -163,6 +173,15 @@ export default function App() {
             element={
               <ProtectedRoute allowed={["admin"]}>
                 <AdminCities />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/properties/import"
+            element={
+              <ProtectedRoute allowed={["admin"]}>
+                <AdminPropertyImport />
               </ProtectedRoute>
             }
           />

@@ -10,7 +10,7 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import Navbar from "../components/Navbar";
-import PropertyCard from "../components/property/Propertycard";
+import PropertyCard from "../components/property/PropertyCard";
 import { propertyService } from "../services/apiService";
 
 export default function Home() {
@@ -25,6 +25,9 @@ export default function Home() {
     priceMin: "",
     priceMax: "",
     city: "",
+    sizeMin: "",
+    sizeMax: "",
+    sizeUnit: "",
     propertyTypes: [], // Array for multiple property type selections
   });
 
@@ -59,6 +62,9 @@ export default function Home() {
     params.set("purpose", propertyType);
     if (filters.priceMin) params.set("priceMin", filters.priceMin);
     if (filters.priceMax) params.set("priceMax", filters.priceMax);
+    if (filters.sizeMin) params.set("sizeMin", filters.sizeMin);
+    if (filters.sizeMax) params.set("sizeMax", filters.sizeMax);
+    if (filters.sizeUnit) params.set("sizeUnit", filters.sizeUnit);
     if (filters.city) params.set("city", filters.city);
     if (filters.type) params.set("type", filters.type);
     window.location.href = `/listings?${params.toString()}`;
@@ -172,7 +178,7 @@ export default function Home() {
               {/* Price Range */}
               <div>
                 <label className="block text-sm font-semibold mb-3">Price Range</label>
-                <div className="flex gap-3">
+                <div className="flex gap-1">
                   <input
                     type="number"
                     placeholder="Min"
@@ -205,6 +211,47 @@ export default function Home() {
                   ))}
                 </select>
               </div>
+
+              <div>
+                <label className="block text-sm font-semibold mb-3">
+                  Property Size
+                </label>
+                <div className="space-y-2">
+                  {/* Size Unit */}
+                  <select
+                    value={filters.sizeUnit || ''}
+                    onChange={(e) => handleFilterChange('sizeUnit', e.target.value)}
+                    className="flex-1 px-1 py-2 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-300 dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value="">All Units</option>
+                    <option value="sqft">Sqft</option>
+                    <option value="ropani">Ropani</option>
+                    <option value="aana">aana</option>
+                  </select>
+                  {/* Min/Max Size */}
+                  <div className="flex gap-1">
+                    <input
+                      type="number"
+                      placeholder="Min Size"
+                      value={filters.sizeMin}
+                      onChange={(e) =>
+                        handleFilterChange("sizeMin", e.target.value)
+                      }
+                      className="flex-1 px-1 py-2 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-300 dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Max Size"
+                      value={filters.sizeMax}
+                      onChange={(e) =>
+                        handleFilterChange("sizeMax", e.target.value)
+                      }
+                      className="flex-1 px-1 py-2 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-300 dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
               {/* Property Type */}
               <div>
                 <label className="block text-sm font-semibold mb-4">Property type</label>

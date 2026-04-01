@@ -1,5 +1,6 @@
 import Property from '../models/property.model.js';
 import User from '../models/user.model.js';
+import City from '../models/city.model.js';
 
 export const createProperty = async (req, res, next) => {
   try {
@@ -224,7 +225,9 @@ export const getAllProperties = async (req, res, next) => {
 
 export const getPropertyById = async (req, res, next) => {
   try {
-    const property = await Property.findById(req.params.id).populate('broker', 'name email phone company profileImage');
+    const property = await Property.findById(req.params.id)
+      .populate('city', 'name')
+      .populate('broker', 'name email phone company profileImage');
 
     if (!property) {
       return res.status(404).json({
@@ -265,12 +268,6 @@ export const updateProperty = async (req, res, next) => {
       });
     }
 
-    if (!['pending', 'rejected'].includes(property.status)) {
-      return res.status(400).json({
-        message: 'Can only edit pending or rejected properties'
-      });
-    }
-
     const {
       title,
       description,
@@ -303,8 +300,8 @@ export const updateProperty = async (req, res, next) => {
     if (parking !== undefined) property.parking = parking || null;
     if (amenities) property.amenities = amenities;
 
-    property.status = 'pending';
-    property.rejectionReason = null;
+    // property.status = 'pending';
+    // property.rejectionReason = null;
 
     await property.save();
     await property.populate('broker', 'name phone company');
@@ -383,6 +380,108 @@ export const getBrokerProperties = async (req, res, next) => {
       page: Number(page),
       pages: Math.ceil(total / limit),
       properties,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const bulkImportProperties = async (req, res, next) => {
+  try {
+    const {
+      title,
+      description,
+      price,
+      type,
+      purpose,
+      cityName,
+      location,
+      size,
+      bedrooms,
+      bathrooms,
+      parking,
+      amenities,
+      rentalType,
+      images,
+      brokerId
+    } = req.body;
+
+    // Validate broker
+    const broker = await User.findById(brokerId);
+    if (!broker) {
+      return res.status(404).json({
+        message: 'Broker not found'
+      });
+    }
+
+    // Validate required fields
+    if (!title || !description || !price || !type || !purpose || !cityName || !location || !size) {
+      return res.status(400).json({
+        message: 'Missing required fields: title, description, price, type, purpose, city, location, size'
+      });
+    }
+
+    // Validate property type
+    if (!['apartment', 'land', 'house', 'commercial', 'office'].includes(type)) {
+      return res.status(400).json({
+        message: 'Invalid property type'
+      });
+    }
+
+    // Validate purpose
+    if (!['sale', 'rent'].includes(purpose)) {
+      return res.status(400).json({
+        message: 'Purpose must be sale or rent'
+      });
+    }
+
+    // Validate rental type
+    if (purpose === 'rent' && rentalType) {
+      if (!['daily', 'monthly', 'yearly'].includes(rentalType)) {
+        return res.status(400).json({
+          message: 'Invalid rental type'
+        });
+      }
+    }
+
+    // Find city by name
+    const city = await City.findOne({
+      name: cityName
+    });
+    if (!city) {
+      return res.status(404).json({
+        message: `City "${cityName}" not found. Please add it first.`
+      });
+    }
+
+    // Create property
+    const property = new Property({
+      title,
+      description,
+      price: Number(price),
+      type,
+      purpose,
+      rentalType: rentalType || null,
+      city: city._id,
+      size,
+      bedrooms: bedrooms || null,
+      bathrooms: bathrooms || null,
+      parking: parking || null,
+      location,
+      images: images && images.length > 0 ? images : [
+        'https://placehold.co/600x400'
+      ],
+      amenities: amenities || [],
+      broker: brokerId,
+      status: 'approved', // Admin-imported properties are auto-approved
+    });
+
+    await property.save();
+    await property.populate('broker', 'name email phone');
+
+    res.status(201).json({
+      message: 'Property imported successfully',
+      property,
     });
   } catch (error) {
     next(error);

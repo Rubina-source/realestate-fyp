@@ -38,7 +38,7 @@ const propertySchema = new mongoose.Schema({
     },
     unit: {
       type: String,
-      enum: ['sqft', 'ropani, aana'],
+      enum: ['sqft', 'ropani', 'aana'],
       default: 'sqft',
     },
   },
@@ -89,7 +89,7 @@ const propertySchema = new mongoose.Schema({
   },
   amenities: [{
     type: String,
-    enum: [
+    /* enum: [
       'Bathroom',
       'Living room',
       'Terrace',
@@ -104,7 +104,13 @@ const propertySchema = new mongoose.Schema({
       'Internet',
       'Kitchen',
       'Balcony',
-    ],
+      'Parking',
+      'CCTV',
+      'Water Supply',
+      'Internet',
+      'Store Room',
+      'Fencing',
+    ], */
   }, ],
   broker: {
     type: mongoose.Schema.Types.ObjectId,

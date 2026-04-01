@@ -14,6 +14,7 @@ import {
     authenticateToken,
     authorize
 } from '../middleware/auth.js';
+import { bulkImportProperties } from '../controllers/property.controller.js';
 
 const router = express.Router();
 
@@ -24,6 +25,8 @@ router.get('/brokers/verified', authenticateToken, authorize(['admin']), getVeri
 router.get('/brokers/all', authenticateToken, authorize(['admin']), getAllBrokers);
 router.patch('/brokers/:userId/verify', authenticateToken, authorize(['admin']), verifyBroker);
 router.patch('/brokers/:userId/reject', authenticateToken, authorize(['admin']), rejectBroker);
+
+router.post('/properties/import', authenticateToken, authorize(['admin']), bulkImportProperties);
 
 // Admin routes - require admin role
 router.get('/listings/pending', authenticateToken, authorize(['admin']), getPendingListings);

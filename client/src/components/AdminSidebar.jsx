@@ -6,6 +6,7 @@ import {
   Clock,
   BarChart3,
   MapPin,
+  Upload,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -139,6 +140,19 @@ export default function AdminSidebar() {
               </Link>
             </div>
           )}
+        </div>
+
+        <div>
+          <Link
+            to="/admin/properties/import"
+            className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors ${isActive("/admin/listings")
+              ? "bg-neutral-100 dark:bg-neutral-800"
+              : ""
+              }`}
+          >
+            <Upload size={16} />
+            <span>Import Properties</span>
+          </Link>
         </div>
 
         {/* Users Section */}
