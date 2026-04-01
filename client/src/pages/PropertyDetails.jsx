@@ -277,13 +277,6 @@ export default function ListingDetail() {
                                 </div>
                             )}
                         </div>
-
-                        <button
-                            onClick={() => setShowInquiryForm(!showInquiryForm)}
-                            className="w-full bg-secondary text-primary font-bold py-2 rounded hover:opacity-90 transition"
-                        >
-                            Send Inquiry
-                        </button>
                     </div>
 
                     {/* Inquiry Form */}
