@@ -26,6 +26,7 @@ import AdminListingsPending from './pages/AdminListingsPending';
 import AdminAllListings from './pages/AdminAllListings';
 import EditListing from './pages/EditListing';
 import AdminPropertyImport from './pages/AdminPropertyImport';
+import Brokers from './pages/Brokers';
 
 
 const ProtectedRoute = ({ children, allowed }) => {
@@ -75,6 +76,8 @@ export default function App() {
           <Route path="/listings/:id" element={<PropertyDetails />} />
           <Route path="/about" element={<About darkMode={dm} />} />
           <Route path="/contact" element={<Contact darkMode={dm} />} />
+          <Route path="/brokers" element={<Brokers />} />
+
 
           {/* ── Any logged-in user ── */}
           <Route >
