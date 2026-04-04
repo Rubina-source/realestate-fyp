@@ -120,7 +120,7 @@ export const getAllProperties = async (req, res, next) => {
       filter.$or = [{
           title: {
             $regex: keyword,
-            $options: 'i'
+            $options: 'i' //caseinensitive 
           }
         },
         {

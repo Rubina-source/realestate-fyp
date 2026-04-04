@@ -7,7 +7,6 @@ import Properties from './pages/Properties';
 import PropertyDetails from './pages/PropertyDetails';
 import About from './pages/About';
 import Contact from './pages/Contact';
-import Profile from './pages/Profile';
 import CreateListing from './pages/CreateListing';
 import AdminDashboard from './pages/AdminDashboard';
 import BrokerDashboard from './pages/BrokerDashboard';
@@ -78,11 +77,6 @@ export default function App() {
           <Route path="/contact" element={<Contact darkMode={dm} />} />
           <Route path="/brokers" element={<Brokers />} />
 
-
-          {/* ── Any logged-in user ── */}
-          <Route >
-            <Route path="/profile" element={<Profile darkMode={dm} />} />
-          </Route>
 
           {/* ── Broker only ── */}
           <Route
