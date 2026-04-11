@@ -211,7 +211,7 @@ export const verifyEmail = async (req, res, next) => {
 
 export const getCurrentUser = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.userId).populate('name');
+    const user = await User.findById(req.user.userId).populate('city', 'name');
     if (!user) {
       return res.status(404).json({
         message: 'User not found'
@@ -230,9 +230,7 @@ export const getCurrentUser = async (req, res, next) => {
 
     // Add broker-specific fields if broker
     if (user.role === 'broker') {
-      responseUser.city = user.city;
-      responseUser.experience = user.experience;
-      responseUser.certification = user.certification;
+      responseUser.city = user.city.name;
       responseUser.isBrokerVerified = user.isBrokerVerified;
     }
 
@@ -250,9 +248,6 @@ export const updateProfile = async (req, res, next) => {
       name,
       phone,
       company,
-      city,
-      experience,
-      certification,
       profileImage
     } = req.body;
 
@@ -269,13 +264,6 @@ export const updateProfile = async (req, res, next) => {
     if (company) user.company = company;
     if (profileImage) user.profileImage = profileImage;
 
-    // Update broker-specific fields
-    if (user.role === 'broker') {
-      if (city) user.city = city;
-      if (experience) user.experience = experience;
-      if (certification) user.certification = certification;
-    }
-
     await user.save();
 
     res.json({
@@ -290,8 +278,6 @@ export const updateProfile = async (req, res, next) => {
         profileImage: user.profileImage,
         ...(user.role === 'broker' && {
           city: user.city,
-          experience: user.experience,
-          certification: user.certification,
           isBrokerVerified: user.isBrokerVerified,
         }),
       },

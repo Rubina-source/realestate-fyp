@@ -25,7 +25,7 @@ export default function Listings() {
       <h1 className='text-3xl font-black text-[#1F3E35] mb-10 uppercase tracking-tighter'>
       </h1>
 
-      {loading && <p className='text-center py-20 text-slate-400 animate-pulse font-bold'>Connecting to Database...</p>}
+      {loading && <p className='text-center py-20 text-slate-400 animate-pulse font-bold'>Loading listings...</p>}
 
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10'>
         {listings.map((listing) => (

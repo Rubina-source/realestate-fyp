@@ -7,6 +7,9 @@
   --color-brand-orange: #f26419;
   --color-brand-dark: #06101c;
 
+  --color-primary: #e4002b;
+  --color-primary-dark: #c20024;
+
   /* This replaces the 'fontFamily' section */
   --font-sans: "Inter", "system-ui", "sans-serif";
 

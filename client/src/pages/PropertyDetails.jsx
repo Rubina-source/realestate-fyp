@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MapPin, Home, DollarSign, User, Phone, Mail, Heart } from 'lucide-react';
-import { propertyService } from '../services/apiService';
+import { inquiryService, propertyService, favoriteService } from '../services/apiService';
 import { useAuth } from '../hooks/useAuth';
+import InquiryCalendar from '../components/InquiryCalendar';
+import toast from 'react-hot-toast';
 
 export default function ListingDetail() {
     const { id } = useParams();
@@ -11,11 +13,10 @@ export default function ListingDetail() {
     const [property, setProperty] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isFavorited, setIsFavorited] = useState(false);
+
     const [showInquiryForm, setShowInquiryForm] = useState(false);
     const [inquiryData, setInquiryData] = useState({
-        clientName: '',
-        clientEmail: '',
-        clientPhone: '',
+        preferredMeetingDate: '',
         message: '',
     });
     const [submitting, setSubmitting] = useState(false);
@@ -25,7 +26,7 @@ export default function ListingDetail() {
             try {
                 const response = await propertyService.getById(id);
                 setProperty(response.data.property);
-
+                setIsFavorited(response.data.property.isFavorite || false);
             } catch (error) {
                 console.error('Failed to fetch property:', error);
                 navigate('/listings');
@@ -37,7 +38,7 @@ export default function ListingDetail() {
         fetchProperty();
     }, [id, user, navigate]);
 
-    /* const handleFavorite = async () => {
+    const handleFavorite = async () => {
         if (!user) {
             navigate('/login');
             return;
@@ -45,36 +46,37 @@ export default function ListingDetail() {
 
         try {
             if (isFavorited) {
-                await favoriteService.remove(id);
+                await favoriteService.remove(property._id);
             } else {
-                await favoriteService.add(id);
+                await favoriteService.add(property._id);
             }
             setIsFavorited(!isFavorited);
         } catch (error) {
             console.error('Error toggling favorite:', error);
         }
-    }; */
+    };
 
-    /*  const handleInquirySubmit = async (e) => {
-         e.preventDefault();
-         setSubmitting(true);
- 
-         try {
-             await inquiryService.create({
-                 propertyId: id,
-                 ...inquiryData,
-             });
- 
-             alert('Inquiry sent successfully!');
-             setInquiryData({ clientName: '', clientEmail: '', clientPhone: '', message: '' });
-             setShowInquiryForm(false);
-         } catch (error) {
-             console.error('Failed to submit inquiry:', error);
-             alert('Failed to send inquiry');
-         } finally {
-             setSubmitting(false);
-         }
-     }; */
+    const handleInquirySubmit = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+
+        try {
+            const response = await inquiryService.create({
+                propertyId: id,
+                ...inquiryData,
+            });
+
+            toast.success(response.data.message);
+            setShowInquiryForm(false);
+            const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${property.broker.email}&su=${encodeURIComponent(response.data.message)}&body=${encodeURIComponent(response.data.emailMessage)}`;
+
+            window.open(gmailUrl, "_blank");
+        } catch (error) {
+            toast.error(error.response.data.message);
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     if (loading) {
         return <div className="flex justify-center items-center h-screen">Loading...</div>;
@@ -99,7 +101,7 @@ export default function ListingDetail() {
                     </div>
 
                     {/* Property Details */}
-                    <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-md p-6 mb-6">
+                    <div className=" rounded-lg p-6 mb-6">
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <h1 className="text-3xl font-bold mb-2">
@@ -107,12 +109,12 @@ export default function ListingDetail() {
                                 </h1>
                                 <div className="flex items-center">
                                     <MapPin size={18} className="mr-2" />
-                                    {property.city.name}, {property.location.address}
+                                    {property.city?.name || 'N/A'}, {property.location?.address || 'N/A'}
                                 </div>
                             </div>
                             <button
-                                // onClick={handleFavorite}
-                                className={`p-3 rounded-full transition ${isFavorited
+                                onClick={handleFavorite}
+                                className={`p-3 cursor-pointer rounded-full transition ${isFavorited
                                     ? 'bg-red-500 text-white'
                                     : 'bg-neutral-200 dark:bg-neutral-700'
                                     }`}
@@ -124,12 +126,12 @@ export default function ListingDetail() {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 my-6">
                             <div className="bg-neutral-100 dark:bg-neutral-700 p-4 rounded">
                                 <div className="text-sm">Price</div>
-                                <div className="text-xl font-bold text-primary">
+                                <div className="text-xl font-bold  capitalize">
                                     Rs. {property.price.toLocaleString()}
                                     {
-                                        property.rentalType === 'daily' ? '/day' :
-                                            property.rentalType === 'monthly' ? '/month' :
-                                                property.rentalType === 'yearly' ? '/year' : ''
+                                        property.rentalType === 'daily' ? ' / day' :
+                                            property.rentalType === 'monthly' ? ' / month' :
+                                                property.rentalType === 'yearly' ? ' / year' : ''
                                     }
                                 </div>
                             </div>
@@ -153,26 +155,17 @@ export default function ListingDetail() {
                             </div>
                         </div>
 
-                        {/* Additional Property Details */}
-                        {property.rentalType && (
-                            <div className="my-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
-                                <div className="text-sm text-blue-600 dark:text-blue-400">Rental Type</div>
-                                <div className="text-xl font-bold text-blue-900 dark:text-blue-200 capitalize">
-                                    {property.rentalType}
-                                </div>
-                            </div>
-                        )}
 
-                        <div className="border-t border-neutral-300 dark:border-neutral-600 pt-6">
-                            <h2 className="text-2xl font-bold mb-4">Description</h2>
-                            <p className="leading-relaxed whitespace-pre-wrap">
+                        <div className="pt-">
+                            <h2 className="text-2xl font-bold mb-1">Description</h2>
+                            <p className="leading-relaxed whitespace-pre-wrap text-sm">
                                 {property.description}
                             </p>
                         </div>
 
                         {/* Bedrooms, Bathrooms, Parking */}
                         {(property.bedrooms || property.bathrooms || property.parking) && (
-                            <div className="border-t border-neutral-300 dark:border-neutral-600 pt-6 mt-6 mb-6">
+                            <div className="pt-6">
                                 <h2 className="text-2xl font-bold mb-4">Features</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-max">
                                     {property.bedrooms && (
@@ -211,13 +204,13 @@ export default function ListingDetail() {
 
                         {/* Amenities */}
                         {property.amenities && property.amenities.length > 0 && (
-                            <div className="border-t border-neutral-300 dark:border-neutral-600 pt-6">
+                            <div className="pt-6">
                                 <h2 className="text-2xl font-bold mb-4">Amenities</h2>
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                     {property.amenities.map((amenity) => (
                                         <div
                                             key={amenity}
-                                            className="flex items-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800"
+                                            className="flex items-center p-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800"
                                         >
                                             <span className="text-green-600 dark:text-green-400 mr-2">✓</span>
                                             <span className="font-medium">
@@ -230,7 +223,6 @@ export default function ListingDetail() {
                         )}
                     </div>
 
-                    {/* Map */}
                     {/* <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-md p-6">
                         <h2 className="text-2xl font-bold mb-4">Location on Map</h2>
                         <MapView
@@ -241,53 +233,75 @@ export default function ListingDetail() {
                     </div> */}
                 </div>
 
-                {/* Sidebar - Broker Info & Inquiry */}
                 <div className="lg:col-span-1">
-                    {/* Broker Card */}
-                    <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-md p-6 mb-6">
+                    <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6 mb-6">
                         <h3 className="text-xl font-bold mb-4">Listed by</h3>
 
-                        {property.broker.profileImage && (
-                            <img
-                                src={property.broker.profileImage}
-                                alt={property.broker.name}
-                                className="w-20 h-20 rounded-full object-cover mb-4"
-                            />
-                        )}
+                        <div className="flex items-center gap-4">
+                            {property.broker.profileImage && (
+                                <img
+                                    src={property.broker.profileImage}
+                                    alt={property.broker.name}
+                                    className="w-20 h-20 rounded-full object-cover mb-4"
+                                />
+                            )}
 
-                        <h4 className="font-bold text-lg mb-1">
-                            {property.broker.name}
-                        </h4>
+                            <div>
+                                <h4 className="font-bold text-lg mb-1">
+                                    {property.broker.name}
+                                </h4>
 
-                        {property.broker.company && (
-                            <p className="mb-4">{property.broker.company}</p>
-                        )}
+                                {property.broker.company && (
+                                    <p className="mb-4">{property.broker.company}</p>
+                                )}
+                            </div>
+                        </div>
 
                         <div className="space-y-2 mb-6">
                             {property.broker.phone && (
-                                <div className="flex items-center">
-                                    <Phone size={18} className="mr-2" />
+                                <Link to={`tel:${property.broker.phone}`} className="flex items-center">
+                                    <Phone size={16} className="mr-2" />
                                     {property.broker.phone}
-                                </div>
+                                </Link>
                             )}
                             {property.broker.email && (
-                                <div className="flex items-center">
-                                    <Mail size={18} className="mr-2" />
+                                <Link to={`mailto:${property.broker.email}`} className="flex items-center">
+                                    <Mail size={16} className="mr-2" />
                                     {property.broker.email}
-                                </div>
+                                </Link>
                             )}
                         </div>
+
+                        <button
+                            onClick={() => {
+                                if (!user) {
+                                    toast.error('Please login to send an inquiry.');
+                                    return;
+                                }
+                                setShowInquiryForm(true);
+                            }}
+                            className="w-full bg-primary text-white cursor-pointer font-bold py-2 rounded hover:opacity-90 transition"
+                        >
+                            Send Inquiry
+                        </button>
+
                     </div>
 
                     {/* Inquiry Form */}
                     {showInquiryForm && (
-                        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-md p-6">
-                            <h3 className="text-lg font-bold mb-4">Send Message</h3>
+                        <div className="bg-white dark:bg-neutral-800 relative rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
+                            <h3 className="text-lg font-bold mb-4">Booking Inquiry</h3>
 
                             <form onSubmit={handleInquirySubmit} className="space-y-4">
-                                <div>
+                                <InquiryCalendar
+                                    propertyId={property._id}
+                                    onDateSelected={(date) =>
+                                        setInquiryData({ ...inquiryData, preferredMeetingDate: date })
+                                    }
+                                />
+                                {/* <div>
                                     <label className="block font-semibold mb-2">
-                                        Name
+                                        Your Name
                                     </label>
                                     <input
                                         type="text"
@@ -328,7 +342,7 @@ export default function ListingDetail() {
                                         required
                                         className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-primary"
                                     />
-                                </div>
+                                </div> */}
 
                                 <div>
                                     <label className="block font-semibold mb-2">
@@ -350,7 +364,7 @@ export default function ListingDetail() {
                                     disabled={submitting}
                                     className="w-full bg-primary dark:bg-neutral-700 text-white font-bold py-2 rounded hover:opacity-90 transition disabled:opacity-50"
                                 >
-                                    {submitting ? 'Sending...' : 'Send Message'}
+                                    {submitting ? 'Sending...' : 'Send Inquiry'}
                                 </button>
                             </form>
                         </div>

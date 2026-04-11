@@ -1,5 +1,6 @@
 import propertyModel from "../models/property.model.js";
 import userModel from "../models/user.model.js";
+import inquiryModel from "../models/inquiry.model.js";
 
 export const getAllUsers = async (req, res, next) => {
     try {
@@ -332,7 +333,7 @@ export const getPublicBrokers = async (req, res, next) => {
                 role: 'broker',
                 isBrokerVerified: true
             })
-            .select('name email phone company city image')
+            // .select('name email phone company city image')
             .select('-password')
             .populate('city', 'name')
             .sort({
@@ -346,6 +347,155 @@ export const getPublicBrokers = async (req, res, next) => {
                 brokers,
                 total: brokers.length,
             },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+export const getStats = async (req, res, next) => {
+    try {
+        const totalUsers = await userModel.countDocuments();
+        const brokerCount = await userModel.countDocuments({
+            role: 'broker'
+        });
+        const clientCount = await userModel.countDocuments({
+            role: 'client'
+        });
+        const pendingBrokers = await userModel.countDocuments({
+            role: 'broker',
+            isBrokerVerified: false
+        });
+
+        const totalListings = await propertyModel.countDocuments();
+        const approvedListings = await propertyModel.countDocuments({
+            status: 'approved'
+        });
+        const pendingListings = await propertyModel.countDocuments({
+            status: 'pending'
+        });
+        const rejectedListings = await propertyModel.countDocuments({
+            status: 'rejected'
+        });
+
+        const totalInquiries = await inquiryModel.countDocuments();
+
+        res.json({
+            users: {
+                total: totalUsers,
+                brokers: brokerCount,
+                clients: clientCount,
+            },
+            listings: {
+                total: totalListings,
+                approved: approvedListings,
+                pending: pendingListings,
+                rejected: rejectedListings,
+            },
+            inquiries: totalInquiries,
+            pendingBrokers,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getPropertyStats = async (req, res, next) => {
+    try {
+        // Property type statistics
+        const typeStats = await propertyModel.aggregate([{
+                $match: {
+                    status: 'approved'
+                }
+            },
+            {
+                $group: {
+                    _id: '$type',
+                    count: {
+                        $sum: 1
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    name: '$_id',
+                    value: '$count'
+                }
+            },
+        ]);
+
+        // Purpose statistics (sale vs rent)
+        const purposeStats = await propertyModel.aggregate([{
+                $match: {
+                    status: 'approved'
+                }
+            },
+            {
+                $group: {
+                    _id: '$purpose',
+                    count: {
+                        $sum: 1
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    name: '$_id',
+                    value: '$count'
+                }
+            },
+        ]);
+
+        // City statistics (top cities by property count)
+        const cityStats = await propertyModel.aggregate([{
+                $match: {
+                    status: 'approved'
+                }
+            },
+            {
+                $group: {
+                    _id: '$city',
+                    count: {
+                        $sum: 1
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'cities',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'cityInfo'
+                }
+            },
+            {
+                $unwind: '$cityInfo'
+            },
+            {
+                $sort: {
+                    count: -1
+                }
+            },
+            {
+                $limit: 10
+            },
+            {
+                $project: {
+                    _id: 0,
+                    name: '$cityInfo.name',
+                    value: '$count'
+                }
+            },
+        ]);
+
+        res.json({
+            success: true,
+            propertyType: typeStats,
+            purpose: purposeStats,
+            cities: cityStats,
         });
     } catch (error) {
         next(error);

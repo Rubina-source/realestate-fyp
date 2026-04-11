@@ -5,6 +5,13 @@
   text-align: center;
 }
 
+.bg-primary {
+  background-color: #e4002b;
+}
+.text-primary {
+  color: #e4002b;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;

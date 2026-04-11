@@ -6,6 +6,9 @@ import authRouter from './routes/auth.route.js';
 import citiesRouter from './routes/cities.route.js';
 import adminRouter from './routes/admin.route.js';
 import propertyRoutes from './routes/property.route.js';
+import inquiryRoutes from './routes/inquiry.route.js';
+import favoriteRouter from './routes/favorites.route.js';
+import userRouter from './routes/user.route.js';
 import {
     errorHandler
 } from './middleware/errorHandler.js';
@@ -52,5 +55,8 @@ app.use('/api/auth', authRouter);
 app.use('/api/cities', citiesRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/properties', propertyRoutes);
+app.use('/api/inquiries', inquiryRoutes);
+app.use('/api/favorites', favoriteRouter);
+app.use('/api/users', userRouter);
 
 app.use(errorHandler);

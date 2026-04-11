@@ -31,6 +31,31 @@ export default function BrokerProperties() {
     }
   };
 
+  const handleMarkAsSoldOrAvailable = async (id, status) => {
+    try {
+      await propertyService.update(id, { status: status });
+      toast.success(`Property marked as ${status} successfully`);
+      fetchBrokerProperties();
+    } catch (error) {
+      console.error(`Failed to mark property as ${status}:`, error);
+      toast.error(`Failed to mark property as ${status}`);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this property?"))
+      return;
+
+    try {
+      await propertyService.delete(id);
+      toast.success("Property deleted successfully");
+      fetchBrokerProperties();
+    } catch (error) {
+      console.error("Failed to delete property:", error);
+      toast.error("Failed to delete property");
+    }
+  };
+
   if (loading) {
     return (
       <BrokerLayout>
@@ -150,26 +175,54 @@ export default function BrokerProperties() {
                       >
                         {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
                       </span>
+                      {property.status === "rejected" && property.rejectionReason && (
+                        <div className="mt-1 text-xs text-red-600 dark:text-red-400 font-medium">
+                          {property.rejectionReason}
+                        </div>
+                      )}
                     </td>
+
                     <td className="px-6 py-4 text-sm">
                       {new Date(property.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
+                        {(property.status === "approved" || property.status === "sold") && (
+                          <button
+                            onClick={() =>
+                              handleMarkAsSoldOrAvailable(
+                                property._id,
+                                property.status === "approved" ? "sold" : "approved",
+                              )
+                            }
+                            className={
+                              "h-9 px-4 py-2 rounded-lg text-xs font-medium transition cursor-pointer flex items-center " +
+                              (property.status === "approved"
+                                ? "bg-green-200 text-green-800 dark:bg-green-700/30 dark:text-green-300"
+                                : "bg-orange-200 text-orange-800 dark:bg-orange-700/30 dark:text-orange-300")
+                            }
+                            title={`Mark as ${property.status === "approved" ? "sold" : "available"}`}
+                          >
+                            Mark as {property.status === "approved" ? "sold" : "available"}
+                          </button>
+                     
+                        )}
+
                         <Link
                           to={`/broker/listings/edit/${property._id}`}
-                          className="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm font-medium"
-                        >
+                          className="h-9 px-4 py-2 bg-blue-600 hover:bg-blue-700 cursor-pointer text-white rounded-lg flex items-center gap-2 text-xs font-medium"                        >
                           <Edit2 size={16} /> Edit
                         </Link>
-                        {/* <button
-                          onClick={() => setDeleteConfirm(city)}
-                          className="bg-red-600 hover:bg-red-700 cursor-pointer text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm font-medium"
+                        <button
+                          onClick={() => handleDelete(property._id)}
+                          className="h-9 w-9 cursor-pointer flex items-center justify-center text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition"
+                          title="Delete"
                         >
-                          <Trash2 size={16} /> Delete
-                        </button> */}
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     </td>
+
                   </tr>
                 ))}
               </tbody>

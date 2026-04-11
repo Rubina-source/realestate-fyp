@@ -12,6 +12,7 @@ import {
     Home,
     Calculator,
     Users,
+    HistoryIcon,
 } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../hooks/useAuth";
@@ -156,6 +157,14 @@ export default function Navbar({ transparent = false }) {
                                                 <Bell size={16} />
                                                 <span className="text-sm">Notifications</span>
                                             </Link>
+                                            <Link
+                                                to="/history"
+                                                className="flex items-center gap-3 px-4 py-3 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition border-b border-[#E0E0E0] dark:border-[#2E2E3E]"
+                                                onClick={() => setAccountDropdown(false)}
+                                            >
+                                                <HistoryIcon size={16} />
+                                                <span className="text-sm">History</span>
+                                            </Link>
 
                                             {/* Broker Upgrade (clients only) */}
                                             {user.role === "client" && (
@@ -205,7 +214,7 @@ export default function Navbar({ transparent = false }) {
                             <>
                                 <Link
                                     to="/login"
-                                    className="px-4 py-2 text-white hover:text-[#E8413B] transition text-sm font-medium"
+                                    className={`px-4 py-2 transition text-sm font-medium ${transparent ? "text-white" : isDark ? "text-white" : "text-[#333333]"}`}
                                 >
                                     Sign In
                                 </Link>
@@ -221,7 +230,7 @@ export default function Navbar({ transparent = false }) {
                         {/* Theme Toggle */}
                         <button
                             onClick={toggleTheme}
-                            className="p-2 rounded-lg  transition dark:text-white"
+                            className={`p-2 rounded-lg  transition ${transparent ? "text-white" : isDark ? "text-white" : "text-[#333333]"}`}
                         >
                             {isDark ? <Sun size={20} /> : <Moon size={20} />}
                         </button>

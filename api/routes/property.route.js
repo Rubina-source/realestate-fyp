@@ -12,14 +12,15 @@ import {
 } from '../controllers/admin.controller.js';
 import {
     authenticateToken,
-    authorize
+    authorize,
+    maybeAuthenticated
 } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // Public routes
-router.get('/', getAllProperties);
-router.get('/:id', getPropertyById);
+router.get('/', maybeAuthenticated, getAllProperties);
+router.get('/:id', maybeAuthenticated, getPropertyById);
 router.get('/brokers/public/all', getPublicBrokers);
 
 // Broker routes

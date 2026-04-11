@@ -5,6 +5,8 @@ import {
     getListings,
     getPendingBrokers,
     getPendingListings,
+    getPropertyStats,
+    getStats,
     getVerifiedBrokers,
     rejectBroker,
     updatePropertyStatus,
@@ -14,7 +16,9 @@ import {
     authenticateToken,
     authorize
 } from '../middleware/auth.js';
-import { bulkImportProperties } from '../controllers/property.controller.js';
+import {
+    bulkImportProperties
+} from '../controllers/property.controller.js';
 
 const router = express.Router();
 
@@ -32,4 +36,7 @@ router.post('/properties/import', authenticateToken, authorize(['admin']), bulkI
 router.get('/listings/pending', authenticateToken, authorize(['admin']), getPendingListings);
 router.get('/listings/all', authenticateToken, authorize(['admin']), getListings);
 router.patch('/listings/:propertyId/status', authenticateToken, authorize(['admin']), updatePropertyStatus);
+
+router.get('/stats', authenticateToken, authorize(['admin']), getStats);
+router.get('/property-stats', authenticateToken, authorize(['admin']), getPropertyStats);
 export default router;

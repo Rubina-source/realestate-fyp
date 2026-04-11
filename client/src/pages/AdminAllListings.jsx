@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { adminService } from '../services/apiService';
 import AdminLayout from '../components/AdminLayout';
-import { Mail, Phone } from 'lucide-react';
+import { Mail, Phone, Trash2 } from 'lucide-react';
 
 export default function AdminAllListings() {
   const [listings, setListings] = useState([]);
@@ -25,6 +25,18 @@ export default function AdminAllListings() {
       console.error('Failed to fetch listings:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this listing? This action cannot be undone.')) return;
+
+    try {
+      await propertyService.delete(id);
+      setProperties(properties.filter(p => p._id !== id));
+      alert('Listing deleted successfully!');
+    } catch (error) {
+      alert('Failed to delete listing');
     }
   };
 
@@ -54,6 +66,7 @@ export default function AdminAllListings() {
                 <th scope="col" className="px-6 py-4">Broker</th>
                 <th scope="col" className="px-6 py-4">City</th>
                 <th scope="col" className="px-6 py-4">Created</th>
+                <th scope="col" className="px-6 py-4">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -68,16 +81,22 @@ export default function AdminAllListings() {
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 rounded-md text-xs font-medium ${listing.status === 'approved'
-                        ? 'bg-green-100 dark:bg-green-900/60'
-                        : listing.status === 'pending'
-                          ? 'bg-yellow-100 dark:bg-yellow-900/60'
-                          : listing.status === 'rejected'
-                            ? 'bg-red-100 dark:bg-red-900/60'
-                            : 'bg-neutral-100 dark:bg-neutral-700'
+                      ? 'bg-green-100 dark:bg-green-900/60'
+                      : listing.status === 'pending'
+                        ? 'bg-yellow-100 dark:bg-yellow-900/60'
+                        : listing.status === 'rejected'
+                          ? 'bg-red-100 dark:bg-red-900/60'
+                          : 'bg-neutral-100 dark:bg-neutral-700'
                       }`}>
                       {listing.status}
                     </span>
+                    {listing.status === 'rejected' && listing.rejectionReason && (
+                      <div className="mt-1 text-xs text-red-600 dark:text-red-400 font-medium">
+                        {listing.rejectionReason}
+                      </div>
+                    )}
                   </td>
+
                   <td className="px-6 py-4">
                     {listing.broker.name}
                   </td>
@@ -86,6 +105,11 @@ export default function AdminAllListings() {
                   </td>
                   <td className="px-6 py-4 text-sm">
                     {listing.createdAt ? new Date(listing.createdAt).toLocaleDateString() : ''}
+                  </td>
+                  <td className="px-6 py-4">
+                    <button onClick={() => handleDelete(listing._id)} className="text-red-500 hover:text-red-700 cursor-pointer">
+                      <Trash2 size={16} />
+                    </button>
                   </td>
                 </tr>
               ))}

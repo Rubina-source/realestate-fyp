@@ -126,6 +126,17 @@ const propertySchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  views: {
+    type: Number,
+    default: 0,
+  },
+  viewHistory: [{
+    ip: String,
+    viewedAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },],
   createdAt: {
     type: Date,
     default: Date.now,

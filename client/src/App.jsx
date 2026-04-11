@@ -26,6 +26,9 @@ import AdminAllListings from './pages/AdminAllListings';
 import EditListing from './pages/EditListing';
 import AdminPropertyImport from './pages/AdminPropertyImport';
 import Brokers from './pages/Brokers';
+import Favorites from './pages/Favorites';
+import History from './pages/History';
+import Settings from './pages/Settings';
 
 
 const ProtectedRoute = ({ children, allowed }) => {
@@ -77,6 +80,37 @@ export default function App() {
           <Route path="/contact" element={<Contact darkMode={dm} />} />
           <Route path="/brokers" element={<Brokers />} />
 
+
+          {/* ── Any logged-in user ── */}
+          <Route >
+            <Route path="/profile" element={<Profile darkMode={dm} />} />
+          </Route>
+
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute allowed={["client", "broker", "admin"]}>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/favorites"
+            element={
+              <ProtectedRoute allowed={["client", "broker"]}>
+                <Favorites />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute allowed={["client", "broker"]}>
+                <History />
+              </ProtectedRoute>
+            }
+          />
 
           {/* ── Broker only ── */}
           <Route

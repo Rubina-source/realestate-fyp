@@ -55,3 +55,22 @@ export const cityService = {
   update: (id, data) => api.put(`/cities/${id}`, data),
   delete: (id) => api.delete(`/cities/${id}`),
 };
+
+export const inquiryService = {
+  create: (data) => api.post('/inquiries', data),
+};
+
+export const favoriteService = {
+  getAll: (filters) => api.get('/favorites', {
+    params: filters
+  }),
+  add: (propertyId) => api.post(`/favorites/${propertyId}`),
+  remove: (propertyId) => api.delete(`/favorites/${propertyId}`),
+  isFavorite: (propertyId) => api.get(`/favorites/${propertyId}/check`),
+};
+
+export const userService = {
+  getHistory: (filters) => api.get('/users/history', {
+    params: filters
+  }),
+};

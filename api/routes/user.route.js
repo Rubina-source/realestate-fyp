@@ -1,8 +1,11 @@
 import express from 'express';
-import { updateUser, deleteUser } from '../controllers/user.controller.js';
-import { verifyToken } from '../utils/verifyUser.js';
+import { updateUser, deleteUser, getHistory } from '../controllers/user.controller.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
-router.post('/update/:id', verifyToken, updateUser);
-router.delete('/delete/:id', verifyToken, deleteUser);
+
+router.post('/update/:id', authenticateToken, updateUser);
+router.delete('/delete/:id', authenticateToken, deleteUser);
+router.get('/history', authenticateToken, getHistory);
+
 export default router;

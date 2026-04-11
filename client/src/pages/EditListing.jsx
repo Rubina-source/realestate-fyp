@@ -353,7 +353,7 @@ export default function EditListing() {
                 <label className="block font-semibold mb-2 text-sm">
                   City <span className="text-orange-500">*</span>
                 </label>
-                <select name="city" value={formData.city._id} onChange={handleChange}
+                <select name="city" value={formData.city} onChange={handleChange}
                   disabled={citiesLoading} required className={"border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none disabled:opacity-50"}>
                   <option value="">Select a city</option>
                   {cities.map((city) => (

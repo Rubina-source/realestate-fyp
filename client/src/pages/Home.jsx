@@ -108,7 +108,7 @@ export default function Home() {
                 <button
                   key={tab}
                   onClick={() => setPropertyType(tab.toLowerCase())}
-                  className={`px-6 py-4 font-semibold text-sm sm:text-base whitespace-nowrap transition bg-white dark:bg-neutral-900 first:rounded-tl-xl last:rounded-tr-xl  
+                  className={`px-6 cursor-pointer py-4 font-semibold text-sm sm:text-base whitespace-nowrap transition bg-white dark:bg-neutral-900 first:rounded-tl-xl last:rounded-tr-xl  
                     ${propertyType === tab.toLowerCase() ||
                       (tab === "Buy" && propertyType === "buy")
                       ? "border-b-2 border-orange-500"
@@ -144,7 +144,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setShowFilterModal(true)}
-                className="p-3 border-2 rounded-lg font-semibold flex items-center gap-2 justify-center"
+                className="p-3 cursor-pointer border-1 border-neutral-200 dark:border-neutral-700 rounded-lg font-semibold flex items-center gap-2 justify-center"
               >
                 <SlidersHorizontal size={20} />
               </button>
@@ -377,7 +377,7 @@ export default function Home() {
                       className="flex-shrink-0 w-72 bg-white dark:bg-neutral-900 rounded-xl p-6 border dark:border-neutral-600 border-neutral-300 transition"
                     >
                       <img
-                        src={broker.profilePicture || "https://images.unsplash.com/photo-1534528741775-53994a69daeb"}
+                        src={broker.profileImage || "https://images.unsplash.com/photo-1534528741775-53994a69daeb"}
                         alt={broker.name}
                         className="w-16 h-16 rounded-full object-cover mb-4"
                       />

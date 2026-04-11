@@ -37,6 +37,8 @@ export default function AdminDashboard() {
     }
   };
 
+  console.log("@stats", stats);
+
   const fetchPropertyStats = async () => {
     try {
       const response = await adminService.getPropertyStats();
@@ -169,22 +171,17 @@ export default function AdminDashboard() {
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
+                    className="text-xs"
                   >
                     {propertyStats.propertyType.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={COLORS[index % COLORS.length]}
+                        className="text-xs"
                       />
                     ))}
                   </Pie>
-                  <Tooltip
-                  /*  contentStyle={{
-                      backgroundColor: "#1F2937",
-                      border: "1px solid #4B5563",
-                      borderRadius: "8px",
-                      color: "#F3F4F6",
-                    }} */
-                  />
+                  <Tooltip />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -207,12 +204,6 @@ export default function AdminDashboard() {
                 <XAxis dataKey="name" stroke="#6B7280" />
                 <YAxis stroke="#6B7280" />
                 <Tooltip
-                /*  contentStyle={{
-                    backgroundColor: "#1F2937",
-                    border: "1px solid #4B5563",
-                    borderRadius: "8px",
-                    color: "#F3F4F6",
-                  }} */
                 />
                 <Bar dataKey="value" fill="#E8413B" radius={[8, 8, 0, 0]} />
               </BarChart>
@@ -240,15 +231,8 @@ export default function AdminDashboard() {
                 dataKey="name"
                 type="category"
                 width={100}
-                stroke="#6B7280"
               />
               <Tooltip
-                contentStyle={{
-                  backgroundColor: "#1F2937",
-                  border: "1px solid #4B5563",
-                  borderRadius: "8px",
-                  color: "#F3F4F6",
-                }}
               />
               <Bar dataKey="value" fill="#1A1A2E" radius={[0, 8, 8, 0]} />
             </BarChart>

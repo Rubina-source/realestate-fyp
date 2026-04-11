@@ -46,15 +46,17 @@ export default function AdminListingsPending() {
   };
 
   const handleReject = async (id) => {
-    if (!window.confirm("Reject this listing?")) return;
+    const message = prompt("Enter the reason for rejecting the listing");
+    if (!message) return;
     try {
-      await adminService.updatePropertyStatus(id, { status: "rejected" });
+      await adminService.updatePropertyStatus(id, { status: "rejected", rejectionReason: message });
+      toast.success("Listing rejected successfully");
       setProperties(properties.filter((p) => p._id !== id));
       setTotal(total - 1);
       // You may use a toast here if desired
     } catch (error) {
       // You may use a toast here if desired
-      alert("Failed to reject listing");
+      toast.error("Failed to reject listing");
     }
   };
 

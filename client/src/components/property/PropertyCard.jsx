@@ -3,11 +3,16 @@ import { Heart, MapPin, Home as HomeIcon } from "lucide-react";
 import { useState } from "react";
 
 export default function PropertyCard({ property }) {
-  const [isFavorited, setIsFavorited] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(property.isFavorite || false);
 
   const handleFavorite = async (e) => {
     e.preventDefault();
-    setIsFavorited(!isFavorited)
+    try {
+      await favoriteService.add(property._id);
+      setIsFavorited(true);
+    } catch (error) {
+      console.error("Error adding favorite:", error);
+    }
   };
   return (
     <Link to={`/listings/${property._id}`}>

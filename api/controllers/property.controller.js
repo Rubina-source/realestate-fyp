@@ -1,6 +1,9 @@
 import Property from '../models/property.model.js';
 import User from '../models/user.model.js';
 import City from '../models/city.model.js';
+import Favorite from '../models/favorite.model.js';
+import jwt from 'jsonwebtoken';
+import userViewHistoryModel from '../models/user-view-history.model.js';
 
 export const createProperty = async (req, res, next) => {
   try {
@@ -94,6 +97,22 @@ export const createProperty = async (req, res, next) => {
 
 export const getAllProperties = async (req, res, next) => {
   try {
+    // Get userId if available (user might be logged in or not)
+    let decoded = null;
+    let userId = null;
+    const authHeader = req.headers['authorization'];
+    if (authHeader) {
+      const token = authHeader.split(' ')[1];
+      try {
+        decoded = jwt.verify(token, process.env.JWT_SECRET);
+        userId = decoded?.userId;
+      } catch (e) {
+        // Invalid token, treat as not logged in, do not throw
+        decoded = null;
+        userId = null;
+      }
+    }
+
     const {
       keyword,
       priceMin,
@@ -120,20 +139,14 @@ export const getAllProperties = async (req, res, next) => {
       filter.$or = [{
           title: {
             $regex: keyword,
-            $options: 'i' //caseinensitive 
-          }
-        },
-        {
-          description: {
-            $regex: keyword,
             $options: 'i'
           }
         },
         {
-          'location.address': {
-            $regex: keyword,
-            $options: 'i'
-          }
+          description: { $regex: keyword, $options: 'i' }
+        },
+        {
+          'location.address': { $regex: keyword, $options: 'i' }
         },
       ];
     }
@@ -160,9 +173,7 @@ export const getAllProperties = async (req, res, next) => {
     // Type filter - support both 'type' and 'types' parameters
     if (types) {
       const typeArray = types.split(',').map(t => t.trim());
-      filter.type = {
-        $in: typeArray
-      };
+      filter.type = { $in: typeArray };
     } else if (type) {
       filter.type = type;
     }
@@ -183,21 +194,13 @@ export const getAllProperties = async (req, res, next) => {
     }
 
     // Sorting
-    let sortBy = {
-      createdAt: -1
-    };
+    let sortBy = { createdAt: -1 };
     if (sort === 'price-low') {
-      sortBy = {
-        price: 1
-      };
+      sortBy = { price: 1 };
     } else if (sort === 'price-high') {
-      sortBy = {
-        price: -1
-      };
+      sortBy = { price: -1 };
     } else if (sort === 'newest') {
-      sortBy = {
-        createdAt: -1
-      };
+      sortBy = { createdAt: -1 };
     }
 
     const skip = (page - 1) * limit;
@@ -210,13 +213,30 @@ export const getAllProperties = async (req, res, next) => {
       .skip(skip)
       .limit(Number(limit));
 
+    // Get user's favorite properties if authenticated (via header or req.user)
+    let favoritePropertyIds = new Set();
+    if (userId) {
+      const propertyIds = properties.map(p => p._id);
+      const favorites = await Favorite.find({
+        user: userId,
+        property: { $in: propertyIds }
+      }).select('property');
+      favoritePropertyIds = new Set(favorites.map(f => f.property.toString()));
+    }
+
+    // Add isFavorite field to each property
+    const propertiesWithFavorite = properties.map(p => ({
+      ...p.toObject(),
+      isFavorite: favoritePropertyIds.has(p._id.toString())
+    }));
+
     const total = await Property.countDocuments(filter);
 
     res.json({
       total,
       page: Number(page),
       pages: Math.ceil(total / limit),
-      properties,
+      properties: propertiesWithFavorite,
     });
   } catch (error) {
     next(error);
@@ -225,9 +245,7 @@ export const getAllProperties = async (req, res, next) => {
 
 export const getPropertyById = async (req, res, next) => {
   try {
-    const property = await Property.findById(req.params.id)
-      .populate('city', 'name')
-      .populate('broker', 'name email phone company profileImage');
+    const property = await Property.findById(req.params.id).populate('broker', 'name email phone company profileImage');
 
     if (!property) {
       return res.status(404).json({
@@ -235,8 +253,53 @@ export const getPropertyById = async (req, res, next) => {
       });
     }
 
+    let userId = req.user?.userId;
+
+    // Get user's IP address
+    const userIp = req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress || 'unknown';
+
+    if (!userId) {
+      property.viewHistory.push({
+        ip: userIp,
+        viewedAt: new Date()
+      });
+      await property.save();
+    }
+
+    // Calculate unique IPs for response
+    const uniqueIPs = new Set(property.viewHistory.map(v => v.ip)).size;
+    const totalViews = property.viewHistory.length;
+
+    let isFavorite = false;
+    if (userId) {
+      const favorite = await Favorite.findOne({
+        user: userId,
+        property: req.params.id
+      });
+      isFavorite = !!favorite;
+      const existingHistory = await userViewHistoryModel.findOne({
+        user: userId,
+        property: req.params.id
+      });
+      if (existingHistory) {
+        existingHistory.viewedAt = new Date();
+        await existingHistory.save();
+      } else {
+        await userViewHistoryModel.create({
+          user: userId,
+          property: req.params.id,
+          viewedAt: new Date(),
+        });
+      }
+    }
+
     res.json({
-      property
+      property: {
+        ...property.toObject(),
+        views: uniqueIPs,
+        totalViews: totalViews,
+        isFavorite: isFavorite
+      }
     });
   } catch (error) {
     next(error);
@@ -282,7 +345,8 @@ export const updateProperty = async (req, res, next) => {
       city,
       bedrooms,
       bathrooms,
-      parking
+      parking,
+      status
     } = req.body;
 
     if (title) property.title = title;
@@ -299,9 +363,13 @@ export const updateProperty = async (req, res, next) => {
     if (bathrooms !== undefined) property.bathrooms = bathrooms || null;
     if (parking !== undefined) property.parking = parking || null;
     if (amenities) property.amenities = amenities;
-
-    // property.status = 'pending';
-    // property.rejectionReason = null;
+    if (status && property.status === 'approved') property.status = status;
+    if (status && property.status === 'sold') property.status = status;
+    // If property was rejected, set status back to pending
+    if (property.status === 'rejected') {
+      property.status = 'pending';
+      property.rejectionReason = null;
+    }
 
     await property.save();
     await property.populate('broker', 'name phone company');
@@ -373,13 +441,29 @@ export const getBrokerProperties = async (req, res, next) => {
       .skip(skip)
       .limit(Number(limit));
 
+    // Get user's favorite properties
+    const propertyIds = properties.map(p => p._id);
+    const favorites = await Favorite.find({
+      user: req.user.userId,
+      property: {
+        $in: propertyIds
+      }
+    }).select('property');
+    const favoritePropertyIds = new Set(favorites.map(f => f.property.toString()));
+
+    // Add isFavorite field to each property
+    const propertiesWithFavorite = properties.map(p => ({
+      ...p.toObject(),
+      isFavorite: favoritePropertyIds.has(p._id.toString())
+    }));
+
     const total = await Property.countDocuments(filter);
 
     res.json({
       total,
       page: Number(page),
       pages: Math.ceil(total / limit),
-      properties,
+      properties: propertiesWithFavorite,
     });
   } catch (error) {
     next(error);

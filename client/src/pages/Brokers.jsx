@@ -91,7 +91,7 @@ export default function Brokers() {
                     className={`flex-shrink-0 w-72 rounded-xl p-6 border border-neutral-200 dark:border-neutral-700 `}
                   >
                     <img
-                      src={broker.image || "https://images.unsplash.com/photo-1534528741775-53994a69daeb"}
+                      src={broker.profileImage || "https://images.unsplash.com/photo-1534528741775-53994a69daeb"}
                       alt={broker.name}
                       className="w-16 h-16 rounded-full object-cover mb-4"
                     />
