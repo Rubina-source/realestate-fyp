@@ -80,12 +80,6 @@ export default function App() {
           <Route path="/contact" element={<Contact darkMode={dm} />} />
           <Route path="/brokers" element={<Brokers />} />
 
-
-          {/* ── Any logged-in user ── */}
-          <Route >
-            <Route path="/profile" element={<Profile darkMode={dm} />} />
-          </Route>
-
           <Route
             path="/settings"
             element={
