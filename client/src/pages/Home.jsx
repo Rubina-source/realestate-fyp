@@ -175,7 +175,7 @@ export default function Home() {
               {/* Search Button */}
               <button
                 type="submit"
-                className="px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition"
+                className="px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition"
               >
                 Search
               </button>
@@ -332,7 +332,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => setShowFilterModal(false)}
-                  className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 cursor-pointer transition"
+                  className="flex-1 px-4 py-2 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark cursor-pointer transition"
                 >
                   Apply
                 </button>

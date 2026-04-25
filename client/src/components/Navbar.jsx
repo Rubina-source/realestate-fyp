@@ -247,7 +247,7 @@ export default function Navbar({ transparent = false }) {
                 </Link>
                 <Link
                   to="/broker-signup"
-                  className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-sm font-medium"
+                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition text-sm font-medium"
                 >
                   Join as Broker
                 </Link>
