@@ -92,7 +92,7 @@ export default function FilterSidebar({ filters, onFilterChange }) {
           className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
         >
           <option value="">All</option>
-          <option value="sale">Sale</option>
+          <option value="buy">Buy</option>
           <option value="rent">Rent</option>
         </select>
       </div>

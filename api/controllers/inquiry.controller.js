@@ -1,5 +1,6 @@
 import Property from '../models/property.model.js';
 import Inquiry from '../models/inquiry.model.js';
+import { createNotification } from '../utils/notification.js';
 
 export const createInquiry = async (req, res, next) => {
     try {
@@ -61,6 +62,28 @@ export const createInquiry = async (req, res, next) => {
 
         await inquiry.save();
 
+        await createNotification({
+            recipientId: property.broker._id,
+            actorId: userId,
+            type: 'new_property_inquiry',
+            title: 'New inquiry received',
+            message: `A client sent an inquiry for "${property.title}".`,
+            link: '/broker/dashboard',
+            entityType: 'inquiry',
+            entityId: inquiry._id,
+        });
+
+        await createNotification({
+            recipientId: userId,
+            actorId: property.broker._id,
+            type: 'inquiry_submitted',
+            title: 'Inquiry submitted',
+            message: `Your inquiry for "${property.title}" has been sent to the broker.`,
+            link: `/listings/${property._id}`,
+            entityType: 'inquiry',
+            entityId: inquiry._id,
+        });
+
         res.status(201).json({
             message: 'Inquiry sent successfully. Broker will contact you soon.',
             emailMessage: `Hello, I am interested in this property and would like to schedule a meeting${preferredMeetingDate ? ` on ${new Date(preferredMeetingDate).toLocaleDateString()}` : ''}. Please let me know if this works. Thank you.`,
@@ -72,6 +95,31 @@ export const createInquiry = async (req, res, next) => {
                 message: 'Another inquiry for this meeting date already exists. Please choose another date.',
             });
         }
+        next(error);
+    }
+};
+export const getBrokerInquiries = async (req, res, next) => {
+    try {
+        const { page = 1, limit = 10 } = req.query;
+
+        const skip = (page - 1) * limit;
+
+        const inquiries = await Inquiry.find({ broker: req.user.userId })
+            .populate('property', 'title images price location city')
+            .populate('client', 'name email phone profileImage')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(Number(limit));
+
+        const total = await Inquiry.countDocuments({ broker: req.user.userId });
+
+        res.json({
+            total,
+            page: Number(page),
+            pages: Math.ceil(total / limit),
+            inquiries,
+        });
+    } catch (error) {
         next(error);
     }
 };

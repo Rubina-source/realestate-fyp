@@ -69,7 +69,7 @@ const Listings = () => {
 
                   <div className="flex justify-between items-center gap-4">
                     <p className="text-3xl font-black text-[#1F3E35] tracking-tighter">Rs. {(item.price / 10000000).toFixed(1)} Cr</p>
-                    <button className="bg-slate-50 text-[#1F3E35] px-6 py-3 rounded-2xl text-[10px] font-black hover:bg-[#1F3E35] hover:text-white transition-all shadow-sm uppercase tracking-widest border border-slate-100">
+                    <button className="bg-slate-50 text-[#1F3E35] px-6 py-3 rounded-2xl text-[10px] font-black hover:bg-primary hover:text-white transition-all shadow-sm uppercase tracking-widest border border-slate-100">
                       Details
                     </button>
                   </div>

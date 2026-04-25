@@ -8,10 +8,30 @@ import {
   Search,
   FilterIcon,
   SlidersHorizontal,
+  Loader2,
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import PropertyCard from "../components/property/PropertyCard";
 import { propertyService } from "../services/apiService";
+import MapView from "../components/MapView";
+
+const DEFAULT_FILTERS = {
+  priceMin: "",
+  priceMax: "",
+  city: "",
+  sizeMin: "",
+  sizeMax: "",
+  sizeUnit: "",
+  propertyTypes: [],
+};
+
+const PROPERTY_TYPES = [
+  { id: "apartment", label: "Apartment" },
+  { id: "house", label: "House" },
+  { id: "land", label: "Land" },
+  { id: "commercial", label: "Commercial" },
+  { id: "office", label: "Office" },
+];
 
 export default function Home() {
   const [properties, setProperties] = useState([]);
@@ -21,16 +41,7 @@ export default function Home() {
   const [propertyType, setPropertyType] = useState("buy");
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState(null); // null = all, "buy" = buying, "rent" = renting
-  const [filters, setFilters] = useState({
-    priceMin: "",
-    priceMax: "",
-    city: "",
-    sizeMin: "",
-    sizeMax: "",
-    sizeUnit: "",
-    propertyTypes: [], // Array for multiple property type selections
-  });
-
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -66,7 +77,9 @@ export default function Home() {
     if (filters.sizeMax) params.set("sizeMax", filters.sizeMax);
     if (filters.sizeUnit) params.set("sizeUnit", filters.sizeUnit);
     if (filters.city) params.set("city", filters.city);
-    if (filters.type) params.set("type", filters.type);
+    if (filters.propertyTypes.length > 0) {
+      params.set("types", filters.propertyTypes.join(","));
+    }
     window.location.href = `/listings?${params.toString()}`;
   };
 
@@ -83,7 +96,17 @@ export default function Home() {
     });
   };
 
-  const cities = ["Kathmandu", "Pokhara", "Lalitpur", "Bhaktapur", "Biratnagar"];
+  const handleResetFilters = () => {
+    setFilters(DEFAULT_FILTERS);
+  };
+
+  const cities = [
+    "Kathmandu",
+    "Pokhara",
+    "Lalitpur",
+    "Bhaktapur",
+    "Biratnagar",
+  ];
 
   return (
     <div>
@@ -109,10 +132,10 @@ export default function Home() {
                   key={tab}
                   onClick={() => setPropertyType(tab.toLowerCase())}
                   className={`px-6 cursor-pointer py-4 font-semibold text-sm sm:text-base whitespace-nowrap transition bg-white dark:bg-neutral-900 first:rounded-tl-xl last:rounded-tr-xl  
-                    ${propertyType === tab.toLowerCase() ||
-                      (tab === "Buy" && propertyType === "buy")
-                      ? "border-b-2 border-orange-500"
-                      : " border-b-2 border-transparent"
+                    ${
+                      propertyType === tab.toLowerCase()
+                        ? "border-b-2 border-orange-500"
+                        : " border-b-2 border-transparent"
                     }`}
                 >
                   {tab}
@@ -163,35 +186,56 @@ export default function Home() {
 
       {/* Filter Modal */}
       {showFilterModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-neutral-300 dark:bg-neutral-800 rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 flex justify-between items-center p-4 border-b border-neutral-300 dark:border-neutral-600 bg-neutral-300 dark:bg-neutral-800">
-              <h3 className="text-lg font-bold">Filters</h3>
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowFilterModal(false)}
+        >
+          <div
+            className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 flex justify-between items-center p-4 border-b border-neutral-200 dark:border-neutral-700 bg-white/95 dark:bg-neutral-900/95 backdrop-blur">
+              <div>
+                <h3 className="text-lg font-bold">Refine Search</h3>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                  Narrow results by price, city, size, and type
+                </p>
+              </div>
               <button
                 onClick={() => setShowFilterModal(false)}
                 className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition"
+                aria-label="Close filters"
               >
-                <X size={20} className="text-neutral-800 dark:text-neutral-200" />
+                <X
+                  size={20}
+                  className="text-neutral-800 dark:text-neutral-200"
+                />
               </button>
             </div>
             <div className="p-6 space-y-5">
               {/* Price Range */}
               <div>
-                <label className="block text-sm font-semibold mb-3">Price Range</label>
+                <label className="block text-sm font-semibold mb-3">
+                  Price Range
+                </label>
                 <div className="flex gap-1">
                   <input
                     type="number"
                     placeholder="Min"
                     value={filters.priceMin}
-                    onChange={(e) => handleFilterChange("priceMin", e.target.value)}
-                    className="flex-1 px-1 py-2 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-300 dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    onChange={(e) =>
+                      handleFilterChange("priceMin", e.target.value)
+                    }
+                    className="flex-1 px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                   <input
                     type="number"
                     placeholder="Max"
                     value={filters.priceMax}
-                    onChange={(e) => handleFilterChange("priceMax", e.target.value)}
-                    className="flex-1 px-1 py-2 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-300 dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    onChange={(e) =>
+                      handleFilterChange("priceMax", e.target.value)
+                    }
+                    className="flex-1 px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
               </div>
@@ -201,7 +245,7 @@ export default function Home() {
                 <select
                   value={filters.city}
                   onChange={(e) => handleFilterChange("city", e.target.value)}
-                  className="w-full px-4 py-2 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                 >
                   <option value="">All Cities</option>
                   {cities.map((city) => (
@@ -219,9 +263,11 @@ export default function Home() {
                 <div className="space-y-2">
                   {/* Size Unit */}
                   <select
-                    value={filters.sizeUnit || ''}
-                    onChange={(e) => handleFilterChange('sizeUnit', e.target.value)}
-                    className="flex-1 px-1 py-2 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-300 dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    value={filters.sizeUnit || ""}
+                    onChange={(e) =>
+                      handleFilterChange("sizeUnit", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     <option value="">All Units</option>
                     <option value="sqft">Sqft</option>
@@ -237,7 +283,7 @@ export default function Home() {
                       onChange={(e) =>
                         handleFilterChange("sizeMin", e.target.value)
                       }
-                      className="flex-1 px-1 py-2 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-300 dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="flex-1 px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                     <input
                       type="number"
@@ -246,7 +292,7 @@ export default function Home() {
                       onChange={(e) =>
                         handleFilterChange("sizeMax", e.target.value)
                       }
-                      className="flex-1 px-1 py-2 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-300 dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="flex-1 px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
                 </div>
@@ -254,15 +300,11 @@ export default function Home() {
 
               {/* Property Type */}
               <div>
-                <label className="block text-sm font-semibold mb-4">Property type</label>
+                <label className="block text-sm font-semibold mb-4">
+                  Property type
+                </label>
                 <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { id: "apartment", label: "Apartment" },
-                    { id: "house", label: "House" },
-                    { id: "land", label: "Land" },
-                    { id: "commercial", label: "Commercial" },
-                    { id: "office", label: "Office" },
-                  ].map((type) => (
+                  {PROPERTY_TYPES.map((type) => (
                     <label
                       key={type.id}
                       className="flex items-center gap-3 cursor-pointer"
@@ -281,20 +323,16 @@ export default function Home() {
               {/* Apply Filters */}
               <div className="flex gap-3 pt-4">
                 <button
-                  onClick={() =>
-                    setFilters({
-                      priceMin: "",
-                      priceMax: "",
-                      propertyTypes: [],
-                    })
-                  }
-                  className="flex-1 px-4 py-2 border border-neutral-200 dark:border-neutral-700 rounded-lg font-semibold hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
+                  type="button"
+                  onClick={handleResetFilters}
+                  className="flex-1 px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg font-semibold hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
                 >
                   Reset
                 </button>
                 <button
+                  type="button"
                   onClick={() => setShowFilterModal(false)}
-                  className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-brand-orange/80 cursor-pointer transition"
+                  className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 cursor-pointer transition"
                 >
                   Apply
                 </button>
@@ -308,12 +346,10 @@ export default function Home() {
       <div className="py-16">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold">
-              Explore all things property
-            </h2>
+            <h2 className="text-3xl font-bold">Explore all things property</h2>
             <Link
               to="/listings"
-              className="text-orange-500 font-semibold hover:underline transition"
+              className="text-blue-500 font-semibold hover:underline transition"
             >
               View All
             </Link>
@@ -325,15 +361,16 @@ export default function Home() {
               { id: null, label: "All Properties" },
               { id: "buy", label: "Buying" },
               { id: "rent", label: "Renting" },
-              { id: "sell", label: "Selling" },
+              // { id: "sell", label: "Selling" },
             ].map((filter) => (
               <button
                 key={filter.id}
                 onClick={() => setCategoryFilter(filter.id)}
-                className={`px-4 cursor-pointer py-1 rounded-full font-semibold transition ${categoryFilter === filter.id
-                  ? "border-orange-500 border-2"
-                  : "border-2"
-                  }`}
+                className={`px-4 cursor-pointer py-1 rounded-full font-semibold transition ${
+                  categoryFilter === filter.id
+                    ? "border-blue-500 border-2"
+                    : "border-2"
+                }`}
               >
                 {filter.label}
               </button>
@@ -355,45 +392,57 @@ export default function Home() {
               .map((property) => (
                 <PropertyCard key={property.id} property={property} />
               ))}
+            {/* <div className="flex items-center justify-center">
+              <Loader2 className="animate-spin" />
+            </div> */}
+            {/* {div} */}
           </div>
+        </div>
+        {loading && (
+          <div className="flex items-center justify-center gap-2">
+            <Loader2 className="animate-spin" />{" "}
+            <span>Loading Properties...</span>
+          </div>
+        )}
+      </div>
+
+      <div className="py-16">
+        <div className="max-w-6xl mx-auto px-6 md:px-12">
+          <MapView />
         </div>
       </div>
 
       {/* Local Brokers Section */}
       <div className="py-16">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
-          <h2 className="text-2xl font-bold mb-8">
-            Local brokers
-          </h2>
+          <h2 className="text-2xl font-bold mb-8">Local brokers</h2>
 
           {/* Horizontal Scrolling Brokers */}
           <div className="overflow-x-auto pb-4">
             <div className="flex gap-6 min-w-max">
-              {
-                brokers.map((broker) => {
-                  return (
-                    <div
-                      key={broker._id}
-                      className="flex-shrink-0 w-72 bg-white dark:bg-neutral-900 rounded-xl p-6 border dark:border-neutral-600 border-neutral-300 transition"
-                    >
-                      <img
-                        src={broker.profileImage || "https://images.unsplash.com/photo-1534528741775-53994a69daeb"}
-                        alt={broker.name}
-                        className="w-16 h-16 rounded-full object-cover mb-4"
-                      />
-                      <h3 className="font-bold">
-                        {broker.name}
-                      </h3>
-                      <p className="text-sm mb-2">
-                        {"Real Estate Broker"}
-                      </p>
-                      {broker.city && <p className="text-sm">
-                        Based in {broker.city.name}
-                      </p>}
-                    </div>
-                  )
-                })
-              }
+              {brokers.map((broker) => {
+                return (
+                  <Link
+                    key={broker._id}
+                    to={`/brokers/${broker._id}`}
+                    className="shrink-0 w-72 bg-white dark:bg-neutral-900 rounded-xl p-6 border dark:border-neutral-600 border-neutral-300 transition"
+                  >
+                    <img
+                      src={
+                        broker.profileImage ||
+                        "https://images.unsplash.com/photo-1534528741775-53994a69daeb"
+                      }
+                      alt={broker.name}
+                      className="w-16 h-16 rounded-full object-cover mb-4"
+                    />
+                    <h3 className="font-bold">{broker.name}</h3>
+                    <p className="text-sm mb-2">{"Real Estate Broker"}</p>
+                    {broker.city && (
+                      <p className="text-sm">Based in {broker.city.name}</p>
+                    )}
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </div>

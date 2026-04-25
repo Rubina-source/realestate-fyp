@@ -21,7 +21,7 @@ const About = () => {
               <div className='flex gap-4'>
                 {/* FIXED LINK TO LISTINGS */}
                 <Link to="/listings">
-                  <button className='bg-[#FF5A3C] text-white px-8 py-4 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-black transition-all shadow-lg flex items-center gap-2 group'>
+                  <button className='bg-primary text-white px-8 py-4 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-primary-dark transition-all shadow-lg flex items-center gap-2 group'>
                     Explore Properties <MoveRight size={16} className='group-hover:translate-x-1 transition-transform' />
                   </button>
                 </Link>

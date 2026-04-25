@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { propertyService, cityService } from "../services/apiService";
 import MapLocationPicker from "../components/MapLocationPicker";
-import { Upload, Loader, X } from "lucide-react";
+import { Upload, Loader, X, Sparkles } from "lucide-react";
 import BrokerLayout from "../components/BrokerLayout";
 import { toast } from "react-hot-toast";
 
@@ -10,6 +10,7 @@ export default function CreateListing() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [generatingDescription, setGeneratingDescription] = useState(false);
   const [cities, setCities] = useState([]);
   const [citiesLoading, setCitiesLoading] = useState(true);
   const [formData, setFormData] = useState({
@@ -28,7 +29,6 @@ export default function CreateListing() {
     bathrooms: "",
     parking: "",
     images: [],
-    amenities: [],
     amenities: [],
   });
 
@@ -60,7 +60,7 @@ export default function CreateListing() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log({ name, value })
+    console.log({ name, value });
     if (
       ["price", "sizeValue", "bedrooms", "bathrooms", "parking"].includes(name)
     ) {
@@ -83,7 +83,6 @@ export default function CreateListing() {
       return { ...prev, amenities };
     });
   };
-
 
   const uploadToCloudinary = async (file) => {
     const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
@@ -145,6 +144,64 @@ export default function CreateListing() {
     setFormData({ ...formData, images: newImages });
   };
 
+  const handleGenerateDescription = async () => {
+    if (!formData.title.trim()) {
+      toast.error("Please enter property title first.");
+      return;
+    }
+
+    const selectedCity = cities.find((city) => city._id === formData.city);
+    const amenitiesText =
+      formData.amenities.length > 0 ? formData.amenities.join(", ") : "N/A";
+
+    const payload = {
+      title: formData.title || "N/A",
+      city: selectedCity?.name || "N/A",
+      address: formData.address || "N/A",
+      category: formData.type || "N/A",
+      type: formData.purpose === "rent" ? "Rent" : "Sale",
+      area:
+        formData.sizeValue && formData.sizeUnit
+          ? `${formData.sizeValue} ${formData.sizeUnit}`
+          : "N/A",
+      bedrooms: formData.bedrooms || "N/A",
+      bathrooms: formData.bathrooms || "N/A",
+      floors: "N/A",
+      parking: formData.parking || "N/A",
+      facing: "N/A",
+      year: "N/A",
+      roadWidth: "N/A",
+      roadType: "N/A",
+      amenities: amenitiesText,
+      price: formData.price || "N/A",
+    };
+
+    try {
+      setGeneratingDescription(true);
+      const response = await propertyService.generateDescription(payload);
+      const generatedDescription = response?.data?.description?.trim();
+
+      if (!generatedDescription) {
+        toast.error("Could not generate description. Please try again.");
+        return;
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        description: generatedDescription,
+      }));
+
+      toast.success("Description generated successfully.");
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ||
+        "Failed to generate description. Please try again.";
+      toast.error(message);
+    } finally {
+      setGeneratingDescription(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -178,7 +235,8 @@ export default function CreateListing() {
       navigate("/broker/dashboard");
     } catch (error) {
       let errorMsg =
-        (error.response?.data?.errors && error.response.data.errors.join(", ")) ||
+        (error.response?.data?.errors &&
+          error.response.data.errors.join(", ")) ||
         error.response?.data?.message ||
         "Failed to create listing";
       toast.error(errorMsg);
@@ -197,9 +255,7 @@ export default function CreateListing() {
             <h1 className="text-2xl md:text-3xl font-bold text-center mb-2">
               Create New Listing
             </h1>
-            <p className="text-center mb-8">
-              Add a new property
-            </p>
+            <p className="text-center mb-8">Add a new property</p>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -217,7 +273,8 @@ export default function CreateListing() {
                     onChange={handleChange}
                     required
                     placeholder="e.g., Modern Apartment in Kathmandu"
-                    className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none" />
+                    className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
+                  />
                 </div>
 
                 {/* Description */}
@@ -225,14 +282,31 @@ export default function CreateListing() {
                   <label className="block font-semibold mb-2 text-sm">
                     Description <span className="text-[#E8413B]">*</span>
                   </label>
-                  <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    required
-                    rows="4"
-                    placeholder="Describe the property features, amenities, and condition..."
-                    className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none" />
+                  <div className="relative">
+                    <textarea
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      required
+                      rows="4"
+                      placeholder="Describe the property features, amenities, and condition..."
+                      className="border text-sm px-3 py-2 pr-12 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleGenerateDescription}
+                      disabled={generatingDescription}
+                      title="Generate AI description"
+                      aria-label="Generate AI description"
+                      className="absolute bottom-2 right-2 p-2 rounded-full bg-primary text-white hover:bg-primary-dark transition disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {generatingDescription ? (
+                        <Loader size={14} className="animate-spin" />
+                      ) : (
+                        <Sparkles size={14} />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -248,7 +322,8 @@ export default function CreateListing() {
                       name="type"
                       value={formData.type}
                       onChange={handleChange}
-                      className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none">
+                      className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
+                    >
                       {types.map((t) => (
                         <option key={t} value={t}>
                           {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -272,32 +347,32 @@ export default function CreateListing() {
                     </select>
                   </div>
                 </div>
-                {
-                  formData.purpose === "rent" && (
-                    <div>
-                      <label className="block font-semibold mb-2 text-sm">
-                        Rental Type{" "}
-                        <span
-                          className={formData.purpose === "rent" ? "text-[#E8413B]" : ""}
-                        >
-                          *
-                        </span>
-                      </label>
-                      <select
-                        name="rentalType"
-                        value={formData.rentalType}
-                        onChange={handleChange}
-                        disabled={formData.purpose !== "rent"}
-                        className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                {formData.purpose === "rent" && (
+                  <div>
+                    <label className="block font-semibold mb-2 text-sm">
+                      Rental Type{" "}
+                      <span
+                        className={
+                          formData.purpose === "rent" ? "text-[#E8413B]" : ""
+                        }
                       >
-                        <option value="">Select rental type</option>
-                        <option value="daily">Daily</option>
-                        <option value="monthly">Monthly</option>
-                        <option value="yearly">Yearly</option>
-                      </select>
-                    </div>
-                  )
-                }
+                        *
+                      </span>
+                    </label>
+                    <select
+                      name="rentalType"
+                      value={formData.rentalType}
+                      onChange={handleChange}
+                      disabled={formData.purpose !== "rent"}
+                      className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="">Select rental type</option>
+                      <option value="daily">Daily</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                    </select>
+                  </div>
+                )}
                 <div className="space-y-4 pt-4">
                   <div className="grid grid-cols-3 gap-3 pb-4">
                     {["apartment", "house"].includes(formData.type) && (
@@ -333,7 +408,9 @@ export default function CreateListing() {
                         />
                       </div>
                     )}
-                    {["apartment", "house", "office", "commercial"].includes(formData.type) && (
+                    {["apartment", "house", "office", "commercial"].includes(
+                      formData.type,
+                    ) && (
                       <div>
                         <label className="block font-semibold mb-2 text-sm">
                           Parking
@@ -383,9 +460,7 @@ export default function CreateListing() {
                             onChange={() => handleAmenityChange(amenity)}
                             className="w-5 h-5 accent-orange-500 rounded cursor-pointer"
                           />
-                          <span className="text-sm ">
-                            {amenity}
-                          </span>
+                          <span className="text-sm ">{amenity}</span>
                         </label>
                       ))}
                     </div>
@@ -509,10 +584,11 @@ export default function CreateListing() {
                 <div className="border-2 border-dashed border-[#E0E0E0] dark:border-[#2E2E3E] rounded-lg p-8 text-center hover:border-[#E8413B] dark:hover:border-[#E8413B] transition">
                   {uploadingImages ? (
                     <div className="flex flex-col items-center gap-2">
-                      <Loader className="animate-spin text-[#E8413B]" size={32} />
-                      <p className="text-sm">
-                        Uploading images...
-                      </p>
+                      <Loader
+                        className="animate-spin text-[#E8413B]"
+                        size={32}
+                      />
+                      <p className="text-sm">Uploading images...</p>
                     </div>
                   ) : (
                     <>
@@ -594,7 +670,7 @@ export default function CreateListing() {
             </form>
           </div>
         </div>
-      </div >
-    </BrokerLayout >
+      </div>
+    </BrokerLayout>
   );
 }

@@ -9,6 +9,7 @@ import propertyRoutes from './routes/property.route.js';
 import inquiryRoutes from './routes/inquiry.route.js';
 import favoriteRouter from './routes/favorites.route.js';
 import userRouter from './routes/user.route.js';
+import notificationRouter from './routes/notification.route.js';
 import {
     errorHandler
 } from './middleware/errorHandler.js';
@@ -58,5 +59,6 @@ app.use('/api/properties', propertyRoutes);
 app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/favorites', favoriteRouter);
 app.use('/api/users', userRouter);
+app.use('/api/notifications', notificationRouter);
 
 app.use(errorHandler);

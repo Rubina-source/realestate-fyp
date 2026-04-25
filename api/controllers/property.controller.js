@@ -4,6 +4,112 @@ import City from '../models/city.model.js';
 import Favorite from '../models/favorite.model.js';
 import jwt from 'jsonwebtoken';
 import userViewHistoryModel from '../models/user-view-history.model.js';
+import { createRoleNotifications } from '../utils/notification.js';
+
+const buildDescriptionPrompt = (data) => {
+  const {
+    title = 'N/A',
+    city = 'N/A',
+    address = 'N/A',
+    category = 'N/A',
+    type = 'N/A',
+    area = 'N/A',
+    bedrooms = 'N/A',
+    bathrooms = 'N/A',
+    floors = 'N/A',
+    parking = 'N/A',
+    facing = 'N/A',
+    year = 'N/A',
+    roadWidth = 'N/A',
+    roadType = 'N/A',
+    amenities = 'N/A',
+    price = 'N/A'
+  } = data;
+
+  return `Property Details:
+- Title: ${title}
+- City: ${city}
+- Address/Locality: ${address}
+- Category: ${category} (Residential / Commercial / Apartment / Land / House)
+- Type: ${type} (Sale / Rent)
+- Area: ${area}
+- Bedrooms: ${bedrooms}
+- Bathrooms: ${bathrooms}
+- Floors: ${floors}
+- Parking: ${parking} spaces
+- Facing: ${facing}
+- Year Built (BS): ${year}
+- Road: ${roadWidth}, ${roadType}
+- Amenities: ${amenities}
+- Price: NPR ${price}`;
+};
+
+const DESCRIPTION_SYSTEM_PROMPT = `You are a professional Nepal real estate copywriter. Write a compelling, accurate, and natural-sounding property listing description in English based on the details below.
+
+Writing Guidelines:
+- Start with a strong hook that highlights the most attractive feature (location, size, or unique amenity)
+- Mention the neighborhood context (e.g., nearness to hospitals, schools, markets)
+- Highlight road access and facing direction naturally (East-facing is desirable in Nepal)
+- Weave in 3–5 standout amenities naturally into the description
+- End with a clear call-to-action encouraging the buyer/renter to contact
+- Tone: Professional yet warm, like a trusted local agent
+- Length: 80–120 words
+- Do NOT use bullet points — write in flowing paragraph form
+- Do NOT mention the price in the description
+
+Return only the description text. No titles, no labels, no extra formatting.`;
+
+export const generatePropertyDescription = async (req, res, next) => {
+  try {
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    const model = process.env.OPENROUTER_MODEL || 'openrouter/free';
+
+    if (!apiKey) {
+      return res.status(500).json({
+        message: 'OpenRouter API key is not configured on server.'
+      });
+    }
+
+    const userPrompt = buildDescriptionPrompt(req.body || {});
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+        'HTTP-Referer': process.env.OPENROUTER_SITE_URL || 'http://localhost:5173',
+        'X-Title': process.env.OPENROUTER_APP_NAME || 'GharRush'
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: DESCRIPTION_SYSTEM_PROMPT },
+          { role: 'user', content: userPrompt }
+        ]
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        message: data?.error?.message || 'Failed to generate description from OpenRouter.'
+      });
+    }
+
+    const description = data?.choices?.[0]?.message?.content?.trim();
+
+    if (!description) {
+      return res.status(502).json({
+        message: 'OpenRouter returned an empty description.'
+      });
+    }
+
+    res.json({ description });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const createProperty = async (req, res, next) => {
   try {
@@ -86,6 +192,17 @@ export const createProperty = async (req, res, next) => {
     await property.save();
     await property.populate('broker', 'name email phone');
 
+    await createRoleNotifications({
+      role: 'admin',
+      actorId: req.user.userId,
+      type: 'property_submission_requested',
+      title: 'New property approval request',
+      message: `${broker.name} submitted "${property.title}" for approval.`,
+      link: '/admin/listings/pending',
+      entityType: 'property',
+      entityId: property._id,
+    });
+
     res.status(201).json({
       message: 'Property listed successfully. Awaiting admin approval.',
       property,
@@ -129,6 +246,14 @@ export const getAllProperties = async (req, res, next) => {
       page = 1,
       limit = 10
     } = req.query;
+
+    const normalizePurpose = (value) => {
+      if (!value) return "";
+      const normalized = String(value).toLowerCase();
+      if (normalized === 'buy' || normalized === 'sale' || normalized === 'sell') return 'sale';
+      if (normalized === 'rent') return 'rent';
+      return '';
+    };
 
     const filter = {
       status: 'approved'
@@ -179,8 +304,9 @@ export const getAllProperties = async (req, res, next) => {
     }
 
     // Purpose filter
-    if (purpose) {
-      filter.purpose = purpose;
+    const normalizedPurpose = normalizePurpose(purpose);
+    if (normalizedPurpose) {
+      filter.purpose = normalizedPurpose;
     }
 
     // Rental type filter
@@ -366,13 +492,28 @@ export const updateProperty = async (req, res, next) => {
     if (status && property.status === 'approved') property.status = status;
     if (status && property.status === 'sold') property.status = status;
     // If property was rejected, set status back to pending
+    let resubmittedForApproval = false;
     if (property.status === 'rejected') {
       property.status = 'pending';
       property.rejectionReason = null;
+      resubmittedForApproval = true;
     }
 
     await property.save();
     await property.populate('broker', 'name phone company');
+
+    if (resubmittedForApproval) {
+      await createRoleNotifications({
+        role: 'admin',
+        actorId: req.user.userId,
+        type: 'property_resubmission_requested',
+        title: 'Property resubmitted for approval',
+        message: `${broker.name} resubmitted "${property.title}" for approval.`,
+        link: '/admin/listings/pending',
+        entityType: 'property',
+        entityId: property._id,
+      });
+    }
 
     res.json({
       message: 'Property updated and resubmitted for approval',

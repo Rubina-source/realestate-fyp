@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { propertyService, cityService } from "../services/apiService";
 import MapLocationPicker from "../components/MapLocationPicker";
-import { Upload, Loader, AlertCircle, X } from "lucide-react";
+import { Upload, Loader, AlertCircle, X, Sparkles } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 export default function EditListing() {
@@ -11,6 +11,7 @@ export default function EditListing() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [generatingDescription, setGeneratingDescription] = useState(false);
   const [cities, setCities] = useState([]);
   const [citiesLoading, setCitiesLoading] = useState(true);
   const [formData, setFormData] = useState({
@@ -148,6 +149,64 @@ export default function EditListing() {
     setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) });
   };
 
+  const handleGenerateDescription = async () => {
+    if (!formData.title.trim()) {
+      toast.error("Please enter property title first.");
+      return;
+    }
+
+    const selectedCity = cities.find((city) => city._id === formData.city);
+    const amenitiesText =
+      formData.amenities.length > 0 ? formData.amenities.join(", ") : "N/A";
+
+    const payload = {
+      title: formData.title || "N/A",
+      city: selectedCity?.name || "N/A",
+      address: formData.address || "N/A",
+      category: formData.type || "N/A",
+      type: formData.purpose === "rent" ? "Rent" : "Sale",
+      area:
+        formData.sizeValue && formData.sizeUnit
+          ? `${formData.sizeValue} ${formData.sizeUnit}`
+          : "N/A",
+      bedrooms: formData.bedrooms || "N/A",
+      bathrooms: formData.bathrooms || "N/A",
+      floors: "N/A",
+      parking: formData.parking || "N/A",
+      facing: "N/A",
+      year: "N/A",
+      roadWidth: "N/A",
+      roadType: "N/A",
+      amenities: amenitiesText,
+      price: formData.price || "N/A",
+    };
+
+    try {
+      setGeneratingDescription(true);
+      const response = await propertyService.generateDescription(payload);
+      const generatedDescription = response?.data?.description?.trim();
+
+      if (!generatedDescription) {
+        toast.error("Could not generate description. Please try again.");
+        return;
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        description: generatedDescription,
+      }));
+
+      toast.success("Description generated successfully.");
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ||
+        "Failed to generate description. Please try again.";
+      toast.error(message);
+    } finally {
+      setGeneratingDescription(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -228,15 +287,31 @@ export default function EditListing() {
               <label className="block font-semibold mb-2 text-sm">
                 Description <span className="text-orange-500">*</span>
               </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                required
-                rows="4"
-                placeholder="Describe the property features, amenities, and condition..."
-                className={"border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none resize-none"}
-              />
+              <div className="relative">
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  required
+                  rows="4"
+                  placeholder="Describe the property features, amenities, and condition..."
+                  className={"border text-sm px-3 py-2 pr-12 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none resize-none"}
+                />
+                <button
+                  type="button"
+                  onClick={handleGenerateDescription}
+                  disabled={generatingDescription}
+                  title="Generate AI description"
+                  aria-label="Generate AI description"
+                  className="absolute bottom-2 right-2 p-2 rounded-full bg-primary text-white hover:bg-primary-dark transition disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {generatingDescription ? (
+                    <Loader size={14} className="animate-spin" />
+                  ) : (
+                    <Sparkles size={14} />
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* Type & Purpose */}

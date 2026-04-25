@@ -124,6 +124,14 @@ export default function Login() {
                   )}
                 </button>
               </div>
+              <div className="mt-2 text-right">
+                <Link
+                  to="/forgot-password"
+                  className="text-xs text-orange-500 hover:underline font-semibold transition"
+                >
+                  Forgot password?
+                </Link>
+              </div>
             </div>
 
             {/* Submit Button */}
@@ -167,7 +175,7 @@ export default function Login() {
           <p className="text-center text-sm mt-3">
             Are you a broker?{" "}
             <Link
-              to="/join-as-broker"
+              to="/broker-signup"
               className="text-orange-500 hover:underline font-semibold transition"
             >
               Join now

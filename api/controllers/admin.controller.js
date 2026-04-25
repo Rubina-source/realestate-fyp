@@ -1,6 +1,7 @@
 import propertyModel from "../models/property.model.js";
 import userModel from "../models/user.model.js";
 import inquiryModel from "../models/inquiry.model.js";
+import { createNotification } from '../utils/notification.js';
 
 export const getAllUsers = async (req, res, next) => {
     try {
@@ -98,6 +99,17 @@ export const verifyBroker = async (req, res, next) => {
         user.isBrokerVerified = true;
         await user.save();
 
+        await createNotification({
+            recipientId: user._id,
+            actorId: req.user.userId,
+            type: 'broker_verification_approved',
+            title: 'Broker verification approved',
+            message: 'Your broker account has been approved by admin.',
+            link: '/broker/dashboard',
+            entityType: 'user',
+            entityId: user._id,
+        });
+
         res.json({
             message: 'Broker verified successfully',
             user: user.toObject({
@@ -132,6 +144,17 @@ export const rejectBroker = async (req, res, next) => {
         }
         user.isBrokerVerified = false;
         await user.save();
+
+        await createNotification({
+            recipientId: user._id,
+            actorId: req.user.userId,
+            type: 'broker_verification_rejected',
+            title: 'Broker verification rejected',
+            message: 'Your broker verification request was rejected by admin. Please update your details and try again.',
+            link: '/broker-signup',
+            entityType: 'user',
+            entityId: user._id,
+        });
 
         res.json({
             message: 'Broker rejected successfully',
@@ -243,6 +266,19 @@ export const updatePropertyStatus = async (req, res, next) => {
             });
         }
 
+        await createNotification({
+            recipientId: property.broker?._id,
+            actorId: req.user.userId,
+            type: `property_${status}`,
+            title: `Property ${status}`,
+            message: status === 'rejected' && rejectionReason
+                ? `Your property "${property.title}" was rejected. Reason: ${rejectionReason}`
+                : `Your property "${property.title}" was marked as ${status}.`,
+            link: '/broker/listings',
+            entityType: 'property',
+            entityId: property._id,
+        });
+
         res.json({
             message: `Property status updated to ${status}`,
             property,
@@ -346,6 +382,53 @@ export const getPublicBrokers = async (req, res, next) => {
             data: {
                 brokers,
                 total: brokers.length,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getPublicBrokerProfile = async (req, res, next) => {
+    try {
+        const { brokerId } = req.params;
+        const { limit = 3 } = req.query;
+
+        const broker = await userModel.findOne({
+            _id: brokerId,
+            role: 'broker',
+            isBrokerVerified: true,
+        })
+            .select('-password')
+            .populate('city', 'name');
+
+        if (!broker) {
+            return res.status(404).json({
+                message: 'Broker not found',
+            });
+        }
+
+        const parsedLimit = Math.max(1, Math.min(Number(limit) || 3, 6));
+
+        const recentListings = await propertyModel.find({
+            broker: brokerId,
+            status: 'approved',
+        })
+            .populate('city', 'name')
+            .sort({ createdAt: -1 })
+            .limit(parsedLimit);
+
+        const totalApprovedListings = await propertyModel.countDocuments({
+            broker: brokerId,
+            status: 'approved',
+        });
+
+        res.json({
+            success: true,
+            data: {
+                broker,
+                totalApprovedListings,
+                recentListings,
             },
         });
     } catch (error) {

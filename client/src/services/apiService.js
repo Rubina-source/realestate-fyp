@@ -3,6 +3,8 @@ import api from './api';
 export const authService = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
+  forgotPassword: (data) => api.post('/auth/forgot-password', data),
+  resetPassword: (data) => api.post('/auth/reset-password', data),
   getCurrentUser: () => api.get('/auth/me'),
   updateProfile: (data) => api.put('/auth/profile', data),
 };
@@ -38,6 +40,7 @@ export const propertyService = {
     params: filters
   }),
   getById: (id) => api.get(`/properties/${id}`),
+  generateDescription: (data) => api.post('/properties/generate-description', data),
   create: (data) => api.post('/properties', data),
   update: (id, data) => api.put(`/properties/${id}`, data),
   delete: (id) => api.delete(`/properties/${id}`),
@@ -45,6 +48,9 @@ export const propertyService = {
     params: filters
   }),
   getPublicBrokers: (filters) => api.get('/properties/brokers/public/all', {
+    params: filters
+  }),
+  getPublicBrokerProfile: (brokerId, filters) => api.get(`/properties/brokers/public/${brokerId}`, {
     params: filters
   }),
 };
@@ -58,6 +64,7 @@ export const cityService = {
 
 export const inquiryService = {
   create: (data) => api.post('/inquiries', data),
+  getBrokerInquiries: (filters) => api.get('/inquiries', { params: filters }),
 };
 
 export const favoriteService = {
@@ -73,4 +80,13 @@ export const userService = {
   getHistory: (filters) => api.get('/users/history', {
     params: filters
   }),
+};
+
+export const notificationService = {
+  getMyNotifications: (filters) => api.get('/notifications', {
+    params: filters,
+  }),
+  getUnreadCount: () => api.get('/notifications/unread-count'),
+  markRead: (id) => api.patch(`/notifications/${id}/read`),
+  markAllRead: () => api.patch('/notifications/read-all'),
 };

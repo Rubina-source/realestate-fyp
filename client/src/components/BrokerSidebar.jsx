@@ -12,7 +12,7 @@ import {
 import { Link, useLocation } from "react-router-dom";
 
 export default function BrokerSidebar() {
-  const location = useLocation()
+  const location = useLocation();
   const [expandedSections, setExpandedSections] = useState({
     brokers: location.pathname.includes("brokers"),
     listings: location.pathname.includes("listings"),
@@ -30,14 +30,10 @@ export default function BrokerSidebar() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div
-      className=" w-64 bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 h-screen overflow-y-auto sticky top-0 flex flex-col"
-    >
+    <div className=" w-64 bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 h-screen overflow-y-auto sticky top-0 flex flex-col">
       {/* Logo Section */}
       <div className="p-6 border-b border-neutral-200 dark:border-neutral-800">
-        <h2 className="text-xl font-semibold text-center">
-          Broker Dashboard
-        </h2>
+        <h2 className="text-xl font-semibold text-center">Broker Dashboard</h2>
       </div>
 
       {/* Navigation */}
@@ -45,17 +41,18 @@ export default function BrokerSidebar() {
         {/* Dashboard */}
         <Link
           to="/broker/dashboard"
-          className={`flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors ${isActive("/admin/dashboard")
-            ? "bg-neutral-100 dark:bg-neutral-800"
-            : ""
-            }`}
+          className={`flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors ${
+            isActive("/admin/dashboard")
+              ? "bg-neutral-100 dark:bg-neutral-800"
+              : ""
+          }`}
         >
           <BarChart3 size={16} />
           <span>Dashboard</span>
         </Link>
 
         {/* Divider */}
-        <div className="my-4" />
+        <div className="" />
         {/* Listings Section */}
         <div>
           <button
@@ -76,10 +73,11 @@ export default function BrokerSidebar() {
             <div className="ml-3 mt-1 space-y-0.5 border-l border-neutral-200 dark:border-neutral-700 pl-3">
               <Link
                 to="/broker/listings/new"
-                className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors ${isActive("/broker/listings/new")
-                  ? "bg-neutral-100 dark:bg-neutral-800"
-                  : ""
-                  }`}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors ${
+                  isActive("/broker/listings/new")
+                    ? "bg-neutral-100 dark:bg-neutral-800"
+                    : ""
+                }`}
               >
                 <Plus size={12} />
                 New
@@ -87,16 +85,28 @@ export default function BrokerSidebar() {
 
               <Link
                 to="/broker/listings"
-                className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors ${isActive("/broker/listings/all")
-                  ? "bg-neutral-100 dark:bg-neutral-800"
-                  : ""
-                  }`}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors ${
+                  isActive("/broker/listings/all")
+                    ? "bg-neutral-100 dark:bg-neutral-800"
+                    : ""
+                }`}
               >
                 <Users size={12} />
                 All
               </Link>
             </div>
           )}
+          <Link
+            to="/broker/inquiries"
+            className={`flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors ${
+              isActive("/admin/dashboard")
+                ? "bg-neutral-100 dark:bg-neutral-800"
+                : ""
+            }`}
+          >
+            <BarChart3 size={16} />
+            <span>Inquiries</span>
+          </Link>
         </div>
       </nav>
     </div>

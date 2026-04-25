@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { MapPin, Search } from "lucide-react";
+import { Link } from "react-router-dom";
 import { propertyService } from "../services/apiService";
 import { useTheme } from "../hooks/useTheme";
 
@@ -86,9 +87,10 @@ export default function Brokers() {
             <div className="overflow-x-auto pb-4">
               <div className="flex gap-6 min-w-max">
                 {filteredBrokers.map((broker) => (
-                  <div
+                  <Link
                     key={broker._id}
-                    className={`flex-shrink-0 w-72 rounded-xl p-6 border border-neutral-200 dark:border-neutral-700 `}
+                    to={`/brokers/${broker._id}`}
+                    className={`shrink-0 w-72 rounded-xl p-6 border border-neutral-200 dark:border-neutral-700 `}
                   >
                     <img
                       src={broker.profileImage || "https://images.unsplash.com/photo-1534528741775-53994a69daeb"}
@@ -108,7 +110,7 @@ export default function Brokers() {
                     )}
                     {broker.city && (
                       <div className="flex items-center gap-2">
-                        <MapPin size={14} className="flex-shrink-0" />
+                        <MapPin size={14} className="shrink-0" />
                         <p className={`text-sm`}>
                           Based in {broker.city.name}
                         </p>
@@ -118,13 +120,16 @@ export default function Brokers() {
                     {/* Contact Button */}
                     {broker.email && (
                       <button
-                        onClick={() => window.location.href = `mailto:${broker.email}?subject=Real Estate Inquiry`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          window.location.href = `mailto:${broker.email}?subject=Real Estate Inquiry`;
+                        }}
                         className="w-full mt-4 py-2 rounded-lg cursor-pointer font-semibold text-sm transition bg-orange-500 text-white"
                       >
                         Contact
                       </button>
                     )}
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>

@@ -1,15 +1,17 @@
 import User from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import { sendEmail } from '../utils/sendEmail.js';
+import { createRoleNotifications } from '../utils/notification.js';
 
 const generateToken = (userId, role) => {
   return jwt.sign({
-      userId,
-      role
-    },
+    userId,
+    role
+  },
     process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRE || '7d',
-    });
+    expiresIn: process.env.JWT_EXPIRE || '7d',
+  });
 };
 
 export const register = async (req, res, next) => {
@@ -101,6 +103,19 @@ export const register = async (req, res, next) => {
     // Create user
     const user = new User(userData);
     await user.save();
+
+    if (role === 'broker') {
+      await createRoleNotifications({
+        role: 'admin',
+        actorId: user._id,
+        type: 'broker_verification_requested',
+        title: 'New broker verification request',
+        message: `${user.name} requested broker verification.`,
+        link: '/admin/brokers/pending',
+        entityType: 'user',
+        entityId: user._id,
+      });
+    }
 
     console.log('User registered successfully:', {
       userId: user._id,
@@ -284,6 +299,103 @@ export const updateProfile = async (req, res, next) => {
     });
   } catch (error) {
     console.error('Profile update error:', error);
+    next(error);
+  }
+};
+
+export const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        message: 'Email is required',
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    // Always return a generic message to avoid email enumeration.
+    if (!user) {
+      return res.json({
+        message: 'If an account exists with this email, a verification code has been sent.',
+      });
+    }
+
+    const code = `${Math.floor(100000 + Math.random() * 900000)}`;
+    const hashedCode = crypto.createHash('sha256').update(code).digest('hex');
+
+    user.resetPasswordCode = hashedCode;
+    user.resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save();
+
+    await sendEmail({
+      to: user.email,
+      subject: 'Your password reset verification code',
+      text: `Your verification code is ${code}. It expires in 10 minutes.`,
+      html: `
+        <p>Your password reset verification code is:</p>
+        <h2 style="letter-spacing: 2px;">${code}</h2>
+        <p>This code expires in 10 minutes.</p>
+      `,
+    });
+
+    return res.json({
+      message: 'If an account exists with this email, a verification code has been sent.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const resetPassword = async (req, res, next) => {
+  try {
+    const { email, code, newPassword, confirmPassword } = req.body;
+
+    if (!email || !code || !newPassword || !confirmPassword) {
+      return res.status(400).json({
+        message: 'Email, verification code, and password fields are required',
+      });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        message: 'Passwords do not match',
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        message: 'Password must be at least 6 characters',
+      });
+    }
+
+    const user = await User.findOne({ email }).select('+resetPasswordCode +resetPasswordExpires');
+
+    if (!user || !user.resetPasswordCode || !user.resetPasswordExpires) {
+      return res.status(400).json({
+        message: 'Invalid or expired verification code',
+      });
+    }
+
+    const hashedCode = crypto.createHash('sha256').update(code).digest('hex');
+    const isExpired = user.resetPasswordExpires.getTime() < Date.now();
+
+    if (isExpired || user.resetPasswordCode !== hashedCode) {
+      return res.status(400).json({
+        message: 'Invalid or expired verification code',
+      });
+    }
+
+    user.password = newPassword;
+    user.resetPasswordCode = null;
+    user.resetPasswordExpires = null;
+    await user.save();
+
+    return res.json({
+      message: 'Password reset successful. You can now log in with your new password.',
+    });
+  } catch (error) {
     next(error);
   }
 };

@@ -4,14 +4,14 @@
   /* This replaces the 'brand' colors in your config */
   --color-brand-navy: #0d2a4a;
   --color-brand-blue: #77b6ea;
-  --color-brand-orange: #f26419;
+  --color-brand-orange: #006aff;
   --color-brand-dark: #06101c;
 
-  --color-primary: #e4002b;
-  --color-primary-dark: #c20024;
+  --color-primary: #006aff;
+  --color-primary-dark: #0d4599;
 
   /* This replaces the 'fontFamily' section */
-  --font-sans: "Inter", "system-ui", "sans-serif";
+  --font-sans: "Open Sans", "system-ui", "sans-serif";
 
   /* This handles the 'extend' logic automatically */
 }
@@ -22,3 +22,32 @@
    Tailwind will look for variables defined inside a .dark selector.
 */
 @variant dark (&:where(.dark, .dark *));
+
+.custom-price-marker div {
+  background: #991b1b;
+  color: white;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+/* button.bg-orange-500,
+a.bg-orange-500,
+input[type="button"].bg-orange-500,
+input[type="submit"].bg-orange-500 {
+  background-color: var(--color-primary) !important;
+  color: white !important;
+}
+
+button.hover\:bg-orange-600:hover,
+a.hover\:bg-orange-600:hover,
+input[type="button"].hover\:bg-orange-600:hover,
+input[type="submit"].hover\:bg-orange-600:hover,
+button.hover\:bg-brand-orange\/80:hover,
+a.hover\:bg-brand-orange\/80:hover,
+input[type="button"].hover\:bg-brand-orange\/80:hover,
+input[type="submit"].hover\:bg-brand-orange\/80:hover {
+  background-color: var(--color-primary-dark) !important;
+  color: white !important;
+} */

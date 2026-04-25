@@ -40,6 +40,17 @@ const userSchema = new mongoose.Schema({
     verificationToken: {
         type: String,
         default: null,
+        select: false
+    },
+    resetPasswordCode: {
+        type: String,
+        default: null,
+        select: false,
+    },
+    resetPasswordExpires: {
+        type: Date,
+        default: null,
+        select: false,
     },
     isBrokerVerified: {
         type: Boolean,

@@ -6,9 +6,11 @@ import {
     updateProperty,
     deleteProperty,
     getBrokerProperties,
+    generatePropertyDescription,
 } from '../controllers/property.controller.js';
 import {
-    getPublicBrokers
+    getPublicBrokers,
+    getPublicBrokerProfile
 } from '../controllers/admin.controller.js';
 import {
     authenticateToken,
@@ -20,11 +22,13 @@ const router = express.Router();
 
 // Public routes
 router.get('/', maybeAuthenticated, getAllProperties);
-router.get('/:id', maybeAuthenticated, getPropertyById);
 router.get('/brokers/public/all', getPublicBrokers);
+router.get('/brokers/public/:brokerId', getPublicBrokerProfile);
+router.get('/:id', maybeAuthenticated, getPropertyById);
 
 // Broker routes
 router.post('/', authenticateToken, authorize(['broker']), createProperty);
+router.post('/generate-description', authenticateToken, authorize(['broker']), generatePropertyDescription);
 router.put('/:id', authenticateToken, authorize(['broker']), updateProperty);
 router.delete('/:id', authenticateToken, authorize(['broker']), deleteProperty);
 router.get('/broker/all', authenticateToken, authorize(['broker']), getBrokerProperties);

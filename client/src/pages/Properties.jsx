@@ -27,24 +27,15 @@ export default function Properties() {
   });
 
   useEffect(() => {
-    const params = new URLSearchParams();
-    console.log("@HI")
-    /*  Object.entries(filters).forEach(([key, value]) => {
-       if (key && key == "purpose") {
-         params.set(key, value);
-       }
-     });
-     setSearchParams(params, {
-       replace: true,
-     }); */
-  }, [])
-
-  useEffect(() => {
     const handler = setTimeout(() => {
       const fetchProperties = async () => {
         setLoading(true);
         try {
-          const response = await propertyService.getAll(filters);
+          const requestFilters = {
+            ...filters,
+            purpose: filters.purpose === "buy" ? "sale" : filters.purpose,
+          };
+          const response = await propertyService.getAll(requestFilters);
           setProperties(response.data.properties);
           setTotal(response.data.total);
         } catch (error) {
@@ -123,7 +114,7 @@ export default function Properties() {
 
               {properties.length > 0 ? (
                 <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 mb-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-5 mb-8">
                     {properties.map((property) => (
                       <PropertyCard key={property._id} property={property} />
                     ))}
