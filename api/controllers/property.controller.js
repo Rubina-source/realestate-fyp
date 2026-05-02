@@ -262,17 +262,17 @@ export const getAllProperties = async (req, res, next) => {
     // Keyword search
     if (keyword) {
       filter.$or = [{
-          title: {
-            $regex: keyword,
-            $options: 'i'
-          }
-        },
-        {
-          description: { $regex: keyword, $options: 'i' }
-        },
-        {
-          'location.address': { $regex: keyword, $options: 'i' }
-        },
+        title: {
+          $regex: keyword,
+          $options: 'i'
+        }
+      },
+      {
+        description: { $regex: keyword, $options: 'i' }
+      },
+      {
+        'location.address': { $regex: keyword, $options: 'i' }
+      },
       ];
     }
 
@@ -351,10 +351,14 @@ export const getAllProperties = async (req, res, next) => {
     }
 
     // Add isFavorite field to each property
-    const propertiesWithFavorite = properties.map(p => ({
-      ...p.toObject(),
-      isFavorite: favoritePropertyIds.has(p._id.toString())
-    }));
+    const propertiesWithFavorite = properties.map(p => {
+      const propertyObj = p.toObject();
+      const { viewHistory, ...rest } = propertyObj;
+      return {
+        ...rest,
+        isFavorite: favoritePropertyIds.has(p._id.toString())
+      };
+    });
 
     const total = await Property.countDocuments(filter);
 
@@ -384,7 +388,10 @@ export const getPropertyById = async (req, res, next) => {
     // Get user's IP address
     const userIp = req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress || 'unknown';
 
-    if (!userId) {
+    const hasViewed = property.viewHistory.some((view) => view.ip === userIp);
+
+    if (!hasViewed) {
+      property.views = Number(property.views || 0) + 1;
       property.viewHistory.push({
         ip: userIp,
         viewedAt: new Date()
@@ -392,8 +399,6 @@ export const getPropertyById = async (req, res, next) => {
       await property.save();
     }
 
-    // Calculate unique IPs for response
-    const uniqueIPs = new Set(property.viewHistory.map(v => v.ip)).size;
     const totalViews = property.viewHistory.length;
 
     let isFavorite = false;
@@ -422,11 +427,122 @@ export const getPropertyById = async (req, res, next) => {
     res.json({
       property: {
         ...property.toObject(),
-        views: uniqueIPs,
+        views: property.views,
         totalViews: totalViews,
         isFavorite: isFavorite
       }
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSimilarProperties = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const {
+      limit = 6,
+      priceRangePct = 15,
+      maxDistanceKm = 15,
+    } = req.query;
+
+    const baseProperty = await Property.findById(id)
+      .populate('city', 'name')
+      .select('price type purpose city location');
+
+    if (!baseProperty) {
+      return res.status(404).json({
+        message: 'Property not found'
+      });
+    }
+
+    if (!baseProperty.location?.lat || !baseProperty.location?.lng) {
+      return res.json({ properties: [] });
+    }
+
+    const priceValue = Number(baseProperty.price) || 0;
+    const pct = Math.max(0, Number(priceRangePct) || 0) / 100;
+    const priceDelta = priceValue ? Math.round(priceValue * pct) : 0;
+    const priceMin = Math.max(0, priceValue - priceDelta);
+    const priceMax = priceValue + priceDelta;
+
+    const filter = {
+      _id: { $ne: baseProperty._id },
+      status: 'approved',
+      type: baseProperty.type,
+      purpose: baseProperty.purpose,
+      city: baseProperty.city,
+    };
+
+    if (priceValue) {
+      filter.price = { $gte: priceMin, $lte: priceMax };
+    }
+
+    const candidates = await Property.find(filter)
+      .populate('broker', 'name phone company')
+      .populate('city', 'name')
+      .limit(Math.min(Number(limit) * 8, 80));
+
+    const toRad = (value) => (value * Math.PI) / 180;
+    const earthRadiusKm = 6371;
+
+    const getDistanceKm = (from, to) => {
+      const dLat = toRad(to.lat - from.lat);
+      const dLng = toRad(to.lng - from.lng);
+      const lat1 = toRad(from.lat);
+      const lat2 = toRad(to.lat);
+
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.sin(dLng / 2) * Math.sin(dLng / 2) * Math.cos(lat1) * Math.cos(lat2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return earthRadiusKm * c;
+    };
+
+    const origin = {
+      lat: baseProperty.location.lat,
+      lng: baseProperty.location.lng,
+    };
+
+    const scored = candidates
+      .filter((item) => item.location?.lat && item.location?.lng)
+      .map((item) => ({
+        ...item.toObject(),
+        distanceKm: getDistanceKm(origin, {
+          lat: item.location.lat,
+          lng: item.location.lng,
+        }),
+        priceDiff: Math.abs(Number(item.price || 0) - priceValue),
+      }))
+      .sort((a, b) =>
+        a.distanceKm === b.distanceKm
+          ? a.priceDiff - b.priceDiff
+          : a.distanceKm - b.distanceKm,
+      );
+
+    const maxDistance = Math.max(0, Number(maxDistanceKm) || 0);
+    const closeBy = maxDistance
+      ? scored.filter((item) => item.distanceKm <= maxDistance)
+      : scored;
+    const finalList = (closeBy.length ? closeBy : scored).slice(0, Number(limit));
+
+    let favoritePropertyIds = new Set();
+    const userId = req.user?.userId;
+    if (userId && finalList.length > 0) {
+      const propertyIds = finalList.map((p) => p._id);
+      const favorites = await Favorite.find({
+        user: userId,
+        property: { $in: propertyIds },
+      }).select('property');
+      favoritePropertyIds = new Set(favorites.map((f) => f.property.toString()));
+    }
+
+    const propertiesWithFavorite = finalList.map((item) => ({
+      ...item,
+      isFavorite: favoritePropertyIds.has(item._id.toString()),
+    }));
+
+    res.json({ properties: propertiesWithFavorite });
   } catch (error) {
     next(error);
   }
@@ -593,10 +709,14 @@ export const getBrokerProperties = async (req, res, next) => {
     const favoritePropertyIds = new Set(favorites.map(f => f.property.toString()));
 
     // Add isFavorite field to each property
-    const propertiesWithFavorite = properties.map(p => ({
-      ...p.toObject(),
-      isFavorite: favoritePropertyIds.has(p._id.toString())
-    }));
+    const propertiesWithFavorite = properties.map(p => {
+      const propertyObj = p.toObject();
+      const { viewHistory, ...rest } = propertyObj;
+      return {
+        ...rest,
+        isFavorite: favoritePropertyIds.has(p._id.toString())
+      };
+    });
 
     const total = await Property.countDocuments(filter);
 

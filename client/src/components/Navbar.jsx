@@ -16,12 +16,15 @@ import {
 } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../hooks/useAuth";
+import { notificationService } from "../services/apiService";
 
 export default function Navbar({ transparent = false }) {
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountDropdown, setAccountDropdown] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  console.log("@unreadCount", unreadCount);
   const dropdownRef = useRef(null);
 
   const handleLogout = () => {
@@ -41,6 +44,24 @@ export default function Navbar({ transparent = false }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const loadUnreadCount = async () => {
+      if (!user) {
+        setUnreadCount(0);
+        return;
+      }
+
+      try {
+        const response = await notificationService.getUnreadCount();
+        setUnreadCount(response.data?.unreadCount || 0);
+      } catch (error) {
+        setUnreadCount(0);
+      }
+    };
+
+    loadUnreadCount();
+  }, [user]);
+
   const navBgClass = transparent
     ? "bg-transparent"
     : isDark
@@ -48,7 +69,7 @@ export default function Navbar({ transparent = false }) {
       : "bg-white border-b border-b-neutral-200";
 
   return (
-    <nav className={`${navBgClass} sticky top-0 z-40`}>
+    <nav className={`${navBgClass} sticky top-0 z-[1000]`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -56,7 +77,7 @@ export default function Navbar({ transparent = false }) {
             to="/"
             className={`font-bold text-2xl flex items-center flex-shrink-0 ${transparent ? "text-[#333333]" : isDark ? "text-white" : "text-[#333333]"}`}
           >
-            <span className="text-orange-500">Ghar</span>
+            <span className="text-primary">Ghar</span>
             <span
               className={
                 transparent
@@ -105,7 +126,7 @@ export default function Navbar({ transparent = false }) {
                 {user.role === "client" && (
                   <Link
                     to="/favorites"
-                    className={`p-2 hover:text-orange-500 ${transparent ? "text-white" : "dark:text-white"} transition`}
+                    className={`p-2 hover:text-primary-dark ${transparent ? "text-white" : "dark:text-white"} transition`}
                     title="Favorites"
                   >
                     <Heart size={20} />
@@ -114,10 +135,13 @@ export default function Navbar({ transparent = false }) {
                 {user.role !== "client" && (
                   <Link
                     to="/notifications"
-                    className={`p-2 hover:text-orange-500 ${transparent ? "text-white" : "dark:text-white"} transition`}
-                    title="Favorites"
+                    className={`relative p-2 hover:text-primary-dark ${transparent ? "text-white" : "dark:text-white"} transition`}
+                    title="Notifications"
                   >
                     <Bell size={20} />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-1 right-1 h-2.5 w-2.5 rounded-full bg-red-500"></span>
+                    )}
                   </Link>
                 )}
 
@@ -154,7 +178,7 @@ export default function Navbar({ transparent = false }) {
 
                   {/* Dropdown Menu */}
                   {accountDropdown && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-950 overflow-hidden z-50">
+                    <div className="absolute right-0 mt-2 w-56 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 shadow-lg overflow-hidden z-50">
                       {/* Profile */}
                       {/*  <Link
                                                 to="/profile"
@@ -197,7 +221,7 @@ export default function Navbar({ transparent = false }) {
                       {user.role === "client" && (
                         <Link
                           to="/broker-signup"
-                          className="flex items-center gap-3 px-4 py-3 text-orange-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition border-b border-[#E0E0E0] dark:border-[#2E2E3E] font-medium"
+                          className="flex items-center gap-3 px-4 py-3 text-primary hover:bg-neutral-200 dark:hover:bg-neutral-700 transition border-b border-[#E0E0E0] dark:border-[#2E2E3E] font-medium"
                           onClick={() => setAccountDropdown(false)}
                         >
                           <Users size={16} />
@@ -257,7 +281,7 @@ export default function Navbar({ transparent = false }) {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className={`p-2 rounded-lg  transition ${transparent ? "text-white" : isDark ? "text-white" : "text-[#333333]"}`}
+              className={`cursor-pointer p-2 rounded-lg  transition ${transparent ? "text-white" : isDark ? "text-white" : "text-[#333333]"}`}
             >
               {isDark ? <Sun size={20} /> : <Moon size={20} />}
             </button>
@@ -267,13 +291,13 @@ export default function Navbar({ transparent = false }) {
           <div className="lg:hidden flex items-center gap-2">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-[#F5F5F5] dark:hover:bg-[#252535] transition text-[#333333] dark:text-[#E5E5E5]"
+              className={`cursor-pointer p-2 rounded-lg  transition ${transparent ? "text-white" : isDark ? "text-white" : "text-[#333333]"}`}
             >
               {isDark ? <Sun size={20} /> : <Moon size={20} />}
             </button>
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="p-2 rounded-lg hover:bg-[#F5F5F5] dark:hover:bg-[#252535] transition text-[#333333] dark:text-[#E5E5E5]"
+              className={`cursor-pointer p-2 rounded-lg  transition ${transparent ? "text-white" : isDark ? "text-white" : "text-[#333333]"}`}
             >
               {mobileOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -282,7 +306,7 @@ export default function Navbar({ transparent = false }) {
 
         {/* Mobile Menu */}
         {mobileOpen && (
-          <div className="lg:hidden pb-4 space-y-2 border-t border-[#E0E0E0] dark:border-[#2E2E3E]">
+          <div className="lg:hidden pb-4 space-y-2 border-t border-[#E0E0E0] dark:border-[#2E2E3E] bg-white dark:bg-neutral-800 rounded-b-xl">
             <NavLinkMobile href="/listings?purpose=sale" label="BUY" />
             <NavLinkMobile href="/listings?purpose=rent" label="RENT" />
             <NavLinkMobile href="/mortgage" label="MORTGAGE" />
@@ -296,11 +320,17 @@ export default function Navbar({ transparent = false }) {
 
 // Nav Link Component
 function NavLink({ href, label, transparent, isDark }) {
+  /* const textColor = transparent
+    ? "text-white hover:text-primary"
+     ? isDark
+      "text-white hover:text-primary-dark"
+  : "text-[#333333] hover:text-primary"; */
+
   const textColor = transparent
-    ? "text-white hover:text-orange-500"
+    ? "text-white hover:text-primary"
     : isDark
-      ? "text-white hover:text-orange-400"
-      : "text-[#333333] hover:text-orange-500";
+      ? "text-white hover:text-primary-dark"
+      : "text-[#333333] hover:text-primary";
 
   return (
     <Link

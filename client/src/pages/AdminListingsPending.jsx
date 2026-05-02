@@ -49,7 +49,10 @@ export default function AdminListingsPending() {
     const message = prompt("Enter the reason for rejecting the listing");
     if (!message) return;
     try {
-      await adminService.updatePropertyStatus(id, { status: "rejected", rejectionReason: message });
+      await adminService.updatePropertyStatus(id, {
+        status: "rejected",
+        rejectionReason: message,
+      });
       toast.success("Listing rejected successfully");
       setProperties(properties.filter((p) => p._id !== id));
       setTotal(total - 1);
@@ -64,10 +67,8 @@ export default function AdminListingsPending() {
     return (
       <AdminLayout>
         <div className="text-center py-64">
-          <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-300 dark:border-neutral-600 border-t-[#E8413B] rounded-full"></div>
-          <p className="mt-4">
-            Loading pending listings...
-          </p>
+          <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-300 dark:border-neutral-600 border-t-primary rounded-full"></div>
+          <p className="mt-4">Loading pending listings...</p>
         </div>
       </AdminLayout>
     );
@@ -77,9 +78,7 @@ export default function AdminListingsPending() {
     <AdminLayout>
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">
-          Pending Property Listings
-        </h1>
+        <h1 className="text-3xl font-bold mb-2">Pending Property Listings</h1>
         <p className="text-sm">
           Review new property listings and approve or reject them.
         </p>
@@ -88,10 +87,8 @@ export default function AdminListingsPending() {
       {loading ? (
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-200 dark:border-neutral-700 border-t-[#E8413B] rounded-full mb-4"></div>
-            <p className="font-medium">
-              Loading listings...
-            </p>
+            <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-200 dark:border-neutral-700 border-t-primary rounded-full mb-4"></div>
+            <p className="font-medium">Loading listings...</p>
           </div>
         </div>
       ) : properties.length === 0 ? (
@@ -137,14 +134,12 @@ export default function AdminListingsPending() {
                     <td className="px-6 py-4 font-medium">
                       Rs. {property.price?.toLocaleString()}
                     </td>
-                    <td className="px-6 py-4">
-                      {property.broker?.name}
-                    </td>
-                    <td className="px-6 py-4">
-                      {property.city.name}
-                    </td>
+                    <td className="px-6 py-4">{property.broker?.name}</td>
+                    <td className="px-6 py-4">{property.city.name}</td>
                     <td className="px-6 py-4 text-sm">
-                      {property.createdAt ? new Date(property.createdAt).toLocaleDateString() : ""}
+                      {property.createdAt
+                        ? new Date(property.createdAt).toLocaleDateString()
+                        : ""}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
@@ -173,15 +168,8 @@ export default function AdminListingsPending() {
           {/* Pagination */}
           <div className="mt-6 flex justify-between items-center p-4">
             <p className="text-sm font-medium">
-              Showing{" "}
-              <span className="font-medium">
-                {properties.length}
-              </span>{" "}
-              of{" "}
-              <span className="font-medium">
-                {total}
-              </span>{" "}
-              pending listings
+              Showing <span className="font-medium">{properties.length}</span>{" "}
+              of <span className="font-medium">{total}</span> pending listings
             </p>
             <div className="flex gap-2">
               <button
@@ -189,7 +177,8 @@ export default function AdminListingsPending() {
                 disabled={page === 1}
                 className="flex items-center justify-center gap-2 px-4 py-2 bg-neutral-300 dark:bg-neutral-700 rounded-lg hover:bg-neutral-400 dark:hover:bg-neutral-600 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors duration-200"
               >
-                <ArrowLeft size={16} />Previous
+                <ArrowLeft size={16} />
+                Previous
               </button>
               <span className="px-4 py-2 font-medium">
                 Page {page} of {Math.ceil(total / limit)}

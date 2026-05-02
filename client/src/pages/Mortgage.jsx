@@ -157,6 +157,16 @@ export default function Mortgage() {
     };
   }, [loanAmount, loanRate, loanTerm, termType]);
 
+  const principalValue = clampNumber(loanAmount);
+  const interestValue = clampNumber(result.totalInterest);
+  const chartTotal = principalValue + interestValue;
+  const principalPercent = chartTotal
+    ? Number(((principalValue / chartTotal) * 100).toFixed(2))
+    : 0;
+  const interestPercent = chartTotal
+    ? Number(((interestValue / chartTotal) * 100).toFixed(2))
+    : 0;
+
   return (
     <section className="py-8 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -170,8 +180,8 @@ export default function Mortgage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-8">
-            <div className="rounded-lg  border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 p-5 sm:p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-8">
+            <div className="rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 p-5 sm:p-6">
               <div className="space-y-4">
                 <label className="space-y-1 block">
                   <span className="text-sm text-neutral-500 dark:text-neutral-400 flex items-center gap-2">
@@ -255,28 +265,116 @@ export default function Mortgage() {
               </div>
             </div>
 
-            <div className="p-5 sm:p-6 ">
-              <div className="pb-5">
-                <p className="text-sm font-semibold">Loan EMI: </p>
-                <p className="text-3xl font-bold mt-1">
-                  {priceFormatter(result.monthlyEmi)}
-                </p>
+            <div className="p-5 sm:p-6">
+              <div className="space-y-5">
+                <div>
+                  <p className="text-sm font-semibold">Loan EMI</p>
+                  <p className="text-3xl font-bold mt-1">
+                    {priceFormatter(result.monthlyEmi)}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm font-semibold">
+                    Total Interest Payable
+                  </p>
+                  <p className="text-3xl font-bold mt-1">
+                    {priceFormatter(result.totalInterest)}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm font-semibold">Total Payment</p>
+                  <p className="text-3xl font-bold mt-1">
+                    {priceFormatter(result.totalPayment)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold">Payment Split</p>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    Principal vs Interest
+                  </p>
+                </div>
+                <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                  {chartTotal ? "Total" : ""}
+                </span>
               </div>
 
-              <div className="py-5">
-                <p className="text-sm font-semibold">
-                  Total Interest Payable:{" "}
-                </p>
-                <p className="text-3xl font-bold mt-1">
-                  {priceFormatter(result.totalInterest)}
-                </p>
+              <div className="mt-6 flex items-center justify-center">
+                <div className="relative h-40 w-40">
+                  <svg viewBox="0 0 120 120" className="h-full w-full">
+                    <circle
+                      cx="60"
+                      cy="60"
+                      r="46"
+                      fill="none"
+                      stroke="currentColor"
+                      className="text-neutral-200 dark:text-neutral-800"
+                      strokeWidth="12"
+                    />
+                    <circle
+                      cx="60"
+                      cy="60"
+                      r="46"
+                      fill="none"
+                      strokeWidth="12"
+                      strokeLinecap="round"
+                      pathLength="100"
+                      strokeDasharray={`${principalPercent} ${100 - principalPercent}`}
+                      stroke="currentColor"
+                      className="text-primary"
+                      transform="rotate(-90 60 60)"
+                    />
+                    <circle
+                      cx="60"
+                      cy="60"
+                      r="46"
+                      fill="none"
+                      strokeWidth="12"
+                      strokeLinecap="round"
+                      pathLength="100"
+                      strokeDasharray={`${interestPercent} ${100 - interestPercent}`}
+                      strokeDashoffset={-principalPercent}
+                      stroke="currentColor"
+                      className="text-amber-500"
+                      transform="rotate(-90 60 60)"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                      Total
+                    </p>
+                    <p className="text-base font-semibold">
+                      {priceFormatter(result.totalPayment)}
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              <div className="pt-5">
-                <p className="text-sm font-semibold">Total Payment: </p>
-                <p className="text-3xl font-bold mt-1">
-                  {priceFormatter(result.totalPayment)}
-                </p>
+              <div className="mt-6 space-y-3 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
+                    <span className="h-2.5 w-2.5 rounded-full bg-primary" />
+                    Principal ({principalPercent}%)
+                  </span>
+                  <span className="font-semibold">
+                    {priceFormatter(principalValue)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
+                    <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+                    Interest ({interestPercent}%)
+                  </span>
+                  <span className="font-semibold">
+                    {priceFormatter(interestValue)}
+                  </span>
+                </div>
               </div>
             </div>
           </div>

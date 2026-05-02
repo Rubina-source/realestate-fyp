@@ -43,12 +43,12 @@ export default function BrokerInquiries() {
       {loading ? (
         <div className="flex items-center justify-center min-h-[50vh]">
           <div className="text-center">
-            <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-300 dark:border-neutral-600 border-t-[#E8413B] rounded-full mb-4" />
+            <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-300 dark:border-neutral-600 border-t-primary rounded-full mb-4" />
             <p className="font-medium">Loading inquiries...</p>
           </div>
         </div>
       ) : inquiries.length === 0 ? (
-        <div className="flex items-center justify-center dark:bg-orange-900/10 bg-orange-50 p-6 rounded-lg">
+        <div className="flex items-center justify-center dark:bg-primary-dark/5 bg-primary/5 p-6 rounded-lg">
           <p className="text-lg font-medium">No inquiries found.</p>
         </div>
       ) : (
@@ -81,12 +81,18 @@ export default function BrokerInquiries() {
                 {inquiries.map((inquiry) => (
                   <tr key={inquiry._id} className="">
                     <td className="px-6 py-4 align-top">
-                      <Link
-                        to={`/listings/${inquiry.property._id}`}
-                        className="font-medium hover:text-blue-500 hover:underline"
-                      >
-                        {inquiry.property?.title}
-                      </Link>
+                      {inquiry.property ? (
+                        <Link
+                          to={`/listings/${inquiry.property._id}`}
+                          className="font-medium hover:text-blue-500 hover:underline"
+                        >
+                          {inquiry.property?.title}
+                        </Link>
+                      ) : (
+                        <span className="font-medium italic">
+                          Direct message
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4 align-top text-sm">
                       <div className="font-medium">
@@ -129,7 +135,7 @@ export default function BrokerInquiries() {
                         ? new Date(
                             inquiry.preferredMeetingDate,
                           ).toLocaleDateString()
-                        : "Not selected"}
+                        : "-"}
                     </td>
                     <td className="px-6 py-4 align-top text-sm">
                       <p className="max-w-md text-neutral-700 dark:text-neutral-300">

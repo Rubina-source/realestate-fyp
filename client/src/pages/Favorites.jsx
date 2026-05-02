@@ -57,7 +57,7 @@ export default function Favorites() {
                     key={p}
                     onClick={() => setPage(p)}
                     className={`px-4 py-2 rounded text-sm font-medium transition ${page === p
-                      ? 'bg-[#E8413B] text-white'
+                      ? 'bg-primary text-white'
                       : 'bg-neutral-200 hover:bg-neutral-300 dark:bg-neutral-800 dark:hover:bg-neutral-700'
                       }`}
                   >

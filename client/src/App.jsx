@@ -34,6 +34,7 @@ import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 import Mortgage from "./pages/Mortgage";
 import BrokerInquiries from "./pages/BrokerInquiries";
+import AiChatWidget from "./components/AiChatWidget";
 
 const ProtectedRoute = ({ children, allowed }) => {
   const { user, loading } = useAuth();
@@ -61,12 +62,16 @@ export default function App() {
   const { isDark } = useTheme();
   const location = useLocation();
   const isHome = location.pathname === "/";
+  const hideChatWidget =
+    location.pathname.startsWith("/admin") ||
+    location.pathname.startsWith("/broker/");
   const dm = isDark;
   return (
     <>
       <Toaster position="top-center" />
 
       {!isHome && <Navbar />}
+      {!hideChatWidget && <AiChatWidget />}
 
       <main
         className={`flex-1 bg-white dark:bg-neutral-900 text-black dark:text-white`}

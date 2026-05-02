@@ -111,7 +111,7 @@ const propertySchema = new mongoose.Schema({
       'Store Room',
       'Fencing',
     ], */
-  }, ],
+  },],
   broker: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

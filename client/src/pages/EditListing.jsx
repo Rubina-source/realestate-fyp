@@ -248,7 +248,7 @@ export default function EditListing() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <Loader className="animate-spin text-orange-500" size={24} />
+        <Loader className="animate-spin text-primary" size={24} />
       </div>
     );
   }
@@ -269,7 +269,7 @@ export default function EditListing() {
             {/* Title */}
             <div>
               <label className="block font-semibold mb-2 text-sm">
-                Property Title <span className="text-orange-500">*</span>
+                Property Title <span className="text-primary">*</span>
               </label>
               <input
                 type="text"
@@ -285,7 +285,7 @@ export default function EditListing() {
             {/* Description */}
             <div>
               <label className="block font-semibold mb-2 text-sm">
-                Description <span className="text-orange-500">*</span>
+                Description <span className="text-primary">*</span>
               </label>
               <div className="relative">
                 <textarea
@@ -318,7 +318,7 @@ export default function EditListing() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block font-semibold mb-2 text-sm">
-                  Property Type <span className="text-orange-500">*</span>
+                  Property Type <span className="text-primary">*</span>
                 </label>
                 <select name="type" value={formData.type} onChange={handleChange} className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none">
                   {types.map((t) => (
@@ -330,7 +330,7 @@ export default function EditListing() {
               </div>
               <div>
                 <label className="block font-semibold mb-2 text-sm">
-                  Purpose <span className="text-orange-500">*</span>
+                  Purpose <span className="text-primary">*</span>
                 </label>
                 <select name="purpose" value={formData.purpose} onChange={handleChange} className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none">
                   <option value="sale">Sale</option>
@@ -343,7 +343,7 @@ export default function EditListing() {
             {formData.purpose === "rent" && (
               <div>
                 <label className="block font-semibold mb-2 text-sm">
-                  Rental Type <span className="text-orange-500">*</span>
+                  Rental Type <span className="text-primary">*</span>
                 </label>
                 <select name="rentalType" value={formData.rentalType} onChange={handleChange} className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none">
                   <option value="">Select rental type</option>
@@ -394,7 +394,7 @@ export default function EditListing() {
                       type="checkbox"
                       checked={formData.amenities.includes(amenity)}
                       onChange={() => handleAmenityChange(amenity)}
-                      className="w-5 h-5 accent-orange-500 rounded cursor-pointer"
+                      className="w-5 h-5 accent-primary rounded cursor-pointer"
                     />
                     <span className="text-sm">{amenity}</span>
                   </label>
@@ -405,7 +405,7 @@ export default function EditListing() {
             {/* Price */}
             <div>
               <label className="block font-semibold mb-2 text-sm">
-                Price (Rs) <span className="text-orange-500">*</span>
+                Price (Rs) <span className="text-primary">*</span>
               </label>
               <input type="number" name="price" value={formData.price}
                 onChange={handleChange} required placeholder="0" className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none" />
@@ -414,7 +414,7 @@ export default function EditListing() {
             {/* Map */}
             <div>
               <label className="block font-semibold mb-2 text-sm">
-                Location <span className="text-orange-500">*</span>
+                Location <span className="text-primary">*</span>
               </label>
               <MapLocationPicker
                 onLocationChange={handleLocationChange}
@@ -426,7 +426,7 @@ export default function EditListing() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block font-semibold mb-2 text-sm">
-                  City <span className="text-orange-500">*</span>
+                  City <span className="text-primary">*</span>
                 </label>
                 <select name="city" value={formData.city} onChange={handleChange}
                   disabled={citiesLoading} required className={"border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none disabled:opacity-50"}>
@@ -438,7 +438,7 @@ export default function EditListing() {
               </div>
               <div>
                 <label className="block font-semibold mb-2 text-sm">
-                  Address <span className="text-orange-500">*</span>
+                  Address <span className="text-primary">*</span>
                 </label>
                 <input type="text" name="address" value={formData.address}
                   onChange={handleChange} required placeholder="Street address" className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none" />
@@ -449,14 +449,14 @@ export default function EditListing() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block font-semibold mb-2 text-sm">
-                  Size Value <span className="text-orange-500">*</span>
+                  Size Value <span className="text-primary">*</span>
                 </label>
                 <input type="number" name="sizeValue" value={formData.sizeValue}
                   onChange={handleChange} required placeholder="0" className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none" />
               </div>
               <div>
                 <label className="block font-semibold mb-2 text-sm">
-                  Unit <span className="text-orange-500">*</span>
+                  Unit <span className="text-primary">*</span>
                 </label>
                 <select name="sizeUnit" value={formData.sizeUnit} onChange={handleChange} className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none">
                   <option value="sqft">Sq Ft</option>
@@ -469,18 +469,18 @@ export default function EditListing() {
             {/* Images */}
             <div className="space-y-4 pt-4 border-t border-neutral-200 dark:border-neutral-700">
               <label className="block font-semibold mb-2 text-sm">
-                Upload Images (1-5) <span className="text-orange-500">*</span>
+                Upload Images (1-5) <span className="text-primary">*</span>
               </label>
 
-              <div className="border-2 border-dashed border-neutral-200 dark:border-neutral-700 rounded-lg p-8 text-center hover:border-orange-500 transition">
+              <div className="border-2 border-dashed border-neutral-200 dark:border-neutral-700 rounded-lg p-8 text-center hover:border-primary transition">
                 {uploadingImages ? (
                   <div className="flex flex-col items-center gap-2">
-                    <Loader className="animate-spin text-orange-500" size={32} />
+                    <Loader className="animate-spin text-primary" size={32} />
                     <p className="text-sm">Uploading images...</p>
                   </div>
                 ) : (
                   <>
-                    <Upload className="mx-auto mb-3 text-orange-500 opacity-70" size={32} />
+                    <Upload className="mx-auto mb-3 text-primary opacity-70" size={32} />
                     <input
                       type="file" multiple accept="image/*"
                       onChange={handleImageUpload}
@@ -488,7 +488,7 @@ export default function EditListing() {
                       className="hidden" id="imageUpload"
                     />
                     <label htmlFor="imageUpload" className="cursor-pointer">
-                      <span className="text-orange-500 font-semibold">Click to upload</span>
+                      <span className="text-primary font-semibold">Click to upload</span>
                     </label>
                     <p className="text-xs text-neutral-400 mt-1">{formData.images.length}/5 images</p>
                   </>
@@ -527,7 +527,7 @@ export default function EditListing() {
               <button
                 type="submit"
                 disabled={submitting || uploadingImages}
-                className="flex-1 px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-md text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-3 bg-primary hover:bg-primary-dark text-white rounded-md text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {submitting ? (
                   <><Loader className="animate-spin" size={18} /> Updating...</>

@@ -25,7 +25,8 @@ export const register = async (req, res, next) => {
       phone,
       company,
       city,
-      profileImage
+      profileImage,
+      brokerIdDocument
     } = req.body;
 
     // Validation
@@ -59,9 +60,9 @@ export const register = async (req, res, next) => {
 
     // Broker-specific validation
     if (role === 'broker') {
-      if (!phone || !company || !city) {
+      if (!phone || !company || !city || !brokerIdDocument) {
         return res.status(400).json({
-          message: 'Phone, company, and city are required for broker registration'
+          message: 'Phone, company, city, and ID document are required for broker registration'
         });
       }
     }
@@ -74,7 +75,8 @@ export const register = async (req, res, next) => {
       email,
       role,
       hasProfileImage: !!profileImage,
-      profileImage: profileImage
+      profileImage: profileImage,
+      hasBrokerIdDocument: !!brokerIdDocument
     });
 
     // Create user object with role-specific fields
@@ -95,6 +97,7 @@ export const register = async (req, res, next) => {
       userData.phone = phone;
       userData.company = company;
       userData.city = city;
+      userData.brokerIdDocument = brokerIdDocument;
       userData.isBrokerVerified = false; // Requires admin approval
     } else if (role === 'client') {
       userData.phone = phone || null;

@@ -4,7 +4,7 @@ const inquirySchema = new mongoose.Schema({
     property: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Property',
-        required: true,
+        default: null,
         index: true,
     },
     broker: {
@@ -32,10 +32,6 @@ const inquirySchema = new mongoose.Schema({
         enum: ['Pending', 'Responded', 'Archived'],
         default: 'Pending',
         index: true,
-    },
-    brokerMessage: {
-        type: String,
-        trim: true,
     },
     respondedAt: {
         type: Date,

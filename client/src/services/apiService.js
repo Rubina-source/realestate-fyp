@@ -40,6 +40,9 @@ export const propertyService = {
     params: filters
   }),
   getById: (id) => api.get(`/properties/${id}`),
+  getSimilar: (id, filters) => api.get(`/properties/${id}/similar`, {
+    params: filters
+  }),
   generateDescription: (data) => api.post('/properties/generate-description', data),
   create: (data) => api.post('/properties', data),
   update: (id, data) => api.put(`/properties/${id}`, data),
@@ -64,6 +67,7 @@ export const cityService = {
 
 export const inquiryService = {
   create: (data) => api.post('/inquiries', data),
+  createBrokerInquiry: (data) => api.post('/inquiries/broker', data),
   getBrokerInquiries: (filters) => api.get('/inquiries', { params: filters }),
 };
 

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import {
   Heart,
+  Eye,
   MapPin,
   Home as HomeIcon,
   Bed,
@@ -123,6 +124,10 @@ export default function PropertyCard({ property }) {
           <div className="flex items-center py-2 text-xs font-semibold">
             {/* <MapPin size={16} className="mr-1" /> */}
             {property.location.address}
+          </div>
+          <div className="flex items-center gap-2 text-xs font-semibold">
+            <Eye size={14} />
+            <span>{property.views ?? 0} views</span>
           </div>
           {/*  {property.city && (
             <div className="flex items-center  mb-3 text-sm">

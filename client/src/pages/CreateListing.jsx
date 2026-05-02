@@ -264,7 +264,7 @@ export default function CreateListing() {
                 {/* Title */}
                 <div>
                   <label className="block font-semibold mb-2 text-sm">
-                    Property Title <span className="text-[#E8413B]">*</span>
+                    Property Title <span className="text-primary">*</span>
                   </label>
                   <input
                     type="text"
@@ -280,7 +280,7 @@ export default function CreateListing() {
                 {/* Description */}
                 <div>
                   <label className="block font-semibold mb-2 text-sm">
-                    Description <span className="text-[#E8413B]">*</span>
+                    Description <span className="text-primary">*</span>
                   </label>
                   <div className="relative">
                     <textarea
@@ -316,7 +316,7 @@ export default function CreateListing() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block font-semibold mb-2 text-sm">
-                      Property Type <span className="text-[#E8413B]">*</span>
+                      Property Type <span className="text-primary">*</span>
                     </label>
                     <select
                       name="type"
@@ -334,7 +334,7 @@ export default function CreateListing() {
 
                   <div>
                     <label className="block font-semibold mb-2 text-sm">
-                      Purpose <span className="text-[#E8413B]">*</span>
+                      Purpose <span className="text-primary">*</span>
                     </label>
                     <select
                       name="purpose"
@@ -353,7 +353,7 @@ export default function CreateListing() {
                       Rental Type{" "}
                       <span
                         className={
-                          formData.purpose === "rent" ? "text-[#E8413B]" : ""
+                          formData.purpose === "rent" ? "text-primary" : ""
                         }
                       >
                         *
@@ -458,7 +458,7 @@ export default function CreateListing() {
                             type="checkbox"
                             checked={formData.amenities.includes(amenity)}
                             onChange={() => handleAmenityChange(amenity)}
-                            className="w-5 h-5 accent-orange-500 rounded cursor-pointer"
+                            className="w-5 h-5 accent-primary rounded cursor-pointer"
                           />
                           <span className="text-sm ">{amenity}</span>
                         </label>
@@ -470,7 +470,7 @@ export default function CreateListing() {
                 {/* Price */}
                 <div>
                   <label className="block font-semibold mb-2 text-sm">
-                    Price (Rs) <span className="text-[#E8413B]">*</span>
+                    Price (Rs) <span className="text-primary">*</span>
                   </label>
                   <input
                     type="number"
@@ -489,7 +489,7 @@ export default function CreateListing() {
                 {/* Map */}
                 <div>
                   <label className="block font-semibold mb-2 text-sm">
-                    Location <span className="text-[#E8413B]">*</span>
+                    Location <span className="text-primary">*</span>
                   </label>
                   <MapLocationPicker
                     value={formData.location}
@@ -502,7 +502,7 @@ export default function CreateListing() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block font-semibold mb-2 text-sm">
-                      City <span className="text-[#E8413B]">*</span>
+                      City <span className="text-primary">*</span>
                     </label>
                     <select
                       name="city"
@@ -522,7 +522,7 @@ export default function CreateListing() {
 
                   <div>
                     <label className="block font-semibold mb-2 text-sm">
-                      Address <span className="text-[#E8413B]">*</span>
+                      Address <span className="text-primary">*</span>
                     </label>
                     <input
                       type="text"
@@ -543,7 +543,7 @@ export default function CreateListing() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block font-semibold mb-2 text-sm">
-                      Size Value <span className="text-[#E8413B]">*</span>
+                      Size Value <span className="text-primary">*</span>
                     </label>
                     <input
                       type="number"
@@ -558,7 +558,7 @@ export default function CreateListing() {
 
                   <div>
                     <label className="block font-semibold mb-2 text-sm">
-                      Unit <span className="text-[#E8413B]">*</span>
+                      Unit <span className="text-primary">*</span>
                     </label>
                     <select
                       name="sizeUnit"
@@ -577,15 +577,15 @@ export default function CreateListing() {
               {/* Images */}
               <div className="space-y-4 pt-4 border-t border-[#E0E0E0] dark:border-[#2E2E3E]">
                 <label className="block font-semibold mb-2 text-sm">
-                  Upload Images (1-5) <span className="text-[#E8413B]">*</span>
+                  Upload Images (1-5) <span className="text-primary">*</span>
                 </label>
 
                 {/* Upload Area */}
-                <div className="border-2 border-dashed border-[#E0E0E0] dark:border-[#2E2E3E] rounded-lg p-8 text-center hover:border-[#E8413B] dark:hover:border-[#E8413B] transition">
+                <div className="border-2 border-dashed border-[#E0E0E0] dark:border-[#2E2E3E] rounded-lg p-8 text-center hover:border-primary dark:hover:border-primary transition">
                   {uploadingImages ? (
                     <div className="flex flex-col items-center gap-2">
                       <Loader
-                        className="animate-spin text-[#E8413B]"
+                        className="animate-spin text-primary"
                         size={32}
                       />
                       <p className="text-sm">Uploading images...</p>
@@ -593,7 +593,7 @@ export default function CreateListing() {
                   ) : (
                     <>
                       <Upload
-                        className="mx-auto mb-3 text-orange-500 opacity-70"
+                        className="mx-auto mb-3 text-primary opacity-70"
                         size={32}
                       />
                       <input
@@ -606,7 +606,7 @@ export default function CreateListing() {
                         id="imageUpload"
                       />
                       <label htmlFor="imageUpload" className="cursor-pointer">
-                        <span className="text-orange-500 font-semibold">
+                        <span className="text-primary font-semibold">
                           Click to upload
                         </span>
                       </label>
@@ -650,7 +650,7 @@ export default function CreateListing() {
                 <button
                   type="submit"
                   disabled={loading || uploadingImages}
-                  className="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 cursor-pointer text-white rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+                  className="w-full px-4 py-3 bg-primary hover:bg-primary-dark cursor-pointer text-white rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
                 >
                   {loading ? (
                     <>

@@ -61,6 +61,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: null,
     },
+    brokerIdDocument: {
+        type: String,
+        default: null,
+        comment: 'Government ID document URL for broker verification',
+    },
     city: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'City',

@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import {
   MapPin,
   Home,
@@ -25,6 +29,7 @@ import {
   Bed,
   Car,
   CableCar,
+  CarIcon,
 } from "lucide-react";
 import {
   inquiryService,
@@ -33,8 +38,18 @@ import {
 } from "../services/apiService";
 import { useAuth } from "../hooks/useAuth";
 import InquiryCalendar from "../components/InquiryCalendar";
+import PropertyCard from "../components/property/PropertyCard";
 import toast from "react-hot-toast";
 import { priceFormatter } from "../lib/price-formatter";
+import { MapContainer, Marker, TileLayer } from "react-leaflet";
+import Slider from "react-slick";
+import { Swiper, SwiperSlide } from "swiper/react";
+
+// Import Swiper styles
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+import { Pagination, Navigation } from "swiper/modules";
 
 const getAmenityIcon = (amenity) => {
   const value = (amenity || "").toLowerCase();
@@ -100,6 +115,8 @@ export default function ListingDetail() {
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [similarProperties, setSimilarProperties] = useState([]);
+  const [similarLoading, setSimilarLoading] = useState(false);
 
   const [showInquiryForm, setShowInquiryForm] = useState(false);
   const [inquiryData, setInquiryData] = useState({
@@ -108,11 +125,17 @@ export default function ListingDetail() {
   });
   const [submitting, setSubmitting] = useState(false);
 
+  const [mapCenter, setMapCenter] = useState([27.7172, 85.334]);
+
   useEffect(() => {
     const fetchProperty = async () => {
       try {
         const response = await propertyService.getById(id);
         setProperty(response.data.property);
+        setMapCenter([
+          response.data.property.location.lat,
+          response.data.property.location.lng,
+        ]);
         setIsFavorited(response.data.property.isFavorite || false);
       } catch (error) {
         console.error("Failed to fetch property:", error);
@@ -124,6 +147,33 @@ export default function ListingDetail() {
 
     fetchProperty();
   }, [id, user, navigate]);
+
+  useEffect(() => {
+    const fetchSimilarProperties = async () => {
+      if (!property?._id) {
+        setSimilarProperties([]);
+        return;
+      }
+
+      try {
+        setSimilarLoading(true);
+        const response = await propertyService.getSimilar(property._id, {
+          limit: 6,
+          priceRangePct: 15,
+          maxDistanceKm: 15,
+        });
+
+        setSimilarProperties(response?.data?.properties || []);
+      } catch (error) {
+        console.error("Failed to fetch similar properties:", error);
+        setSimilarProperties([]);
+      } finally {
+        setSimilarLoading(false);
+      }
+    };
+
+    fetchSimilarProperties();
+  }, [property]);
 
   const handleFavorite = async () => {
     if (!user) {
@@ -194,7 +244,7 @@ export default function ListingDetail() {
     { icon: ScrollText, text: `Listed in ${listedYear}` },
     { icon: MapPin, text: sizeText },
     {
-      icon: DollarSign,
+      icon: CarIcon,
       text: `${property.parking ?? 0} parking space${
         property.parking === 1 ? "" : "s"
       }`,
@@ -209,11 +259,68 @@ export default function ListingDetail() {
         <div className="lg:col-span-2">
           {/* Image Gallery */}
           <div className="rounded-lg overflow-hidden mb-6">
-            <img
+            {/* <img
               src={property.images[0] || "/placeholder.jpg"}
               alt={property.title}
               className="w-full h-96 object-cover"
-            />
+            /> */}
+            {/* <EmblaCarousel slides={property.images} options={{}} /> */}
+            {/* <div className="min-h-0 min-w-0 p-6">
+              <Slider
+                className="m-[30px_auto_50px]"
+                settings={{
+                  dots: true,
+                  fade: true,
+                  infinite: true,
+                  speed: 500,
+                  slidesToShow: 1,
+                  slidesToScroll: 1,
+                  waitForAnimate: false,
+                  autoplay: true,
+                  speed: 2000,
+                  autoplaySpeed: 2000,
+                  cssEase: "linear",
+                }}
+              >
+                {property.images.map((img) => (
+                  <div>
+                    <img
+                      src={img}
+                      alt={property.title}
+                      className="w-full h-96 object-cover"
+                    />
+                  </div>
+                ))}
+              </Slider>
+            </div> */}
+            <Swiper
+              pagination={{
+                type: "fraction",
+              }}
+              navigation={true}
+              // color=""
+              modules={[Pagination, Navigation]}
+              className="mySwiper"
+            >
+              {property.images.map((img) => (
+                <SwiperSlide>
+                  <img
+                    src={img}
+                    alt={property.title}
+                    className="w-full h-96 object-cover"
+                  />
+                </SwiperSlide>
+              ))}
+              {/*   <SwiperSlide>Slide 1</SwiperSlide>
+              <SwiperSlide>Slide 2</SwiperSlide>
+              <SwiperSlide>Slide 3</SwiperSlide>
+              <SwiperSlide>Slide 4</SwiperSlide>
+              <SwiperSlide>Slide 5</SwiperSlide>
+              <SwiperSlide>Slide 6</SwiperSlide>
+              <SwiperSlide>Slide 7</SwiperSlide>
+              <SwiperSlide>Slide 8</SwiperSlide>
+              <SwiperSlide>Slide 9</SwiperSlide> */}
+            </Swiper>
           </div>
 
           {/* Property Details */}
@@ -312,7 +419,7 @@ export default function ListingDetail() {
                 <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
                   Key highlights and standout features of this property
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-4">
                   {property.amenities.map((amenity) => (
                     <span
                       key={amenity}
@@ -322,7 +429,7 @@ export default function ListingDetail() {
                         const AmenityIcon = getAmenityIcon(amenity);
                         return <AmenityIcon size={14} className="" />;
                       })()}
-                      <span className="text-sm font-semibold uppercase tracking-wide">
+                      <span className="text-sm font-semibold  tracking-wide">
                         {amenity}
                       </span>
                     </span>
@@ -330,6 +437,52 @@ export default function ListingDetail() {
                 </div>
               </div>
             )}
+
+            <div className="pt-6">
+              <h2 className="text-2xl font-bold mb-1">Location</h2>
+
+              <div className="h-96 relative z-0">
+                <MapContainer
+                  center={mapCenter}
+                  zoom={80}
+                  className="relative z-0"
+                  style={{ height: "100%", width: "100%" }}
+                >
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+                  <Marker
+                    position={[property.location.lat, property.location.lng]}
+                  />
+                </MapContainer>
+              </div>
+            </div>
+
+            <div className="pt-8">
+              <div className="flex items-center justify-between gap-4 mb-4">
+                <div>
+                  <h2 className="text-2xl font-bold">
+                    Similar Properties
+                  </h2>{" "}
+                </div>
+              </div>
+
+              {similarLoading ? (
+                <div className="flex items-center gap-2 text-sm ">
+                  <Loader2 className="animate-spin" /> Loading similar
+                  listings...
+                </div>
+              ) : similarProperties.length === 0 ? (
+                <div className="text-sm text-neutral-500 dark:text-neutral-400 italic">
+                  No similar listings found yet.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  {similarProperties.map((item) => (
+                    <PropertyCard key={item._id} property={item} />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-md p-6">

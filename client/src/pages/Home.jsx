@@ -38,39 +38,57 @@ export default function Home() {
   const [brokers, setBrokers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [propertyType, setPropertyType] = useState("buy");
+  const [searchPurpose, setSearchPurpose] = useState("buy");
+  const [searchType, setSearchType] = useState("");
+  const [activeTab, setActiveTab] = useState("houses");
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const [categoryFilter, setCategoryFilter] = useState(null); // null = all, "buy" = buying, "rent" = renting
+  const [categoryFilter, setCategoryFilter] = useState({
+    purpose: null,
+    type: null,
+  });
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        // Fetch featured properties
-        const propertiesResponse = await propertyService.getAll({ limit: 6 });
-        setProperties(propertiesResponse.data.properties);
+  const fetchFeaturedProperties = async (filters = {}) => {
+    try {
+      setLoading(true);
+      const response = await propertyService.getAll({ limit: 6, ...filters });
+      setProperties(response.data.properties || []);
+    } catch (error) {
+      console.error("Failed to fetch properties:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        // Fetch public brokers
+  useEffect(() => {
+    const fetchBrokers = async () => {
+      try {
         const brokersResponse = await propertyService.getPublicBrokers({
           limit: 6,
         });
         setBrokers(brokersResponse.data.data.brokers || []);
       } catch (error) {
-        console.error("Failed to fetch data:", error);
-      } finally {
-        setLoading(false);
+        console.error("Failed to fetch brokers:", error);
       }
     };
 
-    fetchData();
+    fetchFeaturedProperties();
+    fetchBrokers();
   }, []);
+
+  useEffect(() => {
+    const filters = {};
+    if (categoryFilter?.purpose) filters.purpose = categoryFilter.purpose;
+    if (categoryFilter?.type) filters.type = categoryFilter.type;
+    fetchFeaturedProperties(filters);
+  }, [categoryFilter]);
 
   const handleSearch = (e) => {
     e.preventDefault();
     const params = new URLSearchParams();
     if (searchKeyword.trim()) params.set("keyword", searchKeyword);
-    params.set("purpose", propertyType);
+    if (searchPurpose) params.set("purpose", searchPurpose);
+    if (searchType) params.set("type", searchType);
     if (filters.priceMin) params.set("priceMin", filters.priceMin);
     if (filters.priceMax) params.set("priceMax", filters.priceMax);
     if (filters.sizeMin) params.set("sizeMin", filters.sizeMin);
@@ -108,6 +126,23 @@ export default function Home() {
     "Biratnagar",
   ];
 
+  const searchTabs = [
+    { id: "houses", label: "Houses", kind: "type", value: "house" },
+    { id: "apartments", label: "Apartments", kind: "type", value: "apartment" },
+    { id: "lands", label: "Lands", kind: "type", value: "land" },
+    { id: "rent", label: "Rent", kind: "purpose", value: "rent" },
+  ];
+
+  const handleSearchTab = (tab) => {
+    if (tab.kind === "purpose") {
+      setSearchPurpose(tab.value);
+      setSearchType("");
+    } else {
+      setSearchType(tab.value);
+    }
+    setActiveTab(tab.id);
+  };
+
   return (
     <div>
       {/* Hero Section */}
@@ -116,7 +151,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/50"></div>
 
         <div className="absolute top-0 left-0 right-0 z-20">
-          <Navbar transparent /> {/* pass a prop to style it for dark bg */}
+          <Navbar transparent /> 
         </div>
 
         {/* Search Container */}
@@ -127,18 +162,18 @@ export default function Home() {
           <div className="rounded-2xl overflow-hidden p-2">
             {/* Tabs */}
             <div className="flex">
-              {["Buy", "Rent"].map((tab) => (
+              {searchTabs.map((tab) => (
                 <button
-                  key={tab}
-                  onClick={() => setPropertyType(tab.toLowerCase())}
-                  className={`px-6 cursor-pointer py-4 font-semibold text-sm sm:text-base whitespace-nowrap transition bg-white dark:bg-neutral-900 first:rounded-tl-xl last:rounded-tr-xl  
+                  key={tab.id}
+                  onClick={() => handleSearchTab(tab)}
+                  className={`px-6 md:-px-3 cursor-pointer py-4 font-semibold text-sm sm:text-base whitespace-nowrap transition bg-white dark:bg-neutral-900 first:rounded-tl-xl last:rounded-tr-xl  
                     ${
-                      propertyType === tab.toLowerCase()
-                        ? "border-b-2 border-orange-500"
+                      activeTab === tab.id
+                        ? "border-b-2 border-primary"
                         : " border-b-2 border-transparent"
                     }`}
                 >
-                  {tab}
+                  {tab.label}
                 </button>
               ))}
             </div>
@@ -158,7 +193,7 @@ export default function Home() {
                   type="text"
                   value={searchKeyword}
                   onChange={(e) => setSearchKeyword(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 text-sm bg-neutral-200 dark:bg-neutral-800 rounded-lg outline-none focus:ring-2 focus:ring-[#E8413B]"
+                  className="w-full pl-12 pr-4 py-3 text-sm bg-neutral-200 dark:bg-neutral-800 rounded-lg outline-none focus:ring-2 focus:ring-primary-dark"
                   placeholder="Search city, adress..."
                 />
               </div>
@@ -226,7 +261,7 @@ export default function Home() {
                     onChange={(e) =>
                       handleFilterChange("priceMin", e.target.value)
                     }
-                    className="flex-1 px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="flex-1 px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-dark"
                   />
                   <input
                     type="number"
@@ -235,7 +270,7 @@ export default function Home() {
                     onChange={(e) =>
                       handleFilterChange("priceMax", e.target.value)
                     }
-                    className="flex-1 px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="flex-1 px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-dark"
                   />
                 </div>
               </div>
@@ -245,7 +280,7 @@ export default function Home() {
                 <select
                   value={filters.city}
                   onChange={(e) => handleFilterChange("city", e.target.value)}
-                  className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-dark"
                 >
                   <option value="">All Cities</option>
                   {cities.map((city) => (
@@ -267,7 +302,7 @@ export default function Home() {
                     onChange={(e) =>
                       handleFilterChange("sizeUnit", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-dark"
                   >
                     <option value="">All Units</option>
                     <option value="sqft">Sqft</option>
@@ -283,7 +318,7 @@ export default function Home() {
                       onChange={(e) =>
                         handleFilterChange("sizeMin", e.target.value)
                       }
-                      className="flex-1 px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="flex-1 px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-dark"
                     />
                     <input
                       type="number"
@@ -292,7 +327,7 @@ export default function Home() {
                       onChange={(e) =>
                         handleFilterChange("sizeMax", e.target.value)
                       }
-                      className="flex-1 px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="flex-1 px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-dark"
                     />
                   </div>
                 </div>
@@ -313,7 +348,7 @@ export default function Home() {
                         type="checkbox"
                         checked={filters.propertyTypes.includes(type.id)}
                         onChange={() => handlePropertyTypeChange(type.id)}
-                        className="w-5 h-5 accent-orange-500 rounded cursor-pointer"
+                        className="w-5 h-5 accent-primary rounded cursor-pointer"
                       />
                       <span className="text-sm">{type.label}</span>
                     </label>
@@ -358,17 +393,30 @@ export default function Home() {
           {/* Quick Filter Buttons */}
           <div className="flex flex-wrap gap-3 mb-8">
             {[
-              { id: null, label: "All Properties" },
-              { id: "buy", label: "Buying" },
-              { id: "rent", label: "Renting" },
-              // { id: "sell", label: "Selling" },
+              { id: "all", label: "All Properties", purpose: null, type: null },
+              { id: "buy", label: "Buying", purpose: "sale", type: null },
+              { id: "rent", label: "Renting", purpose: "rent", type: null },
+              { id: "house", label: "House", purpose: null, type: "house" },
+              {
+                id: "apartment",
+                label: "Apartment",
+                purpose: null,
+                type: "apartment",
+              },
+              { id: "land", label: "Land", purpose: null, type: "land" },
             ].map((filter) => (
               <button
                 key={filter.id}
-                onClick={() => setCategoryFilter(filter.id)}
+                onClick={() =>
+                  setCategoryFilter({
+                    purpose: filter.purpose,
+                    type: filter.type,
+                  })
+                }
                 className={`px-4 cursor-pointer py-1 rounded-full font-semibold transition ${
-                  categoryFilter === filter.id
-                    ? "border-blue-500 border-2"
+                  categoryFilter?.purpose === filter.purpose &&
+                  categoryFilter?.type === filter.type
+                    ? "border-primary border-2"
                     : "border-2"
                 }`}
               >
@@ -378,20 +426,9 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-            {properties
-              .filter((property) => {
-                if (categoryFilter === null) return true;
-                if (categoryFilter === "buy")
-                  return property.purpose === "sale";
-                if (categoryFilter === "rent")
-                  return property.purpose === "rent";
-                if (categoryFilter === "sell")
-                  return property.purpose === "sell";
-                return true;
-              })
-              .map((property) => (
-                <PropertyCard key={property.id} property={property} />
-              ))}
+            {properties.map((property) => (
+              <PropertyCard key={property.id} property={property} />
+            ))}
             {/* <div className="flex items-center justify-center">
               <Loader2 className="animate-spin" />
             </div> */}
@@ -417,39 +454,34 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <h2 className="text-2xl font-bold mb-8">Local brokers</h2>
 
-          {/* Horizontal Scrolling Brokers */}
-          <div className="overflow-x-auto pb-4">
-            <div className="flex gap-6 min-w-max">
-              {brokers.map((broker) => {
-                return (
-                  <Link
-                    key={broker._id}
-                    to={`/brokers/${broker._id}`}
-                    className="shrink-0 w-72 bg-white dark:bg-neutral-900 rounded-xl p-6 border dark:border-neutral-600 border-neutral-300 transition"
-                  >
-                    <img
-                      src={
-                        broker.profileImage ||
-                        "https://images.unsplash.com/photo-1534528741775-53994a69daeb"
-                      }
-                      alt={broker.name}
-                      className="w-16 h-16 rounded-full object-cover mb-4"
-                    />
-                    <h3 className="font-bold">{broker.name}</h3>
-                    <p className="text-sm mb-2">{"Real Estate Broker"}</p>
-                    {broker.city && (
-                      <p className="text-sm">Based in {broker.city.name}</p>
-                    )}
-                  </Link>
-                );
-              })}
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {brokers.map((broker) => (
+              <Link
+                key={broker._id}
+                to={`/brokers/${broker._id}`}
+                className="bg-white dark:bg-neutral-900 rounded-xl p-6 border dark:border-neutral-600 border-neutral-300 transition"
+              >
+                <img
+                  src={
+                    broker.profileImage ||
+                    "https://images.unsplash.com/photo-1534528741775-53994a69daeb"
+                  }
+                  alt={broker.name}
+                  className="w-16 h-16 rounded-full object-cover mb-4"
+                />
+                <h3 className="font-bold">{broker.name}</h3>
+                <p className="text-sm mb-2">Real Estate Broker</p>
+                {broker.city && (
+                  <p className="text-sm">Based in {broker.city.name}</p>
+                )}
+              </Link>
+            ))}
           </div>
         </div>
       </div>
 
       {/* CTA Section */}
-      <section className="bg-orange-500 py-16 px-6">
+      <section className="bg-primary py-16 px-6">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
             Ready to List Your Property?
@@ -460,7 +492,7 @@ export default function Home() {
           </p>
           <Link
             to="/broker-signup"
-            className="inline-block bg-white text-orange-500 px-8 py-3 rounded-lg font-semibold hover:bg-orange- transition"
+            className="inline-block bg-primary p-2 rounded-lg font-semibold hover:bg-primary-dark transition"
           >
             Become a Broker
           </Link>

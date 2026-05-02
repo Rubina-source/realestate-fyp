@@ -54,7 +54,7 @@ export default function AdminUsers() {
       {loading ? (
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-200 dark:border-neutral-700 border-t-orange-500 rounded-full mb-4"></div>
+            <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-200 dark:border-neutral-700 border-t-primary rounded-full mb-4"></div>
             <p className="font-medium">Loading users...</p>
           </div>
         </div>
@@ -131,7 +131,7 @@ export default function AdminUsers() {
                   onClick={() => setPage(p)}
                   className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
                     page === p
-                      ? "bg-orange-500 text-white"
+                      ? "bg-primary text-white"
                       : "bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600"
                   }`}
                 >

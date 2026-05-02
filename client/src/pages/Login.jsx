@@ -97,9 +97,7 @@ export default function Login() {
 
             {/* Password Field */}
             <div>
-              <label className="font-semibold text-sm">
-                Password
-              </label>
+              <label className="font-semibold text-sm">Password</label>
               <div className="relative flex items-center justify-center">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -127,7 +125,7 @@ export default function Login() {
               <div className="mt-2 text-right">
                 <Link
                   to="/forgot-password"
-                  className="text-xs text-orange-500 hover:underline font-semibold transition"
+                  className="text-xs text-primary hover:underline font-semibold transition"
                 >
                   Forgot password?
                 </Link>
@@ -138,7 +136,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full cursor-pointer bg-orange-500 hover:bg-orange-400 disabled:bg-orange-500/60 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2 mt-6"
+              className="w-full cursor-pointer bg-primary hover:bg-primary-dark disabled:bg-primary-dark/80 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2 mt-6"
             >
               {loading ? (
                 <>
@@ -154,9 +152,7 @@ export default function Login() {
           {/* Divider */}
           <div className="flex items-center gap-3 my-6">
             <div className="flex-1 h-px bg-neutral-300 dark:bg-neutral-600"></div>
-            <span className="text-xs">
-              OR
-            </span>
+            <span className="text-xs">OR</span>
             <div className="flex-1 h-px bg-neutral-300 dark:bg-neutral-600"></div>
           </div>
 
@@ -165,7 +161,7 @@ export default function Login() {
             Don't have an account?{" "}
             <Link
               to="/signup"
-              className="text-orange-500 hover:underline font-semibold transition"
+              className="text-primary hover:underline font-semibold transition"
             >
               Create one
             </Link>
@@ -176,7 +172,7 @@ export default function Login() {
             Are you a broker?{" "}
             <Link
               to="/broker-signup"
-              className="text-orange-500 hover:underline font-semibold transition"
+              className="text-primary hover:underline font-semibold transition"
             >
               Join now
             </Link>

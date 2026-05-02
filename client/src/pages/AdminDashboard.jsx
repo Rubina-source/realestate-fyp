@@ -53,7 +53,7 @@ export default function AdminDashboard() {
       <AdminLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-200 dark:border-neutral-700 border-t-orange-500 rounded-full mb-4"></div>
+            <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-200 dark:border-neutral-700 border-t-primary rounded-full mb-4"></div>
             <p className="font-medium">
               Loading dashboard...
             </p>
@@ -65,7 +65,7 @@ export default function AdminDashboard() {
 
   // Chart colors
   const COLORS = [
-    "#E8413B",
+    "#006aff",
     "#1A1A2E",
     "#3B82F6",
     "#10B981",
@@ -205,7 +205,7 @@ export default function AdminDashboard() {
                 <YAxis stroke="#6B7280" />
                 <Tooltip
                 />
-                <Bar dataKey="value" fill="#E8413B" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="value" fill="#006aff" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

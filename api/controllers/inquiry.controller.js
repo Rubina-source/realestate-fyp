@@ -1,5 +1,6 @@
 import Property from '../models/property.model.js';
 import Inquiry from '../models/inquiry.model.js';
+import User from '../models/user.model.js';
 import { createNotification } from '../utils/notification.js';
 
 export const createInquiry = async (req, res, next) => {
@@ -118,6 +119,56 @@ export const getBrokerInquiries = async (req, res, next) => {
             page: Number(page),
             pages: Math.ceil(total / limit),
             inquiries,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const createBrokerInquiry = async (req, res, next) => {
+    try {
+        const { brokerId, message } = req.body;
+        const userId = req.user.userId;
+
+        if (!brokerId || !message) {
+            return res.status(400).json({
+                message: 'Broker and message are required',
+            });
+        }
+
+        const broker = await User.findById(brokerId).select('name role');
+        if (!broker || broker.role !== 'broker') {
+            return res.status(404).json({
+                message: 'Broker not found',
+            });
+        }
+
+        const client = await User.findById(userId).select('name email');
+
+        const inquiry = new Inquiry({
+            broker: broker._id,
+            client: userId,
+            message,
+        });
+
+        await inquiry.save();
+
+        const clientLabel = client?.name || client?.email || 'Someone';
+
+        await createNotification({
+            recipientId: broker._id,
+            actorId: userId,
+            type: 'new_broker_message',
+            title: 'New message received',
+            message: `You got new message from ${clientLabel}.`,
+            link: '/broker/inquiries',
+            entityType: 'inquiry',
+            entityId: inquiry._id,
+        });
+
+        res.status(201).json({
+            message: 'Message sent successfully. Broker will contact you soon.',
+            inquiry,
         });
     } catch (error) {
         next(error);

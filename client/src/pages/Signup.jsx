@@ -157,13 +157,13 @@ export default function Signup() {
                 id="terms"
                 checked={agreedToTerms}
                 onChange={(e) => setAgreedToTerms(e.target.checked)}
-                className="w-4 h-4 rounded accent-[#E8413B] cursor-pointer mt-0.5"
+                className="w-4 h-4 rounded accent-primary cursor-pointer mt-0.5"
               />
               <label htmlFor="terms" className="text-xs text-neutral-500 dark:text-neutral-400 cursor-pointer leading-relaxed">
                 I agree to the{" "}
-                <a href="#" className="text-orange-500 hover:underline">Terms of Service</a>
+                <a href="#" className="text-primary hover:underline">Terms of Service</a>
                 {" "}and{" "}
-                <a href="#" className="text-orange-500 hover:underline">Privacy Policy</a>
+                <a href="#" className="text-primary hover:underline">Privacy Policy</a>
               </label>
             </div>
 
@@ -171,7 +171,7 @@ export default function Signup() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full cursor-pointer bg-orange-500 hover:bg-orange-400 disabled:bg-orange-500/60 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2 mt-2"
+              className="w-full cursor-pointer bg-primary hover:bg-primary-dark disabled:bg-primary-dark/60 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2 mt-2"
             >
               {loading ? (
                 <><Loader className="w-4 h-4 animate-spin" />Creating account...</>
@@ -191,7 +191,7 @@ export default function Signup() {
           {/* Sign In Link */}
           <p className="text-center text-sm">
             Already have an account?{" "}
-            <Link to="/login" className="text-orange-500 hover:underline font-semibold transition">
+            <Link to="/login" className="text-primary hover:underline font-semibold transition">
               Sign in
             </Link>
           </p>
@@ -199,7 +199,7 @@ export default function Signup() {
           {/* Broker Link */}
           <p className="text-center text-sm mt-3">
             Are you a broker?{" "}
-            <Link to="/broker-signup" className="text-orange-500 hover:underline font-semibold transition">
+            <Link to="/broker-signup" className="text-primary hover:underline font-semibold transition">
               Join now
             </Link>
           </p>

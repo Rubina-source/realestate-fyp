@@ -81,10 +81,10 @@ export default function Notifications() {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex justify-center items-center gap-2">
-          <Bell className="w-5 h-5 text-orange-500" />
+          <Bell className="w-5 h-5 text-primary" />
           <h1 className="text-2xl font-semibold">Notifications</h1>
           {unreadCount > 0 && (
-            <span className="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">
+            <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary dark:bg-primary/20">
               {unreadCount} unread
             </span>
           )}
@@ -114,7 +114,7 @@ export default function Notifications() {
               className={`rounded-xl border p-4 ${
                 item.isRead
                   ? "border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900"
-                  : "border-orange-200 dark:border-orange-800 bg-orange-50/50 dark:bg-orange-950/20"
+                    : "border-primary/30 dark:border-primary/40 bg-primary/5 dark:bg-primary/10"
               }`}
             >
               <div className="flex items-start justify-between gap-3">
@@ -132,7 +132,7 @@ export default function Notifications() {
                   <button
                     type="button"
                     onClick={() => handleMarkRead(item._id)}
-                    className="inline-flex items-center gap-1 text-xs text-orange-600 hover:text-orange-700 cursor-pointer"
+                    className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary-dark cursor-pointer"
                   >
                     <Check className="w-4 h-4" />
                     Mark read

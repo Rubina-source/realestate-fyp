@@ -77,7 +77,7 @@ export default function InquiryCalendar({
                   ${isSelected
                     ? 'bg-red-500 text-white border border-red-500 '
                     : isTodayDate
-                      ? 'text-[#E8413B] border border-[#E0E0E0] dark:bg-neutral-800 dark:text-[#E8413B] dark:border-[#E8413B]'
+                      ? 'text-primary border border-[#E0E0E0] dark:bg-neutral-800 dark:text-primary dark:border-primary'
                       : 'border border-neutral-200 hover:border-red-500 dark:text-white dark:border-neutral-700 dark:hover:border-red-500'
                   }`}
 

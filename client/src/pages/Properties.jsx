@@ -85,7 +85,7 @@ export default function Properties() {
               })
             }
             placeholder="Search by title, location..."
-            className="flex-1 px-5 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 border border-neutral-200 dark:border-neutral-700 text-sm"
+            className="flex-1 px-5 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-primary border border-neutral-200 dark:border-neutral-700 text-sm"
           />
         </div>
       </div>

@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
+import { cityService } from "../services/apiService";
 
 export default function FilterSidebar({ filters, onFilterChange }) {
   const [cities, setCities] = useState([]);
   const [citiesLoading, setCitiesLoading] = useState(true);
   // const cities = ['Kathmandu', 'Pokhara', 'Lalitpur', 'Bhaktapur', 'Biratnagar'];
   const propertyTypes = [
-    { id: 'apartment', label: 'Apartment' },
-    { id: 'house', label: 'House' },
-    { id: 'land', label: 'Land' },
-    { id: 'commercial', label: 'Commercial' },
+    { id: "apartment", label: "Apartment" },
+    { id: "house", label: "House" },
+    { id: "land", label: "Land" },
+    { id: "commercial", label: "Commercial" },
   ];
 
   useEffect(() => {
@@ -19,7 +20,7 @@ export default function FilterSidebar({ filters, onFilterChange }) {
         const cityList = response.data.data || [];
         setCities(cityList);
       } catch (error) {
-        console.error('Failed to fetch cities:', error);
+        console.error("Failed to fetch cities:", error);
         setCities([]);
       } finally {
         setCitiesLoading(false);
@@ -34,21 +35,22 @@ export default function FilterSidebar({ filters, onFilterChange }) {
   };
 
   const handlePropertyTypeToggle = (type) => {
-    const currentTypes = filters.type ? filters.type.split(',') : [];
+    const currentTypes = filters.type ? filters.type.split(",") : [];
     let newTypes;
     if (currentTypes.includes(type)) {
       newTypes = currentTypes.filter((t) => t !== type);
     } else {
       newTypes = [...currentTypes, type];
     }
-    const typeString = newTypes.length > 0 ? newTypes.join(',') : undefined;
-    handleChange('type', typeString);
+    const typeString = newTypes.length > 0 ? newTypes.join(",") : undefined;
+    handleChange("type", typeString);
   };
 
-  const selectedTypes = filters.type ? filters.type.split(',') : [];
+  const selectedTypes = filters.type ? filters.type.split(",") : [];
 
   return (
-    <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-800 p-4 md:p-6 h-fit sticky top-20 max-h-[calc(100vh-100px)] overflow-y-auto 
+    <div
+      className="bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-800 p-4 md:p-6 h-fit sticky top-20 max-h-[calc(100vh-100px)] overflow-y-auto 
       [&::-webkit-scrollbar]:w-2 
       [&::-webkit-scrollbar-track]:bg-neutral-100 
       dark:[&::-webkit-scrollbar-track]:bg-neutral-900 
@@ -61,21 +63,20 @@ export default function FilterSidebar({ filters, onFilterChange }) {
 
       {/* Property Type - Checkboxes */}
       <div className="">
-        <label className="font-medium text-sm mb-3 block">
-          Property Type
-        </label>
+        <label className="font-medium text-sm mb-3 block">Property Type</label>
         <div className="space-y-2">
           {propertyTypes.map((type) => (
-            <label key={type.id} className="flex items-center gap-3 cursor-pointer">
+            <label
+              key={type.id}
+              className="flex items-center gap-3 cursor-pointer"
+            >
               <input
                 type="checkbox"
                 checked={selectedTypes.includes(type.id)}
                 onChange={() => handlePropertyTypeToggle(type.id)}
-                className="w-4 h-4 accent-orange-500 rounded cursor-pointer"
+                className="w-4 h-4 accent-primary rounded cursor-pointer"
               />
-              <span className="text-sm">
-                {type.label}
-              </span>
+              <span className="text-sm">{type.label}</span>
             </label>
           ))}
         </div>
@@ -83,12 +84,10 @@ export default function FilterSidebar({ filters, onFilterChange }) {
 
       {/* Purpose */}
       <div className="pt-4">
-        <label className="font-medium text-sm mb-2 block">
-          Purpose
-        </label>
+        <label className="font-medium text-sm mb-2 block">Purpose</label>
         <select
-          value={filters.purpose || ''}
-          onChange={(e) => handleChange('purpose', e.target.value || undefined)}
+          value={filters.purpose || ""}
+          onChange={(e) => handleChange("purpose", e.target.value || undefined)}
           className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
         >
           <option value="">All</option>
@@ -99,13 +98,11 @@ export default function FilterSidebar({ filters, onFilterChange }) {
 
       {/* City */}
       <div className="pt-4">
-        <label className="font-medium text-sm mb-2 block">
-          City
-        </label>
+        <label className="font-medium text-sm mb-2 block">City</label>
         <select
-          value={filters.city || ''}
+          value={filters.city || ""}
           disabled={citiesLoading}
-          onChange={(e) => handleChange('city', e.target.value || undefined)}
+          onChange={(e) => handleChange("city", e.target.value || undefined)}
           className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
         >
           <option value="">All Cities</option>
@@ -119,33 +116,33 @@ export default function FilterSidebar({ filters, onFilterChange }) {
 
       {/* Price Range */}
       <div className="pt-4">
-        <label className="font-medium text-sm mb-2 block">
-          Price Range
-        </label>
+        <label className="font-medium text-sm mb-2 block">Price Range</label>
         <div className="space-y-2">
           <input
             type="number"
             placeholder="Min Price"
-            value={filters.priceMin || ''}
+            value={filters.priceMin || ""}
             min={0}
-            onChange={(e) => handleChange('priceMin', e.target.value || undefined)}
+            onChange={(e) =>
+              handleChange("priceMin", e.target.value || undefined)
+            }
             className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
           />
           <input
             type="number"
             placeholder="Max Price"
-            value={filters.priceMax || ''}
+            value={filters.priceMax || ""}
             min={0}
-            onChange={(e) => handleChange('priceMax', e.target.value || undefined)}
+            onChange={(e) =>
+              handleChange("priceMax", e.target.value || undefined)
+            }
             className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
           />
         </div>
       </div>
 
       <div className="pt-4">
-        <label className="font-medium text-sm mb-2 block">
-          Property Size
-        </label>
+        <label className="font-medium text-sm mb-2 block">Property Size</label>
         <div className="space-y-2">
           {/* Size Unit */}
           <select
@@ -186,12 +183,10 @@ export default function FilterSidebar({ filters, onFilterChange }) {
 
       {/* Sort */}
       <div className="mb-6 pt-4 border-t border-neutral-200 dark:border-neutral-800">
-        <label className="font-medium text-sm mb-2 block">
-          Sort By
-        </label>
+        <label className="font-medium text-sm mb-2 block">Sort By</label>
         <select
-          value={filters.sort || 'newest'}
-          onChange={(e) => handleChange('sort', e.target.value)}
+          value={filters.sort || "newest"}
+          onChange={(e) => handleChange("sort", e.target.value)}
           className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
         >
           <option value="newest">Newest</option>
@@ -203,7 +198,7 @@ export default function FilterSidebar({ filters, onFilterChange }) {
       {/* Reset */}
       <button
         onClick={() => onFilterChange({ keyword: filters.keyword, page: 1 })}
-        className="w-full bg-orange-500 text-white cursor-pointer px-4 py-2 rounded-lg font-semibold hover:bg-orange-400 transition text-sm"
+        className="w-full bg-primary text-white cursor-pointer px-4 py-2 rounded-lg font-semibold hover:bg-primary-dark transition text-sm"
       >
         Reset Filters
       </button>

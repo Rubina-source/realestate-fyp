@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { AlertCircle, CheckCircle, Eye, EyeOff, Loader, X } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle,
+  Eye,
+  EyeOff,
+  Loader,
+  Trash,
+  X,
+} from "lucide-react";
 import { authService, cityService } from "../services/apiService";
 import { toast } from "react-hot-toast";
 
@@ -12,6 +20,7 @@ export default function BrokerSignup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [uploadingId, setUploadingId] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -21,6 +30,7 @@ export default function BrokerSignup() {
     company: "",
     city: "",
     role: "broker",
+    brokerIdDocument: "",
   });
 
   // Fetch cities on mount
@@ -46,6 +56,51 @@ export default function BrokerSignup() {
     setFormData({ ...formData, [name]: value });
   };
 
+  const uploadToCloudinary = async (file) => {
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+    if (!cloudName || !uploadPreset) {
+      throw new Error("Cloudinary configuration missing");
+    }
+
+    const formDataUpload = new FormData();
+    formDataUpload.append("file", file);
+    formDataUpload.append("upload_preset", uploadPreset);
+
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      {
+        method: "POST",
+        body: formDataUpload,
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to upload document");
+    }
+
+    const data = await response.json();
+    return data.secure_url;
+  };
+
+  const handleIdUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadingId(true);
+      const url = await uploadToCloudinary(file);
+      setFormData((prev) => ({ ...prev, brokerIdDocument: url }));
+      toast.success("ID document uploaded successfully.");
+    } catch (error) {
+      const message = error?.message || "Failed to upload ID document.";
+      toast.error(message);
+    } finally {
+      setUploadingId(false);
+      e.target.value = "";
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -71,6 +126,10 @@ export default function BrokerSignup() {
       setLoading(false);
       return toast.error("City is required");
     }
+    if (!formData.brokerIdDocument) {
+      setLoading(false);
+      return toast.error("Please upload your ID document for verification");
+    }
     if (formData.password.length < 6) {
       setLoading(false);
       return toast.error("Password must be at least 6 characters");
@@ -94,6 +153,7 @@ export default function BrokerSignup() {
         company: formData.company,
         city: formData.city,
         role: formData.role,
+        brokerIdDocument: formData.brokerIdDocument,
       };
 
       console.log("Submitting registration data:", registrationData);
@@ -139,7 +199,7 @@ export default function BrokerSignup() {
               {/* Full Name */}
               <div>
                 <label className="block font-semibold mb-2 text-sm">
-                  Full Name <span className="text-[#E8413B]">*</span>
+                  Full Name <span className="text-primary">*</span>
                 </label>
                 <input
                   type="text"
@@ -156,7 +216,7 @@ export default function BrokerSignup() {
               {/* Email */}
               <div>
                 <label className="block text-[#333333] dark:text-[#E5E5E5] font-semibold mb-2 text-sm">
-                  Email Address <span className="text-[#E8413B]">*</span>
+                  Email Address <span className="text-primary">*</span>
                 </label>
                 <input
                   type="email"
@@ -173,7 +233,7 @@ export default function BrokerSignup() {
               {/* Phone */}
               <div>
                 <label className="block text-[#333333] dark:text-[#E5E5E5] font-semibold mb-2 text-sm">
-                  Phone Number <span className="text-[#E8413B]">*</span>
+                  Phone Number <span className="text-primary">*</span>
                 </label>
                 <input
                   type="tel"
@@ -190,7 +250,7 @@ export default function BrokerSignup() {
               {/* Company Name */}
               <div>
                 <label className="block text-[#333333] dark:text-[#E5E5E5] font-semibold mb-2 text-sm">
-                  Company Name <span className="text-[#E8413B]">*</span>
+                  Company Name <span className="text-primary">*</span>
                 </label>
                 <input
                   type="text"
@@ -210,7 +270,7 @@ export default function BrokerSignup() {
               {/* City */}
               <div>
                 <label className="block text-[#333333] dark:text-[#E5E5E5] font-semibold mb-2 text-sm">
-                  Operating City <span className="text-[#E8413B]">*</span>
+                  Operating City <span className="text-primary">*</span>
                 </label>
                 <select
                   name="city"
@@ -229,6 +289,53 @@ export default function BrokerSignup() {
                   ))}
                 </select>
               </div>
+
+              <div>
+                <label className="block font-semibold mb-2 text-sm">
+                  Government ID <span className="text-primary">*</span>
+                </label>
+                <div className="flex flex-col gap-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleIdUpload}
+                    disabled={uploadingId}
+                    className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none disabled:opacity-60"
+                  />
+                  {uploadingId && (
+                    <div className="flex items-center justify-center rounded-md border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 h-32 w-full">
+                      <Loader className="w-5 h-5 animate-spin text-primary" />
+                    </div>
+                  )}
+                  {!uploadingId && formData.brokerIdDocument && (
+                    <div className="rounded-md border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-2">
+                      <div className="flex items-start justify-between gap-3">
+                        <img
+                          src={formData.brokerIdDocument}
+                          alt="Uploaded ID"
+                          className="h-32 w-full max-w-full rounded object-contain"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              brokerIdDocument: "",
+                            }))
+                          }
+                          className="text-xs hover:text-red-800 flex items-center gap-1 text-red-500 cursor-pointer"
+                        >
+                          <Trash className="size-4" />
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    Upload a clear photo of a government-issued ID.
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Security */}
@@ -236,7 +343,7 @@ export default function BrokerSignup() {
               {/* Password */}
               <div>
                 <label className="block text-[#333333] dark:text-[#E5E5E5] font-semibold mb-2 text-sm">
-                  Password <span className="text-[#E8413B]">*</span>
+                  Password <span className="text-primary">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -266,7 +373,7 @@ export default function BrokerSignup() {
               {/* Confirm Password */}
               <div>
                 <label className="block text-[#333333] dark:text-[#E5E5E5] font-semibold mb-2 text-sm">
-                  Confirm Password <span className="text-[#E8413B]">*</span>
+                  Confirm Password <span className="text-primary">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -302,7 +409,7 @@ export default function BrokerSignup() {
                   onChange={(e) => {
                     setAgreedToTerms(e.target.checked);
                   }}
-                  className="w-4 h-4 border border-[#E0E0E0] dark:border-[#2E2E3E] rounded accent-[#E8413B] cursor-pointer mt-0.5"
+                  className="w-4 h-4 border border-[#E0E0E0] dark:border-[#2E2E3E] rounded accent-primary cursor-pointer mt-0.5"
                   autoComplete="off"
                 />
                 <label
@@ -312,14 +419,14 @@ export default function BrokerSignup() {
                   I agree to{" "}
                   <a
                     href="#"
-                    className="text-orange-500 hover:underline font-medium"
+                    className="text-primary hover:underline font-medium"
                   >
                     Terms of Service
                   </a>{" "}
                   and{" "}
                   <a
                     href="#"
-                    className="text-orange-500 hover:underline font-medium"
+                    className="text-primary hover:underline font-medium"
                   >
                     Privacy Policy
                   </a>
@@ -331,7 +438,7 @@ export default function BrokerSignup() {
             <button
               type="submit"
               disabled={loading || !agreedToTerms}
-              className="w-full cursor-pointer bg-orange-500 hover:bg-orange-400 disabled:bg-orange-600/60 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2"
+              className="w-full cursor-pointer bg-primary hover:bg-primary-dark disabled:bg-primary-dark/50 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -350,7 +457,7 @@ export default function BrokerSignup() {
               Already have an account?{" "}
               <Link
                 to="/login"
-                className="text-orange-500 hover:underline font-semibold transition"
+                className="text-primary hover:underline font-semibold transition"
               >
                 Sign in
               </Link>
@@ -359,7 +466,7 @@ export default function BrokerSignup() {
               Looking to join as a regular user?{" "}
               <Link
                 to="/signup"
-                className="text-orange-500 hover:underline font-semibold transition"
+                className="text-primary hover:underline font-semibold transition"
               >
                 Sign up here
               </Link>

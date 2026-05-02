@@ -21,16 +21,20 @@
   },
   "homepage": "https://github.com/rubinamagar/realestate-web-app#readme",
   "dependencies": {
+    "@openrouter/ai-sdk-provider": "^2.9.0",
+    "ai": "^6.0.174",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "csv-parser": "^3.2.0",
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
+    "marked": "^18.0.3",
     "mongodb": "^7.1.0",
     "mongoose": "^8.23.0",
     "nodemailer": "^8.0.5",
     "nodemon": "^3.1.14",
-    "papaparse": "^5.5.3"
+    "papaparse": "^5.5.3",
+    "zod": "^4.4.2"
   }
 }

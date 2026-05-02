@@ -438,10 +438,10 @@ export default function AdminPropertyImport() {
           // Step 1: Upload CSV
           <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-md overflow-hidden">
             <div className="p-8">
-              <div className="border-2 border-dashed border-neutral-200 dark:border-neutral-600 rounded-md p-12 text-center hover:border-orange-500 transition-colors cursor-pointer"
+              <div className="border-2 border-dashed border-neutral-200 dark:border-neutral-600 rounded-md p-12 text-center hover:border-primary transition-colors cursor-pointer"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <Upload className="w-12 h-12 text-orange-500 mx-auto mb-4" />
+                <Upload className="w-12 h-12 text-primary mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">
                   Upload CSV File
                 </h3>
@@ -450,7 +450,7 @@ export default function AdminPropertyImport() {
                 </p>
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-500 transition-colors"
+                  className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition-colors"
                 >
                   Choose File
                 </button>
@@ -466,7 +466,7 @@ export default function AdminPropertyImport() {
               <div className="mt-8 pt-8 border-t border-neutral-200 dark:border-neutral-800">
                 <button
                   onClick={downloadSample}
-                  className="flex items-center gap-2 text-orange-500 hover:text-orange-400 font-medium cursor-pointer"
+                  className="flex items-center gap-2 text-primary hover:text-primary-dark font-medium cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                   Download Sample CSV
@@ -503,7 +503,7 @@ export default function AdminPropertyImport() {
                 <select
                   value={selectedBroker}
                   onChange={(e) => setSelectedBroker(e.target.value)}
-                  className="w-full px-4 py-2 border border-neutral-200 dark:border-neutral-800 rounded-lg bg-white dark:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-4 py-2 border border-neutral-200 dark:border-neutral-800 rounded-lg bg-white dark:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="">-- Select a broker --</option>
                   {brokers.map(broker => (
@@ -533,18 +533,18 @@ export default function AdminPropertyImport() {
                       <label className="block text-sm font-medium mb-2 capitalize">
                         {field === 'lat' ? 'Latitude' : field === 'lng' ? 'Longitude' : field === 'sizeUnit' ? 'Size Unit (sqft/ropani)' : field}
                         {isRequired && (
-                          <span className="text-[#E8413B]">*</span>
+                          <span className="text-primary">*</span>
                         )}
                         {isMapped && (
-                          <span className="text-green-600 dark:text-green-400 text-xs ml-2">✓ Detected</span>
+                            <span className="text-green-600 dark:text-green-400 text-xs ml-2">✓ Detected</span>
                         )}
                       </label>
                       <select
                         value={fieldMapping[field]}
                         onChange={(e) => handleMappingChange(field, e.target.value)}
-                        className={`border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none ${isMapped
-                          ? 'border-green-300 dark:border-green-700 focus:ring-green-500'
-                          : 'border-neutral-200 dark:border-neutral-800 focus:ring-[#E8413B]'
+                          className={`border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none ${isMapped
+                            ? 'border-green-300 dark:border-green-700 focus:ring-green-500'
+                            : 'border-neutral-200 dark:border-neutral-800 focus:ring-primary'
                           }`}
                       >
                         <option value="">-- Not Mapped --</option>
@@ -620,7 +620,7 @@ export default function AdminPropertyImport() {
                                 Error
                               </span>
                             ) : importingRows.has(index) ? (
-                              <Loader className="w-4 h-4 animate-spin text-[#E8413B]" />
+                              <Loader className="w-4 h-4 animate-spin text-primary" />
                             ) : (
                               <span className="text-neutral-400">—</span>
                             )}
@@ -653,7 +653,7 @@ export default function AdminPropertyImport() {
               <button
                 onClick={importAll}
                 disabled={loading || !selectedBroker}
-                className="flex items-center gap-2 px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-400 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {loading && <Loader className="w-4 h-4 animate-spin" />}
                 Import All {csvData.length} Properties

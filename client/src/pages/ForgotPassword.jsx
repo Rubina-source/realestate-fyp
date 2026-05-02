@@ -118,7 +118,7 @@ export default function ForgotPassword() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full cursor-pointer bg-orange-500 hover:bg-orange-400 disabled:bg-orange-500/60 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2"
+              className="w-full cursor-pointer bg-primary hover:bg-primary-dark disabled:bg-primary-dark/60 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -172,7 +172,7 @@ export default function ForgotPassword() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full cursor-pointer bg-orange-500 hover:bg-orange-400 disabled:bg-orange-500/60 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2"
+              className="w-full cursor-pointer bg-primary hover:bg-primary-dark disabled:bg-primary-dark/60 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -197,7 +197,7 @@ export default function ForgotPassword() {
 
         <p className="text-center text-sm mt-6">
           Remembered your password?{' '}
-          <Link to="/login" className="text-orange-500 hover:underline font-semibold transition">
+          <Link to="/login" className="text-primary hover:underline font-semibold transition">
             Back to Login
           </Link>
         </p>

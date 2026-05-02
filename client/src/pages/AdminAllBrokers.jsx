@@ -35,7 +35,7 @@ export default function AdminAllBrokers() {
     return (
       <AdminLayout>
         <div className="text-center py-64">
-          <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-300 dark:border-neutral-600 border-t-[#E8413B] rounded-full"></div>
+          <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-300 dark:border-neutral-600 border-t-primary rounded-full"></div>
           <p className="mt-4">
             Loading all brokers...
           </p>

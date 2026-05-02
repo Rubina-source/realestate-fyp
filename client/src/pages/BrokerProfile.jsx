@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   Building2,
   Mail,
@@ -10,13 +10,21 @@ import {
 } from "lucide-react";
 import { propertyService } from "../services/apiService";
 import PropertyCard from "../components/property/PropertyCard";
+import { inquiryService } from "../services/apiService";
+import { useAuth } from "../hooks/useAuth";
+import toast from "react-hot-toast";
 
 export default function BrokerProfile() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [broker, setBroker] = useState(null);
   const [recentListings, setRecentListings] = useState([]);
   const [totalApprovedListings, setTotalApprovedListings] = useState(0);
+  const [contactOpen, setContactOpen] = useState(false);
+  const [contactMessage, setContactMessage] = useState("");
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     const fetchBrokerProfile = async () => {
@@ -56,7 +64,7 @@ export default function BrokerProfile() {
       <div className="min-h-[60vh] max-w-6xl mx-auto px-4 md:px-12 py-14">
         <Link
           to="/brokers"
-          className="inline-flex items-center gap-2 text-sm font-medium text-orange-600 mb-6"
+          className="inline-flex items-center gap-2 text-sm font-medium text-primary mb-6"
         >
           <ArrowLeft size={16} />
           Back to Brokers
@@ -71,12 +79,42 @@ export default function BrokerProfile() {
     );
   }
 
+  const handleContactClick = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    setContactOpen(true);
+  };
+
+  const handleSendMessage = async (event) => {
+    event.preventDefault();
+    if (!contactMessage.trim()) return;
+
+    try {
+      setSending(true);
+      await inquiryService.createBrokerInquiry({
+        brokerId: broker._id,
+        message: contactMessage.trim(),
+      });
+      toast.success("Message sent to broker.");
+      setContactMessage("");
+      setContactOpen(false);
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to send message.",
+      );
+    } finally {
+      setSending(false);
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <div className="max-w-6xl mx-auto px-4 md:px-12 py-10">
         <Link
           to="/brokers"
-          className="inline-flex items-center gap-2 text-sm font-medium text-orange-600 mb-6"
+          className="inline-flex items-center gap-2 text-sm font-medium text-primary mb-6"
         >
           <ArrowLeft size={16} />
           Back to Brokers
@@ -99,11 +137,11 @@ export default function BrokerProfile() {
                 </h1>
                 {broker.city?.name && (
                   <p className="text-sm inline-flex items-center gap-1">
-                    {/* <MapPin size={14} className="text-orange-500" /> */}
+                    {/* <MapPin size={14} className="text-primary" /> */}
                     {broker.city.name}
                   </p>
                 )}
-                {broker.company && (
+                {/* {broker.company && (
                   <div className="flex items-center gap-1">
                     <p className="text-sm inline-flex items-center gap-1">
                       <Building2 size={14} className="text-gray-700" />
@@ -118,8 +156,18 @@ export default function BrokerProfile() {
                       {broker.email}
                     </p>
                   </div>
-                )}
+                )} */}
               </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleContactClick}
+                className="cursor-pointer px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-semibold transition"
+              >
+                Contact Broker
+              </button>
             </div>
 
             {/*  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full md:w-auto">
@@ -144,7 +192,7 @@ export default function BrokerProfile() {
             {broker.company ? (
               <>
                 {/* <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 p-4 text-sm flex items-center gap-2">
-                <Building2 size={16} className="text-orange-500" />
+                <Building2 size={16} className="text-primary" />
                 {broker.company}
               </div> */}
                 <div className="flex items-center gap-3 rounded-md border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 p-3">
@@ -161,16 +209,16 @@ export default function BrokerProfile() {
             ) : null}
             {/*  {broker.phone ? (
               <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 p-4 text-sm flex items-center gap-2">
-                <Phone size={16} className="text-orange-500" />
+                <Phone size={16} className="text-primary" />
                 {broker.phone}
               </div>
             ) : null}
             {broker.email ? (
               <a
                 href={`mailto:${broker.email}?subject=Property Inquiry`}
-                className="rounded-xl border border-neutral-200 dark:border-neutral-700 p-4 text-sm flex items-center gap-2 hover:border-orange-400 transition"
+                className="rounded-xl border border-neutral-200 dark:border-neutral-700 p-4 text-sm flex items-center gap-2 hover:border-primary transition"
               >
-                <Mail size={16} className="text-orange-500" />
+                <Mail size={16} className="text-primary" />
                 {broker.email}
               </a>
             ) : null} */}
@@ -182,7 +230,7 @@ export default function BrokerProfile() {
             <h2 className="text-2xl font-bold">Recent Listings</h2>
             <Link
               to={`/listings?keyword=${encodeURIComponent(broker.name)}`}
-              className="text-sm font-medium text-orange-600"
+              className="text-sm font-medium text-primary"
             >
               Explore All Properties
             </Link>
@@ -201,6 +249,48 @@ export default function BrokerProfile() {
           )}
         </section>
       </div>
+
+      {contactOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setContactOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-6"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold mb-2">Message Broker</h3>
+            <p className="text-sm text-neutral-600 dark:text-neutral-300 mb-4">
+              Send a direct message to {broker.name}.
+            </p>
+            <form onSubmit={handleSendMessage} className="space-y-4">
+              <textarea
+                rows={4}
+                value={contactMessage}
+                onChange={(event) => setContactMessage(event.target.value)}
+                placeholder="Write your message..."
+                className="w-full rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm outline-none"
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setContactOpen(false)}
+                  className="cursor-pointer px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={sending || !contactMessage.trim()}
+                  className="cursor-pointer px-4 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white text-sm font-semibold disabled:opacity-60"
+                >
+                  {sending ? "Sending..." : "Send Message"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

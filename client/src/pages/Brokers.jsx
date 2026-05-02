@@ -37,6 +37,7 @@ export default function Brokers() {
     setFilteredBrokers(filtered);
   }, [searchTerm, brokers]);
 
+
   return (
     <div className={`min-h-screen`}>
       {/* Header Section */}
@@ -58,6 +59,7 @@ export default function Brokers() {
               className="flex-1 outline-none text-sm"
             />
           </div>
+
         </div>
       </div>
 
@@ -83,55 +85,43 @@ export default function Brokers() {
               </p>
             </div>
 
-            {/* Horizontal Scrolling Brokers Card */}
-            <div className="overflow-x-auto pb-4">
-              <div className="flex gap-6 min-w-max">
-                {filteredBrokers.map((broker) => (
-                  <Link
-                    key={broker._id}
-                    to={`/brokers/${broker._id}`}
-                    className={`shrink-0 w-72 rounded-xl p-6 border border-neutral-200 dark:border-neutral-700 `}
-                  >
-                    <img
-                      src={broker.profileImage || "https://images.unsplash.com/photo-1534528741775-53994a69daeb"}
-                      alt={broker.name}
-                      className="w-16 h-16 rounded-full object-cover mb-4"
-                    />
-                    <h3 className={`font-bold`}>
-                      {broker.name}
-                    </h3>
-                    <p className={`text-sm mb-2`}>
-                      Real Estate Broker
-                    </p>
-                    {broker.company && (
-                      <p className={`text-sm mb-3`}>
-                        {broker.company}
-                      </p>
-                    )}
-                    {broker.city && (
-                      <div className="flex items-center gap-2">
-                        <MapPin size={14} className="shrink-0" />
-                        <p className={`text-sm`}>
-                          Based in {broker.city.name}
-                        </p>
-                      </div>
-                    )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredBrokers.map((broker) => (
+                <Link
+                  key={broker._id}
+                  to={`/brokers/${broker._id}`}
+                  className="rounded-xl p-6 border border-neutral-200 dark:border-neutral-700"
+                >
+                  <img
+                    src={broker.profileImage || "https://images.unsplash.com/photo-1534528741775-53994a69daeb"}
+                    alt={broker.name}
+                    className="w-16 h-16 rounded-full object-cover mb-4"
+                  />
+                  <h3 className="font-bold">{broker.name}</h3>
+                  <p className="text-sm mb-2">Real Estate Broker</p>
+                  {broker.company && (
+                    <p className="text-sm mb-3">{broker.company}</p>
+                  )}
+                  {broker.city && (
+                    <div className="flex items-center gap-2">
+                      <MapPin size={14} className="shrink-0" />
+                      <p className="text-sm">Based in {broker.city.name}</p>
+                    </div>
+                  )}
 
-                    {/* Contact Button */}
-                    {broker.email && (
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          window.location.href = `mailto:${broker.email}?subject=Real Estate Inquiry`;
-                        }}
-                        className="w-full mt-4 py-2 rounded-lg cursor-pointer font-semibold text-sm transition bg-orange-500 text-white"
-                      >
-                        Contact
-                      </button>
-                    )}
-                  </Link>
-                ))}
-              </div>
+                  {broker.email && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        window.location.href = `mailto:${broker.email}?subject=Real Estate Inquiry`;
+                      }}
+                      className="w-full mt-4 py-2 rounded-lg cursor-pointer font-semibold text-sm transition bg-primary text-white"
+                    >
+                      Contact
+                    </button>
+                  )}
+                </Link>
+              ))}
             </div>
           </>
         )}

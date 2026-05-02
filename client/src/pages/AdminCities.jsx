@@ -113,7 +113,7 @@ export default function AdminCities() {
         </div>
         <button
           onClick={handleAdd}
-          className="bg-orange-500 hover:bg-orange-600 cursor-pointer px-6 py-2 rounded-lg flex items-center gap-2 font-medium text-white whitespace-nowrap"
+          className="bg-primary hover:bg-primary-dark cursor-pointer px-6 py-2 rounded-lg flex items-center gap-2 font-medium text-white whitespace-nowrap"
         >
           <Plus size={20} /> Add City
         </button>
@@ -139,7 +139,7 @@ export default function AdminCities() {
                   value={formData.name}
                   onChange={(e) => setFormData({ name: e.target.value })}
                   placeholder="e.g., Ktm, Pokhara"
-                  className="w-full pl-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8413B] focus:border-transparent text-sm transition"
+                  className="w-full pl-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm transition"
                   disabled={submitting}
                   autoFocus
                 />
@@ -157,7 +157,7 @@ export default function AdminCities() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-6 py-2 bg-orange-500 cursor-pointer text-white hover:bg-orange-600 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50"
+                  className="px-6 py-2 bg-primary cursor-pointer text-white hover:bg-primary-dark rounded-lg font-medium transition-colors duration-200 disabled:opacity-50"
                 >
                   {submitting ? 'Saving...' : editingId ? 'Update' : 'Add'}
                 </button>
@@ -207,7 +207,7 @@ export default function AdminCities() {
       {loading ? (
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-200 dark:border-neutral-700 border-t-orange-500 rounded-full mb-4"></div>
+            <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-200 dark:border-neutral-700 border-t-primary rounded-full mb-4"></div>
             <p className="font-medium">Loading cities...</p>
           </div>
         </div>
@@ -218,7 +218,7 @@ export default function AdminCities() {
             <p className="text-sm mb-6 max-w-xs">Get started by adding your first city to the platform</p>
             <button
               onClick={handleAdd}
-              className="bg-orange-500 hover:bg-orange-600 cursor-pointer px-6 py-2 rounded-lg font-medium transition-colors inline-flex items-center gap-2"
+              className="bg-primary hover:bg-primary-dark cursor-pointer px-6 py-2 rounded-lg font-medium transition-colors inline-flex items-center gap-2"
             >
               <Plus size={18} /> Add the first city
             </button>

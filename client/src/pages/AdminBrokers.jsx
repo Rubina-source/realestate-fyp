@@ -60,7 +60,7 @@ export default function AdminBrokers() {
     return (
       <AdminLayout>
         <div className="text-center py-64">
-          <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-300 dark:border-neutral-600 border-t-[#E8413B] rounded-full"></div>
+          <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-300 dark:border-neutral-600 border-t-primary rounded-full"></div>
           <p className="mt-4">
             Loading all brokers...
           </p>
@@ -84,7 +84,7 @@ export default function AdminBrokers() {
       {loading ? (
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-200 dark:border-neutral-700 border-t-[#E8413B] rounded-full mb-4"></div>
+            <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-200 dark:border-neutral-700 border-t-primary rounded-full mb-4"></div>
             <p className="font-medium">
               Loading brokers...
             </p>
@@ -117,6 +117,9 @@ export default function AdminBrokers() {
                     City
                   </th>
                   <th scope="col" className="px-6 py-4">
+                    ID Document
+                  </th>
+                  <th scope="col" className="px-6 py-4">
                     Applied
                   </th>
                   <th scope="col" className="px-6 py-4">
@@ -144,6 +147,20 @@ export default function AdminBrokers() {
                     </td>
                     <td className="px-6 py-4 text-sm">
                       {broker.city?.name || "N/A"}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      {broker.brokerIdDocument ? (
+                        <a
+                          href={broker.brokerIdDocument}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-primary hover:underline font-medium"
+                        >
+                          View ID
+                        </a>
+                      ) : (
+                        "—"
+                      )}
                     </td>
                     <td className="px-6 py-4 text-sm">
                       {new Date(broker.createdAt).toLocaleDateString()}
