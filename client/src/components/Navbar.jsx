@@ -112,6 +112,12 @@ export default function Navbar({ transparent = false }) {
               isDark={isDark}
             />
             <NavLink
+              href="/sold-properties"
+              label="SOLD PROPERTIES"
+              transparent={transparent}
+              isDark={isDark}
+            />
+            <NavLink
               href="/brokers"
               label="FIND BROKER"
               transparent={transparent}
@@ -310,6 +316,7 @@ export default function Navbar({ transparent = false }) {
             <NavLinkMobile href="/listings?purpose=sale" label="BUY" />
             <NavLinkMobile href="/listings?purpose=rent" label="RENT" />
             <NavLinkMobile href="/mortgage" label="MORTGAGE" />
+            <NavLinkMobile href="/sold-properties" label="SOLD PROPERTIES" />
             <NavLinkMobile href="/brokers" label="REAL ESTATE BROKER" />
           </div>
         )}

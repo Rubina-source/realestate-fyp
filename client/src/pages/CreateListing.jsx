@@ -44,9 +44,9 @@ export default function CreateListing() {
         setCities(cityList);
 
         // Set first city as default
-        if (cityList.length > 0 && !formData.city) {
+        /* if (cityList.length > 0 && !formData.city) {
           setFormData((prev) => ({ ...prev, city: cityList[0]._id }));
-        }
+        } */
       } catch (error) {
         console.error("Failed to fetch cities:", error);
         toast.error("Failed to load cities");
@@ -60,7 +60,6 @@ export default function CreateListing() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log({ name, value });
     if (
       ["price", "sizeValue", "bedrooms", "bathrooms", "parking"].includes(name)
     ) {
@@ -168,10 +167,6 @@ export default function CreateListing() {
       bathrooms: formData.bathrooms || "N/A",
       floors: "N/A",
       parking: formData.parking || "N/A",
-      facing: "N/A",
-      year: "N/A",
-      roadWidth: "N/A",
-      roadType: "N/A",
       amenities: amenitiesText,
       price: formData.price || "N/A",
     };
@@ -584,10 +579,7 @@ export default function CreateListing() {
                 <div className="border-2 border-dashed border-[#E0E0E0] dark:border-[#2E2E3E] rounded-lg p-8 text-center hover:border-primary dark:hover:border-primary transition">
                   {uploadingImages ? (
                     <div className="flex flex-col items-center gap-2">
-                      <Loader
-                        className="animate-spin text-primary"
-                        size={32}
-                      />
+                      <Loader className="animate-spin text-primary" size={32} />
                       <p className="text-sm">Uploading images...</p>
                     </div>
                   ) : (

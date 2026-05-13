@@ -1,17 +1,11 @@
 import { useEffect, useState } from "react";
 import { cityService } from "../services/apiService";
+import { PROPERTY_TYPES } from "../lib/property-filters";
 
 export default function FilterSidebar({ filters, onFilterChange }) {
   const [cities, setCities] = useState([]);
   const [citiesLoading, setCitiesLoading] = useState(true);
   // const cities = ['Kathmandu', 'Pokhara', 'Lalitpur', 'Bhaktapur', 'Biratnagar'];
-  const propertyTypes = [
-    { id: "apartment", label: "Apartment" },
-    { id: "house", label: "House" },
-    { id: "land", label: "Land" },
-    { id: "commercial", label: "Commercial" },
-  ];
-
   useEffect(() => {
     const fetchCities = async () => {
       try {
@@ -65,7 +59,7 @@ export default function FilterSidebar({ filters, onFilterChange }) {
       <div className="">
         <label className="font-medium text-sm mb-3 block">Property Type</label>
         <div className="space-y-2">
-          {propertyTypes.map((type) => (
+          {PROPERTY_TYPES.map((type) => (
             <label
               key={type.id}
               className="flex items-center gap-3 cursor-pointer"

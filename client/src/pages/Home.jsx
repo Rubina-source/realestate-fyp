@@ -14,6 +14,7 @@ import Navbar from "../components/Navbar";
 import PropertyCard from "../components/property/PropertyCard";
 import { propertyService } from "../services/apiService";
 import MapView from "../components/MapView";
+import { PROPERTY_TYPES } from "../lib/property-filters";
 
 const DEFAULT_FILTERS = {
   priceMin: "",
@@ -24,14 +25,6 @@ const DEFAULT_FILTERS = {
   sizeUnit: "",
   propertyTypes: [],
 };
-
-const PROPERTY_TYPES = [
-  { id: "apartment", label: "Apartment" },
-  { id: "house", label: "House" },
-  { id: "land", label: "Land" },
-  { id: "commercial", label: "Commercial" },
-  { id: "office", label: "Office" },
-];
 
 export default function Home() {
   const [properties, setProperties] = useState([]);

@@ -237,12 +237,21 @@ export const getAllProperties = async (req, res, next) => {
       sizeMin,
       sizeMax,
       sizeUnit,
+      bedroomsMin,
+      bedroomsMax,
+      bathroomsMin,
+      bathroomsMax,
+      parkingMin,
+      parkingMax,
+      soldDateFrom,
+      soldDateTo,
       type,
       types,
       purpose,
       city,
       rentalType,
       sort,
+      status,
       page = 1,
       limit = 10
     } = req.query;
@@ -255,8 +264,10 @@ export const getAllProperties = async (req, res, next) => {
       return '';
     };
 
+    const allowedStatuses = ['approved', 'sold'];
+    const normalizedStatus = status ? String(status).toLowerCase() : '';
     const filter = {
-      status: 'approved'
+      status: allowedStatuses.includes(normalizedStatus) ? normalizedStatus : 'approved'
     };
 
     // Keyword search
@@ -295,6 +306,27 @@ export const getAllProperties = async (req, res, next) => {
       filter['size.unit'] = sizeUnit;
     }
 
+    // Bedrooms filter
+    if (bedroomsMin || bedroomsMax) {
+      filter.bedrooms = {};
+      if (bedroomsMin) filter.bedrooms.$gte = Number(bedroomsMin);
+      if (bedroomsMax) filter.bedrooms.$lte = Number(bedroomsMax);
+    }
+
+    // Bathrooms filter
+    if (bathroomsMin || bathroomsMax) {
+      filter.bathrooms = {};
+      if (bathroomsMin) filter.bathrooms.$gte = Number(bathroomsMin);
+      if (bathroomsMax) filter.bathrooms.$lte = Number(bathroomsMax);
+    }
+
+    // Parking filter
+    if (parkingMin || parkingMax) {
+      filter.parking = {};
+      if (parkingMin) filter.parking.$gte = Number(parkingMin);
+      if (parkingMax) filter.parking.$lte = Number(parkingMax);
+    }
+
     // Type filter - support both 'type' and 'types' parameters
     if (types) {
       const typeArray = types.split(',').map(t => t.trim());
@@ -319,21 +351,43 @@ export const getAllProperties = async (req, res, next) => {
       filter.city = city;
     }
 
+    // Sold date filter (only for sold listings)
+    if (filter.status === 'sold' && (soldDateFrom || soldDateTo)) {
+      filter.updatedAt = {};
+      if (soldDateFrom) {
+        const fromDate = new Date(soldDateFrom);
+        if (!Number.isNaN(fromDate.getTime())) {
+          fromDate.setHours(0, 0, 0, 0);
+          filter.updatedAt.$gte = fromDate;
+        }
+      }
+      if (soldDateTo) {
+        const toDate = new Date(soldDateTo);
+        if (!Number.isNaN(toDate.getTime())) {
+          toDate.setHours(23, 59, 59, 999);
+          filter.updatedAt.$lte = toDate;
+        }
+      }
+    }
+
     // Sorting
+    const isSold = filter.status === 'sold';
     let sortBy = { createdAt: -1 };
     if (sort === 'price-low') {
       sortBy = { price: 1 };
     } else if (sort === 'price-high') {
       sortBy = { price: -1 };
     } else if (sort === 'newest') {
-      sortBy = { createdAt: -1 };
+      sortBy = { [isSold ? 'updatedAt' : 'createdAt']: -1 };
+    } else if (sort === 'oldest') {
+      sortBy = { [isSold ? 'updatedAt' : 'createdAt']: 1 };
     }
 
     const skip = (page - 1) * limit;
     console.log('Filter:', filter);
 
     const properties = await Property.find(filter)
-      .populate('broker', 'name phone company')
+      .populate('broker', 'name phone company profileImage avatar photoURL image')
       .populate('city', 'name')
       .sort(sortBy)
       .skip(skip)

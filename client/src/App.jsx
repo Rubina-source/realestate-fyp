@@ -22,6 +22,7 @@ import BrokerSignup from "./pages/BrokerSignup";
 import AdminPendingBrokers from "./pages/AdminBrokers";
 import AdminAllBrokers from "./pages/AdminAllBrokers";
 import BrokerProperties from "./pages/BrokerProperties";
+import SoldProperties from "./pages/SoldProperties";
 import AdminListingsPending from "./pages/AdminListingsPending";
 import AdminAllListings from "./pages/AdminAllListings";
 import EditListing from "./pages/EditListing";
@@ -83,6 +84,7 @@ export default function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/broker-signup" element={<BrokerSignup />} />
           <Route path="/listings" element={<Properties />} />
+          <Route path="/sold-properties" element={<SoldProperties />} />
           <Route path="/listings/:id" element={<PropertyDetails />} />
           <Route path="/about" element={<About darkMode={dm} />} />
           <Route path="/contact" element={<Contact darkMode={dm} />} />
