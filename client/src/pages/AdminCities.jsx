@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react';
-import { cityService } from '../services/apiService';
-import AdminLayout from '../components/AdminLayout';
-import { Plus, Edit2, Trash2 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useEffect, useState } from "react";
+import { cityService } from "../services/apiService";
+import AdminLayout from "../components/AdminLayout";
+import { Plus, Edit2, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function AdminCities() {
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ name: '' });
+  const [formData, setFormData] = useState({ name: "" });
   const [editingId, setEditingId] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -23,7 +23,7 @@ export default function AdminCities() {
       const response = await cityService.getAll();
       setCities(response.data.data || []);
     } catch (err) {
-      toast.error('Failed to load cities');
+      toast.error("Failed to load cities");
     } finally {
       setLoading(false);
     }
@@ -31,7 +31,7 @@ export default function AdminCities() {
 
   const handleAdd = () => {
     setEditingId(null);
-    setFormData({ name: '' });
+    setFormData({ name: "" });
     setShowForm(true);
   };
 
@@ -43,7 +43,7 @@ export default function AdminCities() {
 
   const handleCancel = () => {
     setShowForm(false);
-    setFormData({ name: '' });
+    setFormData({ name: "" });
     setEditingId(null);
   };
 
@@ -51,12 +51,12 @@ export default function AdminCities() {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      toast.error('City name is required');
+      toast.error("City name is required");
       return;
     }
 
     if (formData.name.trim().length < 2) {
-      toast.error('City name must be at least 2 characters');
+      toast.error("City name must be at least 2 characters");
       return;
     }
 
@@ -66,22 +66,27 @@ export default function AdminCities() {
       if (editingId) {
         // Update existing city
         await cityService.update(editingId, { name: formData.name.trim() });
-        setCities(cities.map(c => c._id === editingId ? { ...c, name: formData.name.trim() } : c));
-        toast.success('City updated successfully!');
+        setCities(
+          cities.map((c) =>
+            c._id === editingId ? { ...c, name: formData.name.trim() } : c,
+          ),
+        );
+        toast.success("City updated successfully!");
       } else {
         // Create new city
-        const response = await cityService.create({ name: formData.name.trim() });
+        const response = await cityService.create({
+          name: formData.name.trim(),
+        });
         setCities([...cities, response.data.data]);
-        toast.success('City added successfully!');
+        toast.success("City added successfully!");
       }
 
       setShowForm(false);
-      setFormData({ name: '' });
+      setFormData({ name: "" });
       setEditingId(null);
-
     } catch (err) {
-      console.error('Failed to save city:', err);
-      toast.error(err.response?.data?.message || 'Failed to save city');
+      console.error("Failed to save city:", err);
+      toast.error(err.response?.data?.message || "Failed to save city");
     } finally {
       setSubmitting(false);
     }
@@ -90,14 +95,13 @@ export default function AdminCities() {
   const handleDelete = async (cityId) => {
     try {
       setSubmitting(true);
-      setError('');
       await cityService.delete(cityId);
-      setCities(cities.filter(c => c._id !== cityId));
+      setCities(cities.filter((c) => c._id !== cityId));
       setDeleteConfirm(null);
-      toast.success('City deleted successfully!');
+      toast.success("City deleted successfully!");
     } catch (err) {
-      console.error('Failed to delete city:', err);
-      toast.error(err.response?.data?.message || 'Failed to delete city');
+      console.error("Failed to delete city:", err);
+      toast.error(err.response?.data?.message || "Failed to delete city");
     } finally {
       setSubmitting(false);
     }
@@ -109,7 +113,9 @@ export default function AdminCities() {
       <div className="mb-8 flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-medium mb-2">Manage Cities</h1>
-          <p className=" text-sm">Add, edit, or remove cities for property listings.</p>
+          <p className=" text-sm">
+            Add, edit, or remove cities for property listings.
+          </p>
         </div>
         <button
           onClick={handleAdd}
@@ -125,7 +131,7 @@ export default function AdminCities() {
           <div className="bg-white dark:bg-neutral-800 rounded-lg max-w-md w-full border border-neutral-200 dark:border-neutral-700">
             <div className="border-b border-neutral-200 dark:border-neutral-700 p-6">
               <h2 className="text-2xl font-medium">
-                {editingId ? 'Edit City' : 'Add New City'}
+                {editingId ? "Edit City" : "Add New City"}
               </h2>
             </div>
 
@@ -159,7 +165,7 @@ export default function AdminCities() {
                   disabled={submitting}
                   className="px-6 py-2 bg-primary cursor-pointer text-white hover:bg-primary-dark rounded-lg font-medium transition-colors duration-200 disabled:opacity-50"
                 >
-                  {submitting ? 'Saving...' : editingId ? 'Update' : 'Add'}
+                  {submitting ? "Saving..." : editingId ? "Update" : "Add"}
                 </button>
               </div>
             </form>
@@ -172,14 +178,14 @@ export default function AdminCities() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-neutral-800 rounded-lg max-w-md w-full border border-neutral-200 dark:border-neutral-700">
             <div className="border-b border-neutral-200 dark:border-neutral-700 p-6">
-              <h2 className="text-xl font-medium">
-                Delete City?
-              </h2>
+              <h2 className="text-xl font-medium">Delete City?</h2>
             </div>
 
             <div className="p-6">
               <p className=" mb-6 leading-relaxed">
-                Are you sure you want to delete <span className="font-medium">{deleteConfirm.name}</span>? This action cannot be undone.
+                Are you sure you want to delete{" "}
+                <span className="font-medium">{deleteConfirm.name}</span>? This
+                action cannot be undone.
               </p>
 
               <div className="flex gap-3 justify-end">
@@ -193,9 +199,9 @@ export default function AdminCities() {
                 <button
                   onClick={() => handleDelete(deleteConfirm._id)}
                   disabled={submitting}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50"
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-medium transition-colors duration-200 disabled:opacity-50"
                 >
-                  {submitting ? 'Deleting...' : 'Delete'}
+                  {submitting ? "Deleting..." : "Delete"}
                 </button>
               </div>
             </div>
@@ -215,7 +221,9 @@ export default function AdminCities() {
         <div className="flex items-center justify-center min-h-[60vh] bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700">
           <div className="text-center">
             <p className="font-medium mb-3">No cities yet</p>
-            <p className="text-sm mb-6 max-w-xs">Get started by adding your first city to the platform</p>
+            <p className="text-sm mb-6 max-w-xs">
+              Get started by adding your first city to the platform
+            </p>
             <button
               onClick={handleAdd}
               className="bg-primary hover:bg-primary-dark cursor-pointer px-6 py-2 rounded-lg font-medium transition-colors inline-flex items-center gap-2"
@@ -243,9 +251,7 @@ export default function AdminCities() {
                   key={city._id}
                   className="bg-white dark:bg-neutral-800 border-b border-neutral-100 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors duration-200"
                 >
-                  <td className="px-6 py-4 font-medium">
-                    {city.name}
-                  </td>
+                  <td className="px-6 py-4 font-medium">{city.name}</td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-2">
                       <button

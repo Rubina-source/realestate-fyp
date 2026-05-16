@@ -52,6 +52,10 @@ input[type="submit"].hover\:bg-brand-orange\/80:hover {
   color: white !important;
 } */
 
+button {
+  cursor: pointer;
+}
+
 .embla {
   max-width: 48rem;
   margin: auto;

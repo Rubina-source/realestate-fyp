@@ -491,7 +491,7 @@ export const getPropertyById = async (req, res, next) => {
   }
 };
 
-export const getSimilarProperties = async (req, res, next) => {
+/* export const getSimilarProperties = async (req, res, next) => {
   try {
     const { id } = req.params;
     const {
@@ -600,7 +600,7 @@ export const getSimilarProperties = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
+}; */
 
 export const updateProperty = async (req, res, next) => {
   try {

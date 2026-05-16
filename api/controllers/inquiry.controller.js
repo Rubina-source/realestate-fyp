@@ -2,6 +2,7 @@ import Property from '../models/property.model.js';
 import Inquiry from '../models/inquiry.model.js';
 import User from '../models/user.model.js';
 import { createNotification } from '../utils/notification.js';
+import { sendEmail } from '../utils/sendEmail.js';
 
 export const createInquiry = async (req, res, next) => {
     try {
@@ -136,7 +137,7 @@ export const createBrokerInquiry = async (req, res, next) => {
             });
         }
 
-        const broker = await User.findById(brokerId).select('name role');
+        const broker = await User.findById(brokerId).select('name role email');
         if (!broker || broker.role !== 'broker') {
             return res.status(404).json({
                 message: 'Broker not found',
@@ -165,6 +166,36 @@ export const createBrokerInquiry = async (req, res, next) => {
             entityType: 'inquiry',
             entityId: inquiry._id,
         });
+
+        if (broker.email) {
+            const subject = `You got new message form ${clientLabel}`;
+            const safeMessage = message.trim();
+            const text = `You got new message form ${clientLabel}.
+
+Message:
+${safeMessage}
+`;
+            const html = `
+        <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #111;">
+          <h2 style="margin: 0 0 12px;">You got new message form ${clientLabel}</h2>
+          <p style="margin: 0 0 8px;">Message:</p>
+          <div style="padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb; white-space: pre-wrap;">
+            ${safeMessage}
+          </div>
+        </div>
+      `;
+
+            try {
+                await sendEmail({
+                    to: broker.email,
+                    subject,
+                    text,
+                    html,
+                });
+            } catch (emailError) {
+                console.error('Failed to send broker message email:', emailError);
+            }
+        }
 
         res.status(201).json({
             message: 'Message sent successfully. Broker will contact you soon.',

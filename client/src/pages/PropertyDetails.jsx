@@ -115,8 +115,6 @@ export default function ListingDetail() {
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
-  const [similarProperties, setSimilarProperties] = useState([]);
-  const [similarLoading, setSimilarLoading] = useState(false);
 
   const [showInquiryForm, setShowInquiryForm] = useState(false);
   const [inquiryData, setInquiryData] = useState({
@@ -148,32 +146,6 @@ export default function ListingDetail() {
     fetchProperty();
   }, [id, user, navigate]);
 
-  useEffect(() => {
-    const fetchSimilarProperties = async () => {
-      if (!property?._id) {
-        setSimilarProperties([]);
-        return;
-      }
-
-      try {
-        setSimilarLoading(true);
-        const response = await propertyService.getSimilar(property._id, {
-          limit: 6,
-          priceRangePct: 15,
-          maxDistanceKm: 15,
-        });
-
-        setSimilarProperties(response?.data?.properties || []);
-      } catch (error) {
-        console.error("Failed to fetch similar properties:", error);
-        setSimilarProperties([]);
-      } finally {
-        setSimilarLoading(false);
-      }
-    };
-
-    fetchSimilarProperties();
-  }, [property]);
 
   const handleFavorite = async () => {
     if (!user) {
@@ -455,33 +427,6 @@ export default function ListingDetail() {
                   />
                 </MapContainer>
               </div>
-            </div>
-
-            <div className="pt-8">
-              <div className="flex items-center justify-between gap-4 mb-4">
-                <div>
-                  <h2 className="text-2xl font-bold">
-                    Similar Properties
-                  </h2>{" "}
-                </div>
-              </div>
-
-              {similarLoading ? (
-                <div className="flex items-center gap-2 text-sm ">
-                  <Loader2 className="animate-spin" /> Loading similar
-                  listings...
-                </div>
-              ) : similarProperties.length === 0 ? (
-                <div className="text-sm text-neutral-500 dark:text-neutral-400 italic">
-                  No similar listings found yet.
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  {similarProperties.map((item) => (
-                    <PropertyCard key={item._id} property={item} />
-                  ))}
-                </div>
-              )}
             </div>
           </div>
 

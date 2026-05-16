@@ -3,7 +3,7 @@ import {
     createProperty,
     getAllProperties,
     getPropertyById,
-    getSimilarProperties,
+    // getSimilarProperties,
     updateProperty,
     deleteProperty,
     getBrokerProperties,
@@ -25,7 +25,7 @@ const router = express.Router();
 router.get('/', maybeAuthenticated, getAllProperties);
 router.get('/brokers/public/all', getPublicBrokers);
 router.get('/brokers/public/:brokerId', getPublicBrokerProfile);
-router.get('/:id/similar', maybeAuthenticated, getSimilarProperties);
+// router.get('/:id/similar', maybeAuthenticated, getSimilarProperties);
 router.get('/:id', maybeAuthenticated, getPropertyById);
 
 // Broker routes

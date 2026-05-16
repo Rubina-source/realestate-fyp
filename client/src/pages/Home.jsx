@@ -300,7 +300,7 @@ export default function Home() {
                     <option value="">All Units</option>
                     <option value="sqft">Sqft</option>
                     <option value="ropani">Ropani</option>
-                    <option value="aana">aana</option>
+                    <option value="aana">Aana</option>
                   </select>
                   {/* Min/Max Size */}
                   <div className="flex gap-1">
