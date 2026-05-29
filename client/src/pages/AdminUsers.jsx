@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { adminService } from "../services/apiService";
 import AdminLayout from "../components/AdminLayout";
-import { Mail, Phone } from "lucide-react";
+import { Check, CheckCheck, Cross, Mail, Phone, X } from "lucide-react";
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -45,10 +45,6 @@ export default function AdminUsers() {
       {/* Page Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-medium mb-2">Manage Users</h1>
-        <p className="text-sm">
-          View and manage all users on the platform. Change roles and verify
-          accounts.
-        </p>
       </div>
 
       {loading ? (
@@ -92,7 +88,7 @@ export default function AdminUsers() {
                   <td className="px-6 py-4 ">{user.email}</td>
                   <td className="px-6 py-4">
                     <span
-                      className={`px-3 py-1 rounded-md text-xs font-medium ${
+                      className={`px-3 py-1 w-fit flex items-center justify-center rounded-md text-xs font-medium ${
                         user.role === "admin"
                           ? "bg-purple-100 dark:bg-purple-900/60"
                           : user.role === "broker"
@@ -100,6 +96,13 @@ export default function AdminUsers() {
                             : "bg-neutral-100 dark:bg-neutral-700"
                       }`}
                     >
+                      {user.role === "broker" ? (
+                        user.isBrokerVerified ? (
+                          <Check size={14} className="text-green-500 mr-1" />
+                        ) : (
+                          <X size={14} className="text-red-500 mr-1" />
+                        )
+                      ) : null}
                       {user.role}
                     </span>
                   </td>

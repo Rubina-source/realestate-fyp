@@ -214,14 +214,16 @@ export default function Navbar({ transparent = false }) {
                         <Bell size={16} />
                         <span className="text-sm">Notifications</span>
                       </Link> */}
-                      <Link
-                        to="/history"
-                        className="flex items-center gap-3 px-4 py-3 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition border-b border-[#E0E0E0] dark:border-[#2E2E3E]"
-                        onClick={() => setAccountDropdown(false)}
-                      >
-                        <HistoryIcon size={16} />
-                        <span className="text-sm">History</span>
-                      </Link>
+                      {user.role === "client" && (
+                        <Link
+                          to="/history"
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition border-b border-[#E0E0E0] dark:border-[#2E2E3E]"
+                          onClick={() => setAccountDropdown(false)}
+                        >
+                          <HistoryIcon size={16} />
+                          <span className="text-sm">History</span>
+                        </Link>
+                      )}
 
                       {/* Broker Upgrade (clients only) */}
                       {user.role === "client" && (

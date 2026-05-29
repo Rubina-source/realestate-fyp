@@ -58,11 +58,11 @@ export default function PropertyCard({ property }) {
             {property.rentalType && (
               <span>
                 {property.rentalType === "daily"
-                  ? " /day"
+                  ? " / day"
                   : property.rentalType === "monthly"
-                    ? " /month"
+                    ? " / month"
                     : property.rentalType === "yearly"
-                      ? " /year"
+                      ? " / year"
                       : ""}
               </span>
             )}

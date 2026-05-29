@@ -209,8 +209,8 @@ export const getPendingListings = async (req, res, next) => {
         const skip = (page - 1) * limit;
 
         const properties = await propertyModel.find({
-                status: 'pending'
-            })
+            status: 'pending'
+        })
             .populate('broker', 'name email phone company')
             .populate('city', 'name')
             .sort({
@@ -251,13 +251,13 @@ export const updatePropertyStatus = async (req, res, next) => {
 
         const property = await propertyModel.findByIdAndUpdate(
             propertyId, {
-                status,
-                ...(status === 'rejected' && rejectionReason && {
-                    rejectionReason
-                }),
-            }, {
-                new: true
-            }
+            status,
+            ...(status === 'rejected' && rejectionReason && {
+                rejectionReason
+            }),
+        }, {
+            new: true
+        }
         ).populate('broker', 'name email phone');
 
         if (!property) {
@@ -296,9 +296,9 @@ export const getVerifiedBrokers = async (req, res, next) => {
         const skip = (page - 1) * limit;
 
         const brokers = await userModel.find({
-                role: 'broker',
-                isBrokerVerified: true
-            })
+            role: 'broker',
+            isBrokerVerified: true
+        })
             .select('-password')
             .populate('city', 'name')
             .sort({
@@ -332,9 +332,9 @@ export const getAllBrokers = async (req, res, next) => {
         const skip = (page - 1) * limit;
 
         const brokers = await userModel.find({
-                role: 'broker',
-                isBrokerVerified: true
-            })
+            role: 'broker',
+            isBrokerVerified: true
+        })
             .select('-password')
             .populate('city', 'name')
             .sort({
@@ -366,9 +366,9 @@ export const getPublicBrokers = async (req, res, next) => {
         } = req.query;
 
         const brokers = await userModel.find({
-                role: 'broker',
-                isBrokerVerified: true
-            })
+            role: 'broker',
+            isBrokerVerified: true
+        })
             // .select('name email phone company city image')
             .select('-password')
             .populate('city', 'name')
@@ -488,90 +488,90 @@ export const getPropertyStats = async (req, res, next) => {
     try {
         // Property type statistics
         const typeStats = await propertyModel.aggregate([{
-                $match: {
-                    status: 'approved'
+            $match: {
+                status: 'approved'
+            }
+        },
+        {
+            $group: {
+                _id: '$type',
+                count: {
+                    $sum: 1
                 }
-            },
-            {
-                $group: {
-                    _id: '$type',
-                    count: {
-                        $sum: 1
-                    }
-                }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    name: '$_id',
-                    value: '$count'
-                }
-            },
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                name: '$_id',
+                value: '$count'
+            }
+        },
         ]);
 
         // Purpose statistics (sale vs rent)
         const purposeStats = await propertyModel.aggregate([{
-                $match: {
-                    status: 'approved'
+            $match: {
+                status: 'approved'
+            }
+        },
+        {
+            $group: {
+                _id: '$purpose',
+                count: {
+                    $sum: 1
                 }
-            },
-            {
-                $group: {
-                    _id: '$purpose',
-                    count: {
-                        $sum: 1
-                    }
-                }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    name: '$_id',
-                    value: '$count'
-                }
-            },
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                name: '$_id',
+                value: '$count'
+            }
+        },
         ]);
 
         // City statistics (top cities by property count)
         const cityStats = await propertyModel.aggregate([{
-                $match: {
-                    status: 'approved'
+            $match: {
+                status: 'approved'
+            }
+        },
+        {
+            $group: {
+                _id: '$city',
+                count: {
+                    $sum: 1
                 }
-            },
-            {
-                $group: {
-                    _id: '$city',
-                    count: {
-                        $sum: 1
-                    }
-                }
-            },
-            {
-                $lookup: {
-                    from: 'cities',
-                    localField: '_id',
-                    foreignField: '_id',
-                    as: 'cityInfo'
-                }
-            },
-            {
-                $unwind: '$cityInfo'
-            },
-            {
-                $sort: {
-                    count: -1
-                }
-            },
-            {
-                $limit: 10
-            },
-            {
-                $project: {
-                    _id: 0,
-                    name: '$cityInfo.name',
-                    value: '$count'
-                }
-            },
+            }
+        },
+        {
+            $lookup: {
+                from: 'cities',
+                localField: '_id',
+                foreignField: '_id',
+                as: 'cityInfo'
+            }
+        },
+        {
+            $unwind: '$cityInfo'
+        },
+        {
+            $sort: {
+                count: -1
+            }
+        },
+        {
+            $limit: 10
+        },
+        {
+            $project: {
+                _id: 0,
+                name: '$cityInfo.name',
+                value: '$count'
+            }
+        },
         ]);
 
         res.json({

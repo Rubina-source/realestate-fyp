@@ -22,8 +22,8 @@ export default function Properties() {
     sizeMax: searchParams.get("sizeMax") || "",
     sizeUnit: searchParams.get("sizeUnit") || "",
     sort: searchParams.get("sort") || "newest",
-    page: parseInt(searchParams.get("page")) || 1,
-    limit: 12,
+    // page: parseInt(searchParams.get("page")) || 1,
+    // limit: 12,
   });
 
   useEffect(() => {
@@ -69,9 +69,7 @@ export default function Properties() {
       {/* Search Bar */}
       <div className="py-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-4">
-            Browse Properties
-          </h1>
+          <h1 className="text-3xl font-bold mb-4">Browse Properties</h1>
         </div>
         <div className="flex flex-col md:flex-row gap-3">
           <input
@@ -103,14 +101,10 @@ export default function Properties() {
         {/* Properties Grid */}
         <div className="md:col-span-3">
           {loading ? (
-            <div className="text-center py-12">
-              Loading properties...
-            </div>
+            <div className="text-center py-12">Loading properties...</div>
           ) : (
             <>
-              <div className="mb-4 font-medium">
-                Found {total} properties
-              </div>
+              <div className="mb-4 font-medium">Found {total} properties</div>
 
               {properties.length > 0 ? (
                 <>
@@ -132,10 +126,11 @@ export default function Properties() {
                           onClick={() =>
                             handleFilterChange({ ...filters, page })
                           }
-                          className={`px-2 md:px-3 py-2 rounded-lg font-medium transition text-sm md:text-base ${filters.page === page
-                            ? ""
-                            : "border hover:bg-gray-100"
-                            }`}
+                          className={`px-2 md:px-3 py-2 rounded-lg font-medium transition text-sm md:text-base ${
+                            filters.page === page
+                              ? ""
+                              : "border hover:bg-gray-100"
+                          }`}
                         >
                           {page}
                         </button>

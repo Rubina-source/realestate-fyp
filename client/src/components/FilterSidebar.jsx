@@ -25,7 +25,7 @@ export default function FilterSidebar({ filters, onFilterChange }) {
   }, []);
 
   const handleChange = (key, value) => {
-    onFilterChange({ ...filters, [key]: value, page: 1 });
+    onFilterChange({ ...filters, [key]: value });
   };
 
   const handlePropertyTypeToggle = (type) => {

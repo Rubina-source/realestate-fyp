@@ -146,7 +146,6 @@ export default function ListingDetail() {
     fetchProperty();
   }, [id, user, navigate]);
 
-
   const handleFavorite = async () => {
     if (!user) {
       navigate("/login");
@@ -210,7 +209,18 @@ export default function ListingDetail() {
   const highlightCards = [
     {
       icon: DollarSign,
-      text: priceFormatter(property.price),
+      text: (() => {
+        const suffix = property.rentalType
+          ? property.rentalType === "daily"
+            ? "/ day"
+            : property.rentalType === "monthly"
+              ? "/ month"
+              : property.rentalType === "yearly"
+                ? "/ year"
+                : ""
+          : "";
+        return `${priceFormatter(property.price)} ${suffix}`.trim();
+      })(),
     },
     { icon: Home, text: `${typeLabel} property` },
     { icon: ScrollText, text: `Listed in ${listedYear}` },
@@ -302,7 +312,6 @@ export default function ListingDetail() {
                 <h2 className="text-3xl font-bold mb-2">{property.title}</h2>
                 <div className="flex items-center">
                   <MapPin size={18} className="mr-2" />
-                  {property.city?.name || "N/A"},{" "}
                   {property.location?.address || "N/A"}
                 </div>
               </div>

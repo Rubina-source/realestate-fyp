@@ -329,10 +329,14 @@ export const getAllProperties = async (req, res, next) => {
 
     // Type filter - support both 'type' and 'types' parameters
     if (types) {
-      const typeArray = types.split(',').map(t => t.trim());
+      const typeArray = types.split(',').map(t => t.trim()).filter(Boolean);
       filter.type = { $in: typeArray };
     } else if (type) {
-      filter.type = type;
+      const typeArray = String(type)
+        .split(',')
+        .map(t => t.trim())
+        .filter(Boolean);
+      filter.type = typeArray.length > 1 ? { $in: typeArray } : typeArray[0];
     }
 
     // Purpose filter
@@ -429,7 +433,9 @@ export const getAllProperties = async (req, res, next) => {
 
 export const getPropertyById = async (req, res, next) => {
   try {
-    const property = await Property.findById(req.params.id).populate('broker', 'name email phone company profileImage');
+    const property = await Property
+      .findById(req.params.id)
+      .populate('broker', 'name email phone company profileImage')
 
     if (!property) {
       return res.status(404).json({

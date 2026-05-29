@@ -13,6 +13,7 @@ import {
 import Navbar from "../components/Navbar";
 import PropertyCard from "../components/property/PropertyCard";
 import { propertyService } from "../services/apiService";
+import { cityService } from "../services/apiService";
 import MapView from "../components/MapView";
 import { PROPERTY_TYPES } from "../lib/property-filters";
 
@@ -29,6 +30,7 @@ const DEFAULT_FILTERS = {
 export default function Home() {
   const [properties, setProperties] = useState([]);
   const [brokers, setBrokers] = useState([]);
+  const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [searchPurpose, setSearchPurpose] = useState("buy");
@@ -67,6 +69,20 @@ export default function Home() {
 
     fetchFeaturedProperties();
     fetchBrokers();
+  }, []);
+
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        const citiesResponse = await cityService.getAll({
+          limit: 6,
+        });
+        setCities(citiesResponse.data.data || []);
+      } catch (error) {
+        console.error("Failed to fetch cities:", error);
+      }
+    };
+    fetchCities();
   }, []);
 
   useEffect(() => {
@@ -111,13 +127,13 @@ export default function Home() {
     setFilters(DEFAULT_FILTERS);
   };
 
-  const cities = [
+  /* const cities = [
     "Kathmandu",
     "Pokhara",
     "Lalitpur",
     "Bhaktapur",
     "Biratnagar",
-  ];
+  ]; */
 
   const searchTabs = [
     { id: "houses", label: "Houses", kind: "type", value: "house" },
@@ -144,7 +160,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/50"></div>
 
         <div className="absolute top-0 left-0 right-0 z-20">
-          <Navbar transparent /> 
+          <Navbar transparent />
         </div>
 
         {/* Search Container */}
@@ -251,18 +267,20 @@ export default function Home() {
                     type="number"
                     placeholder="Min"
                     value={filters.priceMin}
-                    onChange={(e) =>
-                      handleFilterChange("priceMin", e.target.value)
-                    }
+                    min={0}
+                    onChange={(e) => {
+                      handleFilterChange("priceMin", e.target.value);
+                    }}
                     className="flex-1 px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-dark"
                   />
                   <input
                     type="number"
                     placeholder="Max"
                     value={filters.priceMax}
-                    onChange={(e) =>
-                      handleFilterChange("priceMax", e.target.value)
-                    }
+                    min={0}
+                    onChange={(e) => {
+                      handleFilterChange("priceMax", e.target.value);
+                    }}
                     className="flex-1 px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-dark"
                   />
                 </div>
@@ -277,7 +295,7 @@ export default function Home() {
                 >
                   <option value="">All Cities</option>
                   {cities.map((city) => (
-                    <option key={city._id || city.id} value={city.name || city}>
+                    <option key={city._id || city.id} value={city._id}>
                       {city.name || city}
                     </option>
                   ))}
