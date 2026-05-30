@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+import { Plus, Edit2, Trash2 } from "lucide-react";
 import { cityService } from "../services/apiService";
 import AdminLayout from "../components/AdminLayout";
-import { Plus, Edit2, Trash2 } from "lucide-react";
+import AdminBackButton from "../components/AdminBackButton";
 import toast from "react-hot-toast";
 
 export default function AdminCities() {
@@ -112,7 +113,10 @@ export default function AdminCities() {
       {/* Page Header */}
       <div className="mb-8 flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-medium mb-2">Manage Cities</h1>
+          <div className="flex items-center gap-3 mb-2">
+            <AdminBackButton />
+            <h1 className="text-3xl font-medium">Manage Cities</h1>
+          </div>
           <p className=" text-sm">
             Add, edit, or remove cities for property listings.
           </p>

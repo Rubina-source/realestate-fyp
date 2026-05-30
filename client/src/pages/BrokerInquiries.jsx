@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Mail, Phone, ArrowLeft, ArrowRight } from "lucide-react";
+import { Mail, Phone, ArrowRight } from "lucide-react";
 import BrokerLayout from "../components/BrokerLayout";
 import { inquiryService } from "../services/apiService";
 import { Link } from "react-router-dom";
+import BackButton from "../components/BackButton";
 
 export default function BrokerInquiries() {
   const [inquiries, setInquiries] = useState([]);
@@ -34,7 +35,10 @@ export default function BrokerInquiries() {
   return (
     <BrokerLayout>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Inquiry Requests</h1>
+        <div className="flex items-center gap-3 mb-2">
+          <BackButton />
+          <h1 className="text-3xl font-bold">Inquiry Requests</h1>
+        </div>
         <p className="text-sm text-neutral-600 dark:text-neutral-400">
           Review buyer and renter messages for your listings.
         </p>

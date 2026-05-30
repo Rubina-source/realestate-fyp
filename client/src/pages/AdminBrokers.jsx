@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { adminService } from "../services/apiService";
 import AdminLayout from "../components/AdminLayout";
+import AdminBackButton from "../components/AdminBackButton";
 import { ArrowLeft, ArrowRight, CheckCircle, XCircle } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -61,9 +62,7 @@ export default function AdminBrokers() {
       <AdminLayout>
         <div className="text-center py-64">
           <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-300 dark:border-neutral-600 border-t-primary rounded-full"></div>
-          <p className="mt-4">
-            Loading all brokers...
-          </p>
+          <p className="mt-4">Loading all brokers...</p>
         </div>
       </AdminLayout>
     );
@@ -73,9 +72,10 @@ export default function AdminBrokers() {
     <AdminLayout>
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">
-          Pending Broker Verification
-        </h1>
+        <div className="flex items-center gap-3 mb-2">
+          <AdminBackButton />
+          <h1 className="text-3xl font-bold">Pending Broker Verification</h1>
+        </div>
         <p className="text-sm">
           Review new broker applications and verify or reject them.
         </p>
@@ -85,9 +85,7 @@ export default function AdminBrokers() {
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="animate-spin inline-block w-8 h-8 border-4 border-neutral-200 dark:border-neutral-700 border-t-primary rounded-full mb-4"></div>
-            <p className="font-medium">
-              Loading brokers...
-            </p>
+            <p className="font-medium">Loading brokers...</p>
           </div>
         </div>
       ) : brokers.length === 0 ? (
@@ -133,15 +131,9 @@ export default function AdminBrokers() {
                     key={broker._id}
                     className="bg-white dark:bg-neutral-800 border-b border-neutral-100 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors duration-200"
                   >
-                    <td className="px-6 py-4 font-medium">
-                      {broker.name}
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      {broker.email}
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      {broker.phone || "—"}
-                    </td>
+                    <td className="px-6 py-4 font-medium">{broker.name}</td>
+                    <td className="px-6 py-4 text-sm">{broker.email}</td>
+                    <td className="px-6 py-4 text-sm">{broker.phone || "—"}</td>
                     <td className="px-6 py-4 text-sm">
                       {broker.company || "N/A"}
                     </td>
@@ -192,15 +184,8 @@ export default function AdminBrokers() {
           {/* Pagination */}
           <div className="mt-6 flex justify-between items-center p-4">
             <p className="text-sm font-medium">
-              Showing{" "}
-              <span className="font-medium">
-                {brokers.length}
-              </span>{" "}
-              of{" "}
-              <span className="font-medium">
-                {total}
-              </span>{" "}
-              pending brokers
+              Showing <span className="font-medium">{brokers.length}</span> of{" "}
+              <span className="font-medium">{total}</span> pending brokers
             </p>
             <div className="flex gap-2">
               <button
@@ -208,7 +193,8 @@ export default function AdminBrokers() {
                 disabled={page === 1}
                 className="flex items-center justify-center gap-2 px-4 py-2 bg-neutral-300 dark:bg-neutral-700 rounded-lg hover:bg-neutral-400 dark:hover:bg-neutral-600 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors duration-200"
               >
-                <ArrowLeft size={16} />Previous
+                <ArrowLeft size={16} />
+                Previous
               </button>
               <span className="px-4 py-2 font-medium">
                 Page {page} of {Math.ceil(total / limit)}

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+import { Mail, Phone, Trash2 } from "lucide-react";
 import { adminService } from "../services/apiService";
 import AdminLayout from "../components/AdminLayout";
-import { Mail, Phone, Trash2 } from "lucide-react";
+import AdminBackButton from "../components/AdminBackButton";
 
 export default function AdminAllListings() {
   const [listings, setListings] = useState([]);
@@ -61,7 +62,10 @@ export default function AdminAllListings() {
   return (
     <AdminLayout>
       <div className="mb-8">
-        <h1 className="text-3xl font-medium mb-2">All Listings</h1>
+        <div className="flex items-center gap-3 mb-2">
+          <AdminBackButton />
+          <h1 className="text-3xl font-medium">All Listings</h1>
+        </div>
         <p className="text-sm">
           Browse and manage all property listings on the platform.
         </p>

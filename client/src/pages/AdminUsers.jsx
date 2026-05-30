@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+import { Check, CheckCheck, Cross, Mail, Phone, X } from "lucide-react";
 import { adminService } from "../services/apiService";
 import AdminLayout from "../components/AdminLayout";
-import { Check, CheckCheck, Cross, Mail, Phone, X } from "lucide-react";
+import AdminBackButton from "../components/AdminBackButton";
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -44,7 +45,10 @@ export default function AdminUsers() {
     <AdminLayout>
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-medium mb-2">Manage Users</h1>
+        <div className="flex items-center gap-3 mb-2">
+          <AdminBackButton />
+          <h1 className="text-3xl font-medium">Manage Users</h1>
+        </div>
       </div>
 
       {loading ? (

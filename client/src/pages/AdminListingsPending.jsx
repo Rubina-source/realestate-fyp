@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { adminService } from "../services/apiService";
 import AdminLayout from "../components/AdminLayout";
+import AdminBackButton from "../components/AdminBackButton";
 import { ArrowLeft, ArrowRight, CheckCircle, XCircle } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -78,7 +79,10 @@ export default function AdminListingsPending() {
     <AdminLayout>
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Pending Property Listings</h1>
+        <div className="flex items-center gap-3 mb-2">
+          <AdminBackButton />
+          <h1 className="text-3xl font-bold">Pending Property Listings</h1>
+        </div>
         <p className="text-sm">
           Review new property listings and approve or reject them.
         </p>

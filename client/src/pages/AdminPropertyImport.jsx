@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Upload, Download, AlertCircle, CheckCircle, Loader } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
+import AdminBackButton from '../components/AdminBackButton';
 import { adminService, propertyService } from '../services/apiService';
 import Papa from 'papaparse';
 import toast from 'react-hot-toast';
@@ -426,9 +427,10 @@ export default function AdminPropertyImport() {
     <AdminLayout>
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">
-            Bulk Property Import
-          </h1>
+          <div className="flex items-center gap-3 mb-2">
+            <AdminBackButton />
+            <h1 className="text-3xl font-bold">Bulk Property Import</h1>
+          </div>
           <p>
             Import multiple properties from a CSV file with field mapping
           </p>

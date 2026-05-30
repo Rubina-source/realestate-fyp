@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { propertyService } from "../services/apiService";
 import BrokerLayout from "../components/BrokerLayout";
-import { ArrowLeft, ArrowRight, Edit2, Trash2, Eye } from "lucide-react";
+import { ArrowRight, Edit2, Trash2, Eye } from "lucide-react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
+import BackButton from "../components/BackButton";
 
 export default function BrokerProperties() {
   const [properties, setProperties] = useState([]);
@@ -71,7 +72,10 @@ export default function BrokerProperties() {
     <BrokerLayout>
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Your Property Listings</h1>
+        <div className="flex items-center gap-3 mb-2">
+          <BackButton />
+          <h1 className="text-3xl font-bold">Your Property Listings</h1>
+        </div>
         <p className="text-sm">List of all your property listings.</p>
       </div>
 

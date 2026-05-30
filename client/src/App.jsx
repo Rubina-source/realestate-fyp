@@ -59,6 +59,24 @@ const ProtectedRoute = ({ children, allowed }) => {
   return children;
 };
 
+const PublicRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  /* if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
+  } */
+
+  if (user && user?.role === "admin") {
+    return <Navigate to="/admin/dashboard" />;
+  }
+
+  return children;
+};
+
 export default function App() {
   const { isDark } = useTheme();
   const location = useLocation();
@@ -78,7 +96,14 @@ export default function App() {
         className={`flex-1 bg-white dark:bg-neutral-900 text-black dark:text-white`}
       >
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route
+            path="/"
+            element={
+              <PublicRoute>
+                <Home />
+              </PublicRoute>
+            }
+          />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/signup" element={<Signup />} />
@@ -86,11 +111,32 @@ export default function App() {
           <Route path="/listings" element={<Properties />} />
           <Route path="/sold-properties" element={<SoldProperties />} />
           <Route path="/listings/:id" element={<PropertyDetails />} />
-          <Route path="/about" element={<About darkMode={dm} />} />
-          <Route path="/contact" element={<Contact darkMode={dm} />} />
-          <Route path="/brokers" element={<Brokers />} />
-          <Route path="/brokers/:id" element={<BrokerProfile />} />
-          <Route path="/mortgage" element={<Mortgage />} />
+          {/* <Route path="/about" element={<About darkMode={dm} />} /> */}
+          {/* <Route path="/contact" element={<Contact darkMode={dm} />} /> */}
+          <Route
+            path="/brokers"
+            element={
+              <PublicRoute>
+                <Brokers />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/brokers/:id"
+            element={
+              <PublicRoute>
+                <BrokerProfile />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/mortgage"
+            element={
+              <PublicRoute>
+                <Mortgage />
+              </PublicRoute>
+            }
+          />
 
           <Route
             path="/settings"
