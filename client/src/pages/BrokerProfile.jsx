@@ -229,7 +229,7 @@ export default function BrokerProfile() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold">Recent Listings</h2>
             <Link
-              to={`/listings?keyword=${encodeURIComponent(broker.name)}`}
+              to={`/listings?broker=${broker._id}`}
               className="text-sm font-medium text-primary"
             >
               Explore All Properties

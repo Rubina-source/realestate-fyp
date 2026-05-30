@@ -276,15 +276,6 @@ export default function App() {
             }
           />
 
-          <Route
-            path="/admin/properties/import"
-            element={
-              <ProtectedRoute allowed={["admin"]}>
-                <AdminPropertyImport />
-              </ProtectedRoute>
-            }
-          />
-
           {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
         </Routes>
       </main>

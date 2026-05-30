@@ -252,8 +252,9 @@ export const getAllProperties = async (req, res, next) => {
       rentalType,
       sort,
       status,
+      broker,
       page = 1,
-      limit = 10
+      // limit = 10
     } = req.query;
 
     const normalizePurpose = (value) => {
@@ -284,6 +285,7 @@ export const getAllProperties = async (req, res, next) => {
       {
         'location.address': { $regex: keyword, $options: 'i' }
       },
+      { 'broker.name': { $regex: keyword, $options: 'i' } }
       ];
     }
 
@@ -355,6 +357,11 @@ export const getAllProperties = async (req, res, next) => {
       filter.city = city;
     }
 
+    // Broker filter
+    if (broker) {
+      filter.broker = broker;
+    }
+
     // Sold date filter (only for sold listings)
     if (filter.status === 'sold' && (soldDateFrom || soldDateTo)) {
       filter.updatedAt = {};
@@ -387,15 +394,15 @@ export const getAllProperties = async (req, res, next) => {
       sortBy = { [isSold ? 'updatedAt' : 'createdAt']: 1 };
     }
 
-    const skip = (page - 1) * limit;
+    // const skip = (page - 1) * limit;
     console.log('Filter:', filter);
 
     const properties = await Property.find(filter)
       .populate('broker', 'name phone company profileImage avatar photoURL image')
       .populate('city', 'name')
       .sort(sortBy)
-      .skip(skip)
-      .limit(Number(limit));
+      /* .skip(skip)
+      .limit(Number(limit)); */
 
     // Get user's favorite properties if authenticated (via header or req.user)
     let favoritePropertyIds = new Set();
@@ -423,7 +430,7 @@ export const getAllProperties = async (req, res, next) => {
     res.json({
       total,
       page: Number(page),
-      pages: Math.ceil(total / limit),
+      pages: Math.ceil(total),
       properties: propertiesWithFavorite,
     });
   } catch (error) {
@@ -710,9 +717,12 @@ export const deleteProperty = async (req, res, next) => {
       });
     }
 
-    if (property.broker.toString() !== req.user.userId) {
+    const isOwner = property.broker.toString() === req.user.userId;
+    const isAdmin = req.user.role === "admin";
+
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({
-        message: 'Not authorized to delete this property'
+        message: "Not authorized to delete this property",
       });
     }
 

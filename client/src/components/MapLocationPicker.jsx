@@ -31,6 +31,23 @@ export default function MapLocationPicker({ value, onChange }) {
   const [mapCenter, setMapCenter] = useState([27.7172, 85.334]);
   const [zoom, setZoom] = useState(13);
 
+  useEffect(() => {
+    if (value?.lat && value?.lng) {
+      setMapCenter([value.lat, value.lng]);
+    }
+  }, [value?.lat, value?.lng]);
+
+  const MapUpdater = ({ center, zoomLevel }) => {
+    const map = useMap();
+
+    useEffect(() => {
+      if (center?.length === 2) {
+        map.setView(center, zoomLevel);
+      }
+    }, [center, zoomLevel, map]);
+
+    return null;
+  };
 
   const handleLocationSelect = (coords) => {
     onChange(coords);
@@ -45,6 +62,7 @@ export default function MapLocationPicker({ value, onChange }) {
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
+            <MapUpdater center={mapCenter} zoomLevel={zoom} />
             <LocationPicker onLocationSelect={handleLocationSelect} />
             {value?.lat && value?.lng && (
               <Marker position={[value.lat, value.lng]}>

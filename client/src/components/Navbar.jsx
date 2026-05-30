@@ -93,36 +93,40 @@ export default function Navbar({ transparent = false }) {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1">
-            <NavLink
-              href="/listings?purpose=buy"
-              label="BUY"
-              transparent={transparent}
-              isDark={isDark}
-            />
-            <NavLink
-              href="/listings?purpose=rent"
-              label="RENT"
-              transparent={transparent}
-              isDark={isDark}
-            />
-            <NavLink
-              href="/mortgage"
-              label="MORTGAGE"
-              transparent={transparent}
-              isDark={isDark}
-            />
-            <NavLink
-              href="/sold-properties"
-              label="SOLD PROPERTIES"
-              transparent={transparent}
-              isDark={isDark}
-            />
-            <NavLink
-              href="/brokers"
-              label="FIND BROKER"
-              transparent={transparent}
-              isDark={isDark}
-            />
+            {user?.role !== "admin" && (
+              <>
+                <NavLink
+                  href="/listings?purpose=buy"
+                  label="BUY"
+                  transparent={transparent}
+                  isDark={isDark}
+                />
+                <NavLink
+                  href="/listings?purpose=rent"
+                  label="RENT"
+                  transparent={transparent}
+                  isDark={isDark}
+                />
+                <NavLink
+                  href="/mortgage"
+                  label="MORTGAGE"
+                  transparent={transparent}
+                  isDark={isDark}
+                />
+                <NavLink
+                  href="/sold-properties"
+                  label="SOLD PROPERTIES"
+                  transparent={transparent}
+                  isDark={isDark}
+                />
+                <NavLink
+                  href="/brokers"
+                  label="FIND BROKER"
+                  transparent={transparent}
+                  isDark={isDark}
+                />
+              </>
+            )}
           </div>
 
           <div className="hidden lg:flex items-center gap-4">

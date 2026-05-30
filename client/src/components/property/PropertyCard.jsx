@@ -12,15 +12,33 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { priceFormatter } from "../../lib/price-formatter";
+import { favoriteService } from "../../services/apiService";
+import { useAuth } from "../../hooks/useAuth";
+import toast from "react-hot-toast";
 
-export default function PropertyCard({ property }) {
-  const [isFavorited, setIsFavorited] = useState(property.isFavorite || false);
+export default function PropertyCard({ property, onFavoriteChange }) {
+  const [isFavorited, setIsFavorited] = useState(
+    property.isFavorite || property.isFavorited || false,
+  );
+
+  const {user}=  useAuth()
 
   const handleFavorite = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
+    if(!user) return toast.error("Please login to continue.")
     try {
-      await favoriteService.add(property._id);
-      setIsFavorited(true);
+      if (isFavorited) {
+        await favoriteService.remove(property._id);
+        setIsFavorited(false);
+      } else {
+        await favoriteService.add(property._id);
+        setIsFavorited(true);
+      }
+
+      if (onFavoriteChange) {
+        onFavoriteChange();
+      }
     } catch (error) {
       console.error("Error adding favorite:", error);
     }

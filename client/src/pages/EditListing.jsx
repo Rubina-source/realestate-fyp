@@ -56,6 +56,7 @@ export default function EditListing() {
         setLoading(true);
         const response = await propertyService.getById(id);
         const property = response.data.property;
+        console.log("@Property", property)
         setFormData({
           title: property.title || "",
           description: property.description || "",
@@ -89,7 +90,9 @@ export default function EditListing() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (["price", "sizeValue", "bedrooms", "bathrooms", "parking"].includes(name)) {
+    if (
+      ["price", "sizeValue", "bedrooms", "bathrooms", "parking"].includes(name)
+    ) {
       if (value !== "" && Number(value) < 0) return;
     }
     setFormData({ ...formData, [name]: value });
@@ -111,7 +114,8 @@ export default function EditListing() {
   const uploadToCloudinary = async (file) => {
     const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
     const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
-    if (!cloudName || !uploadPreset) throw new Error("Cloudinary configuration missing");
+    if (!cloudName || !uploadPreset)
+      throw new Error("Cloudinary configuration missing");
 
     const fd = new FormData();
     fd.append("file", file);
@@ -119,7 +123,7 @@ export default function EditListing() {
 
     const response = await fetch(
       `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-      { method: "POST", body: fd }
+      { method: "POST", body: fd },
     );
     if (!response.ok) throw new Error("Failed to upload image to Cloudinary");
     const data = await response.json();
@@ -146,7 +150,10 @@ export default function EditListing() {
   };
 
   const removeImage = (index) => {
-    setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) });
+    setFormData({
+      ...formData,
+      images: formData.images.filter((_, i) => i !== index),
+    });
   };
 
   const handleGenerateDescription = async () => {
@@ -236,7 +243,8 @@ export default function EditListing() {
       navigate("/broker/dashboard");
     } catch (error) {
       const msg =
-        (error.response?.data?.errors && error.response.data.errors.join(", ")) ||
+        (error.response?.data?.errors &&
+          error.response.data.errors.join(", ")) ||
         error.response?.data?.message ||
         "Failed to update listing";
       toast.error(msg);
@@ -295,7 +303,9 @@ export default function EditListing() {
                   required
                   rows="4"
                   placeholder="Describe the property features, amenities, and condition..."
-                  className={"border text-sm px-3 py-2 pr-12 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none resize-none"}
+                  className={
+                    "border text-sm px-3 py-2 pr-12 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none resize-none"
+                  }
                 />
                 <button
                   type="button"
@@ -320,7 +330,12 @@ export default function EditListing() {
                 <label className="block font-semibold mb-2 text-sm">
                   Property Type <span className="text-primary">*</span>
                 </label>
-                <select name="type" value={formData.type} onChange={handleChange} className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none">
+                <select
+                  name="type"
+                  value={formData.type}
+                  onChange={handleChange}
+                  className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
+                >
                   {types.map((t) => (
                     <option key={t} value={t}>
                       {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -332,7 +347,12 @@ export default function EditListing() {
                 <label className="block font-semibold mb-2 text-sm">
                   Purpose <span className="text-primary">*</span>
                 </label>
-                <select name="purpose" value={formData.purpose} onChange={handleChange} className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none">
+                <select
+                  name="purpose"
+                  value={formData.purpose}
+                  onChange={handleChange}
+                  className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
+                >
                   <option value="sale">Sale</option>
                   <option value="rent">Rent</option>
                 </select>
@@ -345,7 +365,12 @@ export default function EditListing() {
                 <label className="block font-semibold mb-2 text-sm">
                   Rental Type <span className="text-primary">*</span>
                 </label>
-                <select name="rentalType" value={formData.rentalType} onChange={handleChange} className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none">
+                <select
+                  name="rentalType"
+                  value={formData.rentalType}
+                  onChange={handleChange}
+                  className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
+                >
                   <option value="">Select rental type</option>
                   <option value="daily">Daily</option>
                   <option value="monthly">Monthly</option>
@@ -358,38 +383,82 @@ export default function EditListing() {
             <div className="grid grid-cols-3 gap-3">
               {["apartment", "house"].includes(formData.type) && (
                 <div>
-                  <label className="block font-semibold mb-2 text-sm">Bedrooms</label>
-                  <input type="number" name="bedrooms" min="0" placeholder="0"
-                    value={formData.bedrooms} onChange={handleChange} className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none" />
+                  <label className="block font-semibold mb-2 text-sm">
+                    Bedrooms
+                  </label>
+                  <input
+                    type="number"
+                    name="bedrooms"
+                    min="0"
+                    placeholder="0"
+                    value={formData.bedrooms}
+                    onChange={handleChange}
+                    className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
+                  />
                 </div>
               )}
               {["apartment", "house"].includes(formData.type) && (
                 <div>
-                  <label className="block font-semibold mb-2 text-sm">Bathrooms</label>
-                  <input type="number" name="bathrooms" min="0" placeholder="0"
-                    value={formData.bathrooms} onChange={handleChange} className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none" />
+                  <label className="block font-semibold mb-2 text-sm">
+                    Bathrooms
+                  </label>
+                  <input
+                    type="number"
+                    name="bathrooms"
+                    min="0"
+                    placeholder="0"
+                    value={formData.bathrooms}
+                    onChange={handleChange}
+                    className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
+                  />
                 </div>
               )}
-              {["apartment", "house", "office", "commercial"].includes(formData.type) && (
+              {["apartment", "house", "office", "commercial"].includes(
+                formData.type,
+              ) && (
                 <div>
-                  <label className="block font-semibold mb-2 text-sm">Parking</label>
-                  <input type="number" name="parking" min="0" placeholder="0"
-                    value={formData.parking} onChange={handleChange} className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none" />
+                  <label className="block font-semibold mb-2 text-sm">
+                    Parking
+                  </label>
+                  <input
+                    type="number"
+                    name="parking"
+                    min="0"
+                    placeholder="0"
+                    value={formData.parking}
+                    onChange={handleChange}
+                    className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
+                  />
                 </div>
               )}
             </div>
 
             {/* Amenities */}
             <div>
-              <label className="block font-semibold mb-2 text-sm">Amenities</label>
+              <label className="block font-semibold mb-2 text-sm">
+                Amenities
+              </label>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  "Bathroom", "Living room", "Terrace", "Security",
-                  "Price negotiable", "Garden", "Swimming Pool", "Gym",
-                  "Lift", "Water Supply", "Electricity Backup", "Internet",
-                  "Kitchen", "Balcony",
+                  "Bathroom",
+                  "Living room",
+                  "Terrace",
+                  "Security",
+                  "Price negotiable",
+                  "Garden",
+                  "Swimming Pool",
+                  "Gym",
+                  "Lift",
+                  "Water Supply",
+                  "Electricity Backup",
+                  "Internet",
+                  "Kitchen",
+                  "Balcony",
                 ].map((amenity) => (
-                  <label key={amenity} className="flex items-center gap-3 cursor-pointer p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
+                  <label
+                    key={amenity}
+                    className="flex items-center gap-3 cursor-pointer p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
+                  >
                     <input
                       type="checkbox"
                       checked={formData.amenities.includes(amenity)}
@@ -407,8 +476,15 @@ export default function EditListing() {
               <label className="block font-semibold mb-2 text-sm">
                 Price (Rs) <span className="text-primary">*</span>
               </label>
-              <input type="number" name="price" value={formData.price}
-                onChange={handleChange} required placeholder="0" className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none" />
+              <input
+                type="number"
+                name="price"
+                value={formData.price}
+                onChange={handleChange}
+                required
+                placeholder="0"
+                className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
+              />
             </div>
 
             {/* Map */}
@@ -417,8 +493,8 @@ export default function EditListing() {
                 Location <span className="text-primary">*</span>
               </label>
               <MapLocationPicker
-                onLocationChange={handleLocationChange}
-                initialCoords={formData.location}
+                value={formData.location}
+                onChange={handleLocationChange}
               />
             </div>
 
@@ -428,11 +504,21 @@ export default function EditListing() {
                 <label className="block font-semibold mb-2 text-sm">
                   City <span className="text-primary">*</span>
                 </label>
-                <select name="city" value={formData.city} onChange={handleChange}
-                  disabled={citiesLoading} required className={"border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none disabled:opacity-50"}>
+                <select
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  disabled={citiesLoading}
+                  required
+                  className={
+                    "border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none disabled:opacity-50"
+                  }
+                >
                   <option value="">Select a city</option>
                   {cities.map((city) => (
-                    <option key={city._id} value={city._id}>{city.name}</option>
+                    <option key={city._id} value={city._id}>
+                      {city.name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -440,8 +526,15 @@ export default function EditListing() {
                 <label className="block font-semibold mb-2 text-sm">
                   Address <span className="text-primary">*</span>
                 </label>
-                <input type="text" name="address" value={formData.address}
-                  onChange={handleChange} required placeholder="Street address" className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none" />
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  required
+                  placeholder="Street address"
+                  className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
+                />
               </div>
             </div>
 
@@ -451,14 +544,26 @@ export default function EditListing() {
                 <label className="block font-semibold mb-2 text-sm">
                   Size Value <span className="text-primary">*</span>
                 </label>
-                <input type="number" name="sizeValue" value={formData.sizeValue}
-                  onChange={handleChange} required placeholder="0" className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none" />
+                <input
+                  type="number"
+                  name="sizeValue"
+                  value={formData.sizeValue}
+                  onChange={handleChange}
+                  required
+                  placeholder="0"
+                  className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
+                />
               </div>
               <div>
                 <label className="block font-semibold mb-2 text-sm">
                   Unit <span className="text-primary">*</span>
                 </label>
-                <select name="sizeUnit" value={formData.sizeUnit} onChange={handleChange} className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none">
+                <select
+                  name="sizeUnit"
+                  value={formData.sizeUnit}
+                  onChange={handleChange}
+                  className="border text-sm px-3 py-2 rounded w-full bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 focus:outline-none"
+                >
                   <option value="sqft">Sq Ft</option>
                   <option value="ropani">Ropani</option>
                   <option value="aana">Aana</option>
@@ -480,30 +585,50 @@ export default function EditListing() {
                   </div>
                 ) : (
                   <>
-                    <Upload className="mx-auto mb-3 text-primary opacity-70" size={32} />
+                    <Upload
+                      className="mx-auto mb-3 text-primary opacity-70"
+                      size={32}
+                    />
                     <input
-                      type="file" multiple accept="image/*"
+                      type="file"
+                      multiple
+                      accept="image/*"
                       onChange={handleImageUpload}
                       disabled={formData.images.length >= 5 || uploadingImages}
-                      className="hidden" id="imageUpload"
+                      className="hidden"
+                      id="imageUpload"
                     />
                     <label htmlFor="imageUpload" className="cursor-pointer">
-                      <span className="text-primary font-semibold">Click to upload</span>
+                      <span className="text-primary font-semibold">
+                        Click to upload
+                      </span>
                     </label>
-                    <p className="text-xs text-neutral-400 mt-1">{formData.images.length}/5 images</p>
+                    <p className="text-xs text-neutral-400 mt-1">
+                      {formData.images.length}/5 images
+                    </p>
                   </>
                 )}
               </div>
 
               {formData.images.length > 0 && (
                 <div className="mt-4">
-                  <p className="text-sm mb-3">{formData.images.length} image(s) uploaded</p>
+                  <p className="text-sm mb-3">
+                    {formData.images.length} image(s) uploaded
+                  </p>
                   <div className="grid grid-cols-3 gap-3">
                     {formData.images.map((img, idx) => (
-                      <div key={idx} className="relative rounded-lg aspect-square overflow-hidden group">
-                        <img src={img} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
+                      <div
+                        key={idx}
+                        className="relative rounded-lg aspect-square overflow-hidden group"
+                      >
+                        <img
+                          src={img}
+                          alt={`Preview ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
                         <button
-                          type="button" onClick={() => removeImage(idx)}
+                          type="button"
+                          onClick={() => removeImage(idx)}
                           className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition"
                         >
                           <X className="w-4 h-4" />
@@ -530,9 +655,14 @@ export default function EditListing() {
                 className="flex-1 px-4 py-3 bg-primary hover:bg-primary-dark text-white rounded-md text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {submitting ? (
-                  <><Loader className="animate-spin" size={18} /> Updating...</>
+                  <>
+                    <Loader className="animate-spin" size={18} /> Updating...
+                  </>
                 ) : uploadingImages ? (
-                  <><Loader className="animate-spin" size={18} /> Uploading Images...</>
+                  <>
+                    <Loader className="animate-spin" size={18} /> Uploading
+                    Images...
+                  </>
                 ) : (
                   "Update Listing"
                 )}

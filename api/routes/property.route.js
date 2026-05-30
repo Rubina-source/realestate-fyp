@@ -32,7 +32,7 @@ router.get('/:id', maybeAuthenticated, getPropertyById);
 router.post('/', authenticateToken, authorize(['broker']), createProperty);
 router.post('/generate-description', authenticateToken, authorize(['broker']), generatePropertyDescription);
 router.put('/:id', authenticateToken, authorize(['broker']), updateProperty);
-router.delete('/:id', authenticateToken, authorize(['broker']), deleteProperty);
+router.delete('/:id', authenticateToken, authorize(['broker', 'admin']), deleteProperty);
 router.get('/broker/all', authenticateToken, authorize(['broker']), getBrokerProperties);
 
 export default router;

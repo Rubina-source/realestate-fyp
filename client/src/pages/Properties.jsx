@@ -14,6 +14,7 @@ export default function Properties() {
 
   const [filters, setFilters] = useState({
     keyword: searchParams.get("keyword") || "",
+    broker: searchParams.get("broker") || "",
     purpose: searchParams.get("purpose") || "",
     city: searchParams.get("city") || "",
     priceMin: searchParams.get("priceMin") || "",

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { propertyService } from "../services/apiService";
 import BrokerLayout from "../components/BrokerLayout";
-import { ArrowRight, Edit2, Trash2, Eye } from "lucide-react";
+import { ArrowRight, ArrowLeft, Edit2, Trash2, Eye } from "lucide-react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import BackButton from "../components/BackButton";
