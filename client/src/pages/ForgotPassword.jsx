@@ -61,6 +61,29 @@ export default function ForgotPassword() {
     }
   };
 
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+
+    if (!formData.code) {
+      toast.error('Verification code is required');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await authService.verifyResetCode({
+        email,
+        code: formData.code,
+      });
+      toast.success(response.data.message);
+      setStep(3);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to verify code');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleResetPassword = async (e) => {
     e.preventDefault();
 
@@ -98,7 +121,9 @@ export default function ForgotPassword() {
         <p className="text-center text-sm mb-6">
           {step === 1
             ? 'Enter your email to receive a verification code.'
-            : 'Enter the code from your email and set your new password.'}
+            : step === 2
+              ? 'Enter the verification code from your email.'
+              : 'Set your new password.'}
         </p>
 
         {step === 1 ? (
@@ -130,8 +155,8 @@ export default function ForgotPassword() {
               )}
             </button>
           </form>
-        ) : (
-          <form onSubmit={handleResetPassword} className="space-y-4">
+        ) : step === 2 ? (
+          <form onSubmit={handleVerifyCode} className="space-y-4">
             <div>
               <label className="block font-semibold mb-2 text-sm">Verification Code</label>
               <input
@@ -145,6 +170,32 @@ export default function ForgotPassword() {
               />
             </div>
 
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full cursor-pointer bg-primary hover:bg-primary-dark disabled:bg-primary-dark/60 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <Loader className="w-4 h-4 animate-spin" />
+                  Verifying...
+                </>
+              ) : (
+                'Confirm code'
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleRequestCode}
+              disabled={loading || resendCooldown > 0}
+              className="w-full cursor-pointer border border-neutral-300 dark:border-neutral-700 rounded-lg py-2 text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800 transition disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : 'Resend code'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleResetPassword} className="space-y-4">
             <div>
               <label className="block font-semibold mb-2 text-sm">New Password</label>
               <input
@@ -184,14 +235,6 @@ export default function ForgotPassword() {
               )}
             </button>
 
-            <button
-              type="button"
-              onClick={handleRequestCode}
-              disabled={loading || resendCooldown > 0}
-              className="w-full cursor-pointer border border-neutral-300 dark:border-neutral-700 rounded-lg py-2 text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800 transition disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : 'Resend code'}
-            </button>
           </form>
         )}
 

@@ -7,6 +7,7 @@ import {
     updateProfile,
     forgotPassword,
     resetPassword,
+    verifyResetCode,
 } from '../controllers/auth.controller.js';
 import {
     authenticateToken
@@ -16,6 +17,7 @@ const router = express.Router();
 router.post('/register', register);
 router.post('/login', login);
 router.post('/forgot-password', forgotPassword);
+router.post('/verify-reset-code', verifyResetCode);
 router.post('/reset-password', resetPassword);
 router.get('/verify/:token', verifyEmail);
 router.get('/me', authenticateToken, getCurrentUser);

@@ -317,6 +317,7 @@ export const forgotPassword = async (req, res, next) => {
     }
 
     const user = await User.findOne({ email });
+    console.log("user",user, email)
 
     // Always return a generic message to avoid email enumeration.
     if (!user) {
@@ -331,6 +332,7 @@ export const forgotPassword = async (req, res, next) => {
     user.resetPasswordCode = hashedCode;
     user.resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000);
     await user.save();
+    console.log(user)
 
     await sendEmail({
       to: user.email,
@@ -397,6 +399,41 @@ export const resetPassword = async (req, res, next) => {
 
     return res.json({
       message: 'Password reset successful. You can now log in with your new password.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyResetCode = async (req, res, next) => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return res.status(400).json({
+        message: 'Email and verification code are required',
+      });
+    }
+
+    const user = await User.findOne({ email }).select('+resetPasswordCode +resetPasswordExpires');
+
+    if (!user || !user.resetPasswordCode || !user.resetPasswordExpires) {
+      return res.status(400).json({
+        message: 'Invalid or expired verification code',
+      });
+    }
+
+    const hashedCode = crypto.createHash('sha256').update(code).digest('hex');
+    const isExpired = user.resetPasswordExpires.getTime() < Date.now();
+
+    if (isExpired || user.resetPasswordCode !== hashedCode) {
+      return res.status(400).json({
+        message: 'Invalid or expired verification code',
+      });
+    }
+
+    return res.json({
+      message: 'Verification code confirmed. You can now set your new password.',
     });
   } catch (error) {
     next(error);
