@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Mail, Phone, Trash2 } from "lucide-react";
-import { adminService } from "../services/apiService";
+import { adminService, propertyService } from "../services/apiService";
 import AdminLayout from "../components/AdminLayout";
 import AdminBackButton from "../components/AdminBackButton";
 
@@ -39,9 +39,9 @@ export default function AdminAllListings() {
 
     try {
       await propertyService.delete(id);
-      setProperties(properties.filter((p) => p._id !== id));
+      setListings(listings.filter((p) => p._id !== id));
       alert("Listing deleted successfully!");
-    } catch (error) {
+    } catch (err) {
       alert("Failed to delete listing");
     }
   };
@@ -50,9 +50,7 @@ export default function AdminAllListings() {
     try {
       await adminService.updatePropertyStatus(id, { status });
       setListings((previous) =>
-        previous.map((item) =>
-          item._id === id ? { ...item, status } : item,
-        ),
+        previous.map((item) => (item._id === id ? { ...item, status } : item)),
       );
     } catch (error) {
       alert(`Failed to mark property as ${status}`);
@@ -144,7 +142,7 @@ export default function AdminAllListings() {
                       )}
                   </td>
 
-                  <td className="px-6 py-4">{listing.broker.name}</td>
+                  <td className="px-6 py-4">{listing.broker?.name}</td>
                   <td className="px-6 py-4">{listing.city?.name || "-"}</td>
                   <td className="px-6 py-4 text-sm">
                     {listing.createdAt
@@ -172,7 +170,8 @@ export default function AdminAllListings() {
                           }
                           title={`Mark as ${listing.status === "approved" ? "sold" : "available"}`}
                         >
-                          Mark as {listing.status === "approved" ? "sold" : "available"}
+                          Mark as{" "}
+                          {listing.status === "approved" ? "sold" : "available"}
                         </button>
                       )}
                       <button
