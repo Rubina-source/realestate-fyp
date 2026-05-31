@@ -181,29 +181,23 @@ export default function BrokerProperties() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
-                        {(property.status === "approved" ||
-                          property.status === "sold") && (
+                        {property.status === "approved"  && (
                           <button
                             onClick={() =>
                               handleMarkAsSoldOrAvailable(
                                 property._id,
-                                property.status === "approved"
-                                  ? "sold"
-                                  : "approved",
+                                "sold"
                               )
                             }
                             className={
                               "h-9 px-4 py-2 rounded-lg text-xs font-medium transition cursor-pointer flex items-center " +
-                              (property.status === "approved"
-                                ? "bg-green-200 text-green-800 dark:bg-green-700/30 dark:text-green-300"
-                                : "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary")
+                              // (property.status === "approved"
+                              "bg-green-200 text-green-800 dark:bg-green-700/30 dark:text-green-300"
+                                // : "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary")
                             }
-                            title={`Mark as ${property.status === "approved" ? "sold" : "available"}`}
+                            title={`Mark as sold`}
                           >
-                            Mark as{" "}
-                            {property.status === "approved"
-                              ? "sold"
-                              : "available"}
+                            Mark as sold
                           </button>
                         )}
 
